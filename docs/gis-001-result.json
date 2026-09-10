@@ -1,0 +1,102 @@
+{
+  "task_id": "GIS-001",
+  "title": "Basisgeometrie Mastenbroekweg",
+  "description": "TESTDATA: alleen broninventarisatie en geometrische status; nog geen ontwerp maken.",
+  "status": "AWAITING_HUMAN_APPROVAL",
+  "assigned_agent": "A01",
+  "created_at": "2026-09-10T15:00:58.361608+00:00",
+  "updated_at": "2026-09-10T15:00:58.565613+00:00",
+  "input_refs": [
+    "examples/gis-001.json"
+  ],
+  "output_refs": [
+    "GIS-001/A02/v1"
+  ],
+  "review_status": "SUFFICIENT",
+  "human_approval": null,
+  "outputs": [
+    {
+      "task_id": "GIS-001",
+      "agent_id": "A02",
+      "timestamp": "2026-09-10T15:00:58.443610+00:00",
+      "input_refs": [
+        "examples/gis-001.json"
+      ],
+      "source_refs": [
+        "fixture-1",
+        "fixture-2",
+        "fixture-3",
+        "fixture-4"
+      ],
+      "source_type": "fixture",
+      "source_status": "TESTDATA",
+      "confidence": 0.0,
+      "output_version": 1,
+      "reviewer": null,
+      "review_status": "PENDING",
+      "human_approval": null,
+      "notes": [
+        "Uitsluitend synthetische TESTDATA; geen bewijs over de echte locatie."
+      ],
+      "kind": "source_inventory",
+      "payload": {
+        "sources": [
+          {
+            "source_id": "fixture-1",
+            "label": "BGT",
+            "source_type": "fixture",
+            "source_status": "TESTDATA",
+            "location": "examples/gis-001.json",
+            "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+          },
+          {
+            "source_id": "fixture-2",
+            "label": "BAG",
+            "source_type": "fixture",
+            "source_status": "TESTDATA",
+            "location": "examples/gis-001.json",
+            "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+          },
+          {
+            "source_id": "fixture-3",
+            "label": "BRK / Kadastrale kaart",
+            "source_type": "fixture",
+            "source_status": "TESTDATA",
+            "location": "examples/gis-001.json",
+            "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+          },
+          {
+            "source_id": "fixture-4",
+            "label": "PDOK",
+            "source_type": "fixture",
+            "source_status": "TESTDATA",
+            "location": "examples/gis-001.json",
+            "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+          }
+        ],
+        "missing_data": [
+          "Alle officiële bronbestanden ontbreken; niets is gedownload."
+        ],
+        "geometry_uncertainties": [
+          "CRS, actualiteit, nauwkeurigheid en projectgrens zijn niet vastgesteld."
+        ],
+        "k00_discrepancies": [
+          "K00 is niet aangeleverd; vergelijking is niet uitgevoerd."
+        ],
+        "recommendations": [
+          "Sluit later officiële BGT, BAG en BRK-bronnen aan; PDOK is een voorziening, geen zelfstandige geometrische bron."
+        ]
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "task_id": "GIS-001",
+      "reviewer": "A07",
+      "timestamp": "2026-09-10T15:00:58.521613+00:00",
+      "output_version": 1,
+      "verdict": "SUFFICIENT",
+      "findings": []
+    }
+  ]
+}

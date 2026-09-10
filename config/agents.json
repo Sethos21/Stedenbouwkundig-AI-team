@@ -1,0 +1,112 @@
+[
+  {
+    "agent_id": "A01",
+    "name": "Regisseur",
+    "active": true,
+    "responsibilities": [
+      "Workflow coördineren",
+      "Taken toewijzen",
+      "Versies beheren",
+      "Specialist-output controleren",
+      "Review aanvragen",
+      "Revisies initiëren",
+      "Menselijke goedkeuring aanvragen"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Brondata verzinnen",
+      "GIS-conclusies geverifieerd verklaren"
+    ]
+  },
+  {
+    "agent_id": "A02",
+    "name": "GIS & Brondata",
+    "active": true,
+    "responsibilities": [
+      "Broninventarisatie",
+      "Geometrische herkomst vastleggen",
+      "Feit, afleiding en indicatie onderscheiden",
+      "Bronregister opbouwen",
+      "Afwijkingen signaleren"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Stedenbouwkundig ontwerpen",
+      "Nieuwe wegen, kavels of gebouwen bedenken",
+      "TESTDATA als echte data presenteren"
+    ]
+  },
+  {
+    "agent_id": "A03",
+    "name": "Stedenbouwkundige",
+    "active": false,
+    "responsibilities": [
+      "Toekomstig: stedenbouwkundig ontwerpen"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Deelnemen aan Milestone 1 runtime"
+    ]
+  },
+  {
+    "agent_id": "A04",
+    "name": "Landschapsarchitect",
+    "active": false,
+    "responsibilities": [
+      "Toekomstig: landschapsontwerp"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Deelnemen aan Milestone 1 runtime"
+    ]
+  },
+  {
+    "agent_id": "A05",
+    "name": "Mobiliteitsontwerper",
+    "active": false,
+    "responsibilities": [
+      "Toekomstig: mobiliteitsontwerp"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Deelnemen aan Milestone 1 runtime"
+    ]
+  },
+  {
+    "agent_id": "A06",
+    "name": "Planoloog & Beleid",
+    "active": false,
+    "responsibilities": [
+      "Toekomstig: planologie en beleid"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Deelnemen aan Milestone 1 runtime"
+    ]
+  },
+  {
+    "agent_id": "A07",
+    "name": "Gemeentelijke Reviewer",
+    "active": true,
+    "responsibilities": [
+      "Specialist-output kritisch beoordelen",
+      "Bronkwaliteit controleren",
+      "Inconsistenties aanwijzen",
+      "Ontbrekende onderbouwing signaleren",
+      "Verdict geven",
+      "Concrete herstelpunten formuleren"
+    ],
+    "forbidden": [
+      "APPROVED zetten",
+      "K00 wijzigen",
+      "Ontwerp stilzwijgend wijzigen",
+      "Brongegevens veranderen"
+    ]
+  }
+]

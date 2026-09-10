@@ -1,0 +1,23 @@
+{"task_id": "GIS-001", "actor": "A01", "action": "task_created", "timestamp": "2026-09-10T15:00:58.363611+00:00", "details": {"source_status": "TESTDATA"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "status_changed", "timestamp": "2026-09-10T15:00:58.383607+00:00", "details": {"previous": "DRAFT", "target": "READY"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "agent_started", "timestamp": "2026-09-10T15:00:58.395615+00:00", "details": {}}
+{"task_id": "GIS-001", "actor": "A01", "action": "task_assigned", "timestamp": "2026-09-10T15:00:58.409609+00:00", "details": {"assigned_agent": "A02"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "status_changed", "timestamp": "2026-09-10T15:00:58.421612+00:00", "details": {"previous": "READY", "target": "RUNNING"}}
+{"task_id": "GIS-001", "actor": "A02", "action": "agent_started", "timestamp": "2026-09-10T15:00:58.432610+00:00", "details": {}}
+{"task_id": "GIS-001", "actor": "A02", "action": "source_registered", "timestamp": "2026-09-10T15:00:58.446608+00:00", "details": {"source": {"source_id": "fixture-1", "label": "BGT", "source_type": "fixture", "source_status": "TESTDATA", "location": "examples/gis-001.json", "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"}}}
+{"task_id": "GIS-001", "actor": "A02", "action": "source_registered", "timestamp": "2026-09-10T15:00:58.446608+00:00", "details": {"source": {"source_id": "fixture-2", "label": "BAG", "source_type": "fixture", "source_status": "TESTDATA", "location": "examples/gis-001.json", "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"}}}
+{"task_id": "GIS-001", "actor": "A02", "action": "source_registered", "timestamp": "2026-09-10T15:00:58.446608+00:00", "details": {"source": {"source_id": "fixture-3", "label": "BRK / Kadastrale kaart", "source_type": "fixture", "source_status": "TESTDATA", "location": "examples/gis-001.json", "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"}}}
+{"task_id": "GIS-001", "actor": "A02", "action": "source_registered", "timestamp": "2026-09-10T15:00:58.446608+00:00", "details": {"source": {"source_id": "fixture-4", "label": "PDOK", "source_type": "fixture", "source_status": "TESTDATA", "location": "examples/gis-001.json", "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"}}}
+{"task_id": "GIS-001", "actor": "A02", "action": "agent_completed", "timestamp": "2026-09-10T15:00:58.446608+00:00", "details": {"output_version": 1}}
+{"task_id": "GIS-001", "actor": "A01", "action": "status_changed", "timestamp": "2026-09-10T15:00:58.458607+00:00", "details": {"previous": "RUNNING", "target": "SPECIALIST_COMPLETE"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "status_changed", "timestamp": "2026-09-10T15:00:58.471608+00:00", "details": {"previous": "SPECIALIST_COMPLETE", "target": "REVIEW_PENDING"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "task_assigned", "timestamp": "2026-09-10T15:00:58.488610+00:00", "details": {"assigned_agent": "A07"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "review_requested", "timestamp": "2026-09-10T15:00:58.499615+00:00", "details": {}}
+{"task_id": "GIS-001", "actor": "A07", "action": "agent_started", "timestamp": "2026-09-10T15:00:58.510609+00:00", "details": {}}
+{"task_id": "GIS-001", "actor": "A07", "action": "review_completed", "timestamp": "2026-09-10T15:00:58.524615+00:00", "details": {"review": {"task_id": "GIS-001", "reviewer": "A07", "timestamp": "2026-09-10T15:00:58.521613+00:00", "output_version": 1, "verdict": "SUFFICIENT", "findings": []}}}
+{"task_id": "GIS-001", "actor": "A07", "action": "agent_completed", "timestamp": "2026-09-10T15:00:58.524615+00:00", "details": {}}
+{"task_id": "GIS-001", "actor": "A01", "action": "task_assigned", "timestamp": "2026-09-10T15:00:58.536611+00:00", "details": {"assigned_agent": "A01"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "status_changed", "timestamp": "2026-09-10T15:00:58.548614+00:00", "details": {"previous": "REVIEW_PENDING", "target": "REVIEWED"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "status_changed", "timestamp": "2026-09-10T15:00:58.566614+00:00", "details": {"previous": "REVIEWED", "target": "AWAITING_HUMAN_APPROVAL"}}
+{"task_id": "GIS-001", "actor": "A01", "action": "approval_requested", "timestamp": "2026-09-10T15:00:58.577613+00:00", "details": {}}
+{"task_id": "GIS-001", "actor": "A01", "action": "agent_completed", "timestamp": "2026-09-10T15:00:58.588614+00:00", "details": {}}

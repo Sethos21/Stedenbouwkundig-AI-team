@@ -1,0 +1,43 @@
+{
+  "project": "Mastenbroekweg Weert",
+  "description": "TESTDATA: alleen broninventarisatie en geometrische status; nog geen ontwerp maken.",
+  "rules": [
+    "Geen ontwerp",
+    "TESTDATA is geen echte brondata"
+  ],
+  "K00": "immutable reference; niet aangeleverd",
+  "sources": [
+    {
+      "source_id": "fixture-1",
+      "label": "BGT",
+      "source_type": "fixture",
+      "source_status": "TESTDATA",
+      "location": "examples/gis-001.json",
+      "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+    },
+    {
+      "source_id": "fixture-2",
+      "label": "BAG",
+      "source_type": "fixture",
+      "source_status": "TESTDATA",
+      "location": "examples/gis-001.json",
+      "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+    },
+    {
+      "source_id": "fixture-3",
+      "label": "BRK / Kadastrale kaart",
+      "source_type": "fixture",
+      "source_status": "TESTDATA",
+      "location": "examples/gis-001.json",
+      "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+    },
+    {
+      "source_id": "fixture-4",
+      "label": "PDOK",
+      "source_type": "fixture",
+      "source_status": "TESTDATA",
+      "location": "examples/gis-001.json",
+      "geometry_origin": "Geen geometrie aanwezig; synthetisch registeritem"
+    }
+  ]
+}
