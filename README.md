@@ -1,4 +1,4 @@
-# BVC AI Ontwerpteam — Milestone 1
+# BVC AI Ontwerpteam — Milestone 1 en 2A
 
 Een lokale, versieerbare en testbare ontwerpruntime, volledig los van de BVC Financiële Rapportagetool. Deze milestone bewijst de keten **A01 Regisseur → A02 GIS & Brondata → A07 Gemeentelijke Reviewer → AWAITING_HUMAN_APPROVAL**.
 
@@ -68,4 +68,41 @@ Fixtures moeten TESTDATA blijven. De overige bronstatussen zijn voorbereid, maar
 
 Taakwijzigingen en canonieke auditevents worden samen in SQLite-transacties opgeslagen. audit.jsonl is een opnieuw te genereren leesbare export bij CLI-afsluiting. Audit is inspecteerbaar, niet cryptografisch fraudebestendig. Gebruik op de netwerkmap één actieve CLI/workflow tegelijk; meerdere machines en onbetrouwbare SMB-locking zijn niet ondersteund.
 
-Er zijn geen koppelingen met OpenAI, Google Drive, QGIS, PDOK, Kadaster, BGT, BAG of Autodesk Forma. Er zijn geen kaartgeneratie, webdashboard, clouddeployment of productie-authenticatie. AIProvider is de uitbreidingsgrens voor een latere Responses API/Agents SDK-adapter. Voor Milestone 2: eerst de menselijke identiteit en rechten uitwerken, daarna één read-only bronadapter met bron- en geometrievalidatie.
+Milestone 1 heeft geen externe koppelingen. Milestone 2A voegt alleen een optionele OpenAI-provider toe; Google Drive, QGIS, PDOK, Kadaster, BGT, BAG en Autodesk Forma blijven afwezig. Er zijn geen kaartgeneratie, webdashboard, clouddeployment of productie-authenticatie. AIProvider is de uitbreidingsgrens voor de Responses API-adapter. Menselijke authenticatie/rechten en een read-only bronadapter met bron- en geometrievalidatie vallen buiten Milestone 2A.
+
+## Milestone 2A: optionele OpenAI-provider
+
+Milestone 1 blijft standaard beschikbaar met `--provider mock` (ook de standaard zonder argument).
+Er zijn geen packages nodig: de OpenAI-adapter gebruikt Python HTTPS en de Responses API.
+`OPENAI_API_KEY` wordt uitsluitend uit de procesomgeving gelezen; er wordt geen `.env` geladen of key opgeslagen.
+Een ontbrekende key geeft bij `demo`/`resume` een fout, bij de beperkte `smoke` een expliciete SKIPPED-uitkomst.
+Leescommando's en menselijke besluiten vereisen geen API-key, ook met `--provider openai`.
+
+```powershell
+.\bvc-ai.ps1 --provider mock smoke
+.\bvc-ai.ps1 --provider openai smoke
+```
+
+De OpenAI-smoke doet maximaal één A02-aanvraag met de lokale `examples/gis-001.json` TESTDATA-fixture.
+A07 gebruikt in deze smoke de deterministische provider. De bestaande workflow eindigt bij voldoende review
+op AWAITING_HUMAN_APPROVAL. Iedere smoke krijgt een eigen `runtime/smoke/<unieke-id>`-map;
+de bestaande goedgekeurde GIS-001 in `runtime` wordt niet aangeraakt. Het resultaat meldt de opslagmap.
+Zonder omgevingskey wordt geen opslagmap gemaakt en geen API-call gedaan.
+
+Voor een volledige providerworkflow in een afzonderlijke opslagmap (twee API-calls bij een succesvolle run):
+
+```powershell
+.\bvc-ai.ps1 --provider openai --data runtime/openai-demo demo gis-001
+```
+
+Model: `gpt-4.1-mini-2025-04-14`, instelbaar via `--model`. Socket-timeout: 30 seconden,
+instelbaar via `--timeout` (maximaal 120). Per aanvraag maximaal 1200 outputtokens, geen automatische retries.
+Het verzoek bevat geen tools en gebruikt `store: false`. De fixture wordt wel naar OpenAI verzonden.
+Er is geen web-, GIS-, Drive- of ontwerpfunctionaliteit toegevoegd.
+
+De adapter valideert JSON lokaal naast het strikte API-schema. A02 retourneert alleen tekstlijsten;
+bronregisteritems worden lokaal ongewijzigd gekopieerd. Provider/model/rol/TESTDATA-herkomst wordt door
+vertrouwde adaptercode toegevoegd in `payload.recommendations`; A07-herkomst staat in review `findings`.
+`source_type=fixture` en `source_status=TESTDATA` blijven bronherkomst beschrijven, niet de AI-provider.
+De domain/application-lagen, statusmachine en HumanApprovalService zijn ongewijzigd.
+Zie [Milestone 2A-validatie](docs/milestone-2a.md).

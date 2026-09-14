@@ -10,4 +10,14 @@ De regels voor K00 worden vóór iedere mockschrijfactie uitgevoerd. Reads lever
 
 SQLite gebruikt rollback-journaling (DELETE) en transacties voor besluiten plus audit. JSONL is een projectie van de canonieke audittabel; bij een crash kan de projectie achterlopen en wordt deze bij de volgende CLI-opdracht opnieuw opgebouwd. Geïsoleerde lokale CLI-processen worden getest, maar gelijktijdige workflow-uitvoering vanaf meerdere hosts en SMB-storingen vallen buiten M1. Onderbreking kan een RUNNING-taak achterlaten; automatische crashrecovery is nog niet gebouwd.
 
-Geen externe calls, credentials of productiebronnen. Providerimplementaties zijn vertrouwde code; de huidige implementatie is deterministisch. Rolprofielen beschrijven ook toekomstige beperkingen; runtimehandhaving richt zich op de actieve broninventarisatie, statusmachine, bronstatus, reviewverdict, approval-capability en K00.
+Milestone 1 doet geen externe calls en gebruikt geen credentials of productiebronnen. Providerimplementaties zijn vertrouwde code; de standaardimplementatie is deterministisch. Rolprofielen beschrijven ook toekomstige beperkingen; runtimehandhaving richt zich op de actieve broninventarisatie, statusmachine, bronstatus, reviewverdict, approval-capability en K00.
+
+## Milestone 2A
+
+De CLI selecteert via agents/factory.py de mock- of OpenAI-provider. De bestaande AIProvider-interface en alle domain/application-code blijven ongewijzigd. agents/openai_provider.py verzorgt HTTPS, strikte JSON-output, lokale antwoordvalidatie en veilige foutmeldingen. Er is geen SDK of package geïnstalleerd. De key komt uitsluitend uit OPENAI_API_KEY.
+
+De provider retourneert uitsluitend data en ontvangt geen Store, human capability, AgentSession of tools. Providerherkomst wordt in bestaande tekstvelden vastgelegd: A02 in payload.recommendations, A07 in Review.findings. Bronreferenties blijven ongewijzigde fixture/TESTDATA-items. Er is geen nieuw provenance-datamodel of databasemigratie.
+
+De CLI-smoke composeert InventorySmokeProvider: één geselecteerde inventory-call en een deterministische A07-review. De volledige bestaande workflow draait in een unieke submap; de goedgekeurde runtime/GIS-001 blijft intact. Fouten tijdens de call worden door de bestaande workflow geaudit en leiden tot FAILED. Ontbrekende configuratie wordt vóór taakcreatie afgehandeld.
+
+Deze beperkte, vertrouwde adapter introduceert geen procesisolatie of productie-authenticatie. De eerder beschreven lokale beveiligingsgrens blijft gelden.

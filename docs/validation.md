@@ -1,6 +1,7 @@
 # Milestone 1 — validatie
 
-Uitgevoerd op 10 september 2026 in de opgegeven UNC-projectmap.
+Oorspronkelijke validatie uitgevoerd op 10 september 2026 in de opgegeven UNC-projectmap.
+Actuele taak- en git-status gecontroleerd op 11 september 2026 bij de start van Milestone 2A.
 
 ## Resultaten
 
@@ -8,13 +9,13 @@ Uitgevoerd op 10 september 2026 in de opgegeven UNC-projectmap.
 - Volledige suite: **35 tests geslaagd**, 17,587 seconden; exitcode 0.
 - Eerste run ontdekte drie Windows-codepagefouten in CLI-uitvoer. De CLI schrijft nu expliciet UTF-8; de volledige suite is daarna opnieuw uitgevoerd en geslaagd.
 - GIS-001 is na de tests uitgevoerd in runtime/state.sqlite3.
-- Eindstatus: **AWAITING_HUMAN_APPROVAL**.
+- Actuele eindstatus: **APPROVED**. De oorspronkelijke workflow stopte op AWAITING_HUMAN_APPROVAL; daarna volgde het afzonderlijke menselijke besluit.
 - Review: **SUFFICIENT**, uitsluitend voor de synthetische demonstratie.
-- human_approval: **null**.
+- human_approval: **aanwezig**, human_actor **Seth**, decision **APPROVED**, timestamp **2026-09-10T15:28:45.072834+00:00**, notes leeg.
 - Vier bronreferenties, alle **TESTDATA**; geen echte downloads, geometrie of ontwerp.
 - Snapshot: [gis-001-result.json](gis-001-result.json).
-- Auditbewijs: [gis-001-audit.jsonl](gis-001-audit.jsonl).
-- De blijvende demo is niet goedgekeurd of afgewezen.
+- Historisch auditbewijs vóór goedkeuring: [gis-001-audit.jsonl](gis-001-audit.jsonl), bewust ongewijzigd. De canonieke runtime/state.sqlite3 en de overeenkomende runtime/audit.jsonl bevatten aanvullend het human_approved-event van Seth op 2026-09-10T15:28:45.074834+00:00.
+- De blijvende demo is expliciet goedgekeurd door de menselijke actor Seth. Het bijgewerkte resultaatsnapshot is alleen-lezen uit de actuele database overgenomen; geen besluit opnieuw uitgevoerd en geen historische auditdata gewijzigd.
 
 ## Dekking gevraagde controles
 
@@ -52,8 +53,10 @@ De netwerkmap ondersteunt deze geteste sequentiële uitvoering. Multi-hostconcur
 - CLI gebruikt status/review/audit rechtstreeks, zonder extra geneste subcommando's.
 - Python was niet aanwezig en is binnen .tools geïnstalleerd. uv kon geen verkorte versielink op de share maken; de launcher gebruikt de werkende interpreter rechtstreeks. Geen globale Pythonregistratie of Git-configuratie gewijzigd.
 - Geen integraties of onderdelen buiten Milestone 1 toegevoegd.
-- Git-repository bestond al. Bestanden zijn klaar voor versiebeheer, maar niet gecommit.
+- Milestone 1 is gecommit: 8245141cb44d3922011f82f317320eb22fe7dcc2, 'Milestone 1 - basis AI ontwerpteam', 10 september 2026 om 17:33:29 +0200. Branch master was schoon bij de start van Milestone 2A. De nieuwe Milestone-2A-wijzigingen zijn nog niet gecommit.
 
-## Volgende milestone
+## Oorspronkelijk vervolgadvies en Milestone 2A
 
 Werk eerst de geauthenticeerde menselijke beslisroute en rechten uit. Voeg daarna één read-only officiële bronadapter toe, met expliciete bronlicentie, herkomst, actualiteit, CRS-controles en K00-integriteitscontrole. Koppel pas daarna een echte AI-provider via AIProvider, zonder approval- of shelltools.
+
+Milestone 2A is vervolgens expliciet beperkt tot een optionele OpenAI-provider, zonder authenticatie of bronintegraties. Zie [milestone-2a.md](milestone-2a.md) voor de actuele uitbreiding en validatie. De bovengenoemde 35 tests en looptijd zijn historische M1-resultaten.

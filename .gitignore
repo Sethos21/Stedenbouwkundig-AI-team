@@ -2,3 +2,5 @@
 runtime/
 __pycache__/
 *.pyc
+.env
+.env.*

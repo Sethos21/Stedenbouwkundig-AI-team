@@ -2,10 +2,10 @@
   "task_id": "GIS-001",
   "title": "Basisgeometrie Mastenbroekweg",
   "description": "TESTDATA: alleen broninventarisatie en geometrische status; nog geen ontwerp maken.",
-  "status": "AWAITING_HUMAN_APPROVAL",
+  "status": "APPROVED",
   "assigned_agent": "A01",
   "created_at": "2026-09-10T15:00:58.361608+00:00",
-  "updated_at": "2026-09-10T15:00:58.565613+00:00",
+  "updated_at": "2026-09-10T15:28:45.072834+00:00",
   "input_refs": [
     "examples/gis-001.json"
   ],
@@ -13,7 +13,13 @@
     "GIS-001/A02/v1"
   ],
   "review_status": "SUFFICIENT",
-  "human_approval": null,
+  "human_approval": {
+    "task_id": "GIS-001",
+    "human_actor": "Seth",
+    "timestamp": "2026-09-10T15:28:45.072834+00:00",
+    "decision": "APPROVED",
+    "notes": ""
+  },
   "outputs": [
     {
       "task_id": "GIS-001",
