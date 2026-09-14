@@ -106,3 +106,14 @@ vertrouwde adaptercode toegevoegd in `payload.recommendations`; A07-herkomst sta
 `source_type=fixture` en `source_status=TESTDATA` blijven bronherkomst beschrijven, niet de AI-provider.
 De domain/application-lagen, statusmachine en HumanApprovalService zijn ongewijzigd.
 Zie [Milestone 2A-validatie](docs/milestone-2a.md).
+
+## Milestone 2B — Ontwerplus (uitsluitend TESTDATA)
+
+De acht-agent ontwerpworkflow heeft eigen rolcapabilities, revisiegates, specialistische reviews, een iteratielimiet en een menselijk beslispakket. De bestaande GIS-demo en rolconfiguratie blijven behouden.
+
+```powershell
+.\bvc-ai.ps1 demo design-test-001
+.\bvc-ai.ps1 --data runtime/milestone-2b design-report DESIGN-TEST-001
+```
+
+De demo gebruikt alleen de deterministische provider en stopt op AWAITING_HUMAN_APPROVAL met human_approval null. Opslag staat apart onder runtime/milestone-2b. Zie [workflow en architectuur](docs/milestone-2b.md) en [validatiebewijs](docs/milestone-2b-validation.md).

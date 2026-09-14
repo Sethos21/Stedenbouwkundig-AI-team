@@ -1,0 +1,260 @@
+{
+  "project_id": "DESIGN-TEST-001",
+  "source_status": "TESTDATA",
+  "description": "Volledig synthetische lokale metrische geometrie, geen echte locatie of formele validatie.",
+  "geometry_registry": {
+    "fixture/boundary": {
+      "kind": "source",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          0,
+          0
+        ],
+        [
+          300,
+          0
+        ],
+        [
+          300,
+          300
+        ],
+        [
+          0,
+          300
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "fixture/existing": {
+      "kind": "source",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          0,
+          0
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          20,
+          300
+        ],
+        [
+          0,
+          300
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "fixture/zone1": {
+      "kind": "source",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          30,
+          30
+        ],
+        [
+          120,
+          30
+        ],
+        [
+          120,
+          270
+        ],
+        [
+          30,
+          270
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "fixture/zone2": {
+      "kind": "source",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          120,
+          30
+        ],
+        [
+          220,
+          30
+        ],
+        [
+          220,
+          270
+        ],
+        [
+          120,
+          270
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "fixture/zone3": {
+      "kind": "source",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          220,
+          30
+        ],
+        [
+          280,
+          30
+        ],
+        [
+          280,
+          270
+        ],
+        [
+          220,
+          270
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "design/compact": {
+      "kind": "design",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          60,
+          40
+        ],
+        [
+          250,
+          40
+        ],
+        [
+          250,
+          260
+        ],
+        [
+          60,
+          260
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "design/linear": {
+      "kind": "design",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          160,
+          50
+        ],
+        [
+          230,
+          50
+        ],
+        [
+          230,
+          250
+        ],
+        [
+          160,
+          250
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "design/green": {
+      "kind": "design",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          240,
+          30
+        ],
+        [
+          280,
+          30
+        ],
+        [
+          280,
+          250
+        ],
+        [
+          240,
+          250
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "design/access": {
+      "kind": "design",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          30,
+          30
+        ],
+        [
+          230,
+          30
+        ],
+        [
+          230,
+          50
+        ],
+        [
+          30,
+          50
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "design/integrated": {
+      "kind": "design",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          60,
+          60
+        ],
+        [
+          230,
+          60
+        ],
+        [
+          230,
+          200
+        ],
+        [
+          60,
+          200
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    },
+    "design/central": {
+      "kind": "design",
+      "source_status": "TESTDATA",
+      "coordinates": [
+        [
+          200,
+          210
+        ],
+        [
+          230,
+          210
+        ],
+        [
+          230,
+          240
+        ],
+        [
+          200,
+          240
+        ]
+      ],
+      "crs": "SYNTHETIC_LOCAL_METRES"
+    }
+  }
+}

@@ -2,10 +2,15 @@ from typing import Protocol
 from copy import deepcopy
 
 class AIProvider(Protocol):
+    def design_step(self, step: str, context: dict, input_revisions: dict) -> dict: ...
     def inventory(self, brief: dict, revision_points: list) -> dict: ...
     def review(self, output: dict) -> dict: ...
 
 class DeterministicTestProvider:
+    def design_step(self, step, context, input_revisions):
+        from bvc_ai.agents.design_mock import design_proposal
+        return design_proposal(step, context, input_revisions)
+
     def inventory(self, brief, revision_points):
         return {
             "sources": deepcopy(brief["sources"]),

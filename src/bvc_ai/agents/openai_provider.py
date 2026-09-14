@@ -43,6 +43,9 @@ def fixture_sources(brief):
 
 
 class OpenAIProvider:
+    def design_step(self, step, context, input_revisions):
+        raise ValueError("Milestone 2B ondersteunt uitsluitend de deterministische provider")
+
     def __init__(self, *, model=DEFAULT_MODEL, timeout=30):
         if not os.environ.get("OPENAI_API_KEY", "").strip():
             raise OpenAIProviderError("OPENAI_API_KEY ontbreekt; gebruik mock of stel de omgevingsvariabele lokaal in.")

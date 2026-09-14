@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-09-14T10:35:51.571235+00:00",
+  "test_count": 99,
+  "test_seconds": 44.105,
+  "historical_files_unchanged": true,
+  "historical_sha256": {
+    "docs/architecture.md": "4290f7c11c268f953c9cc38a70c92d8f0f0aaea1db8e20491330c4c36a551c5c",
+    "docs/gis-001-audit.jsonl": "20aacd945f769cb1155851efc4db866ec6cd4f5eb73fff91f2c44fe149b6aa28",
+    "docs/gis-001-result.json": "52638f4ade4a297b95bb49094ae1514dc8407fa1223f3b85335683065777e478",
+    "docs/validation.md": "43a66567103aa95ab7a3f853068c6e760ceb7bbe9dc9c9353f29163d5578966e",
+    "docs/workflow.md": "a6a0e6c7123fc1c5884f0ed323050047e3d1cf0ee6e6aa2d281982d191532876",
+    "runtime/audit.jsonl": "7ea3a8457867f09309a2cbee8b195ace5c78be02b19271afcc0f2036200b2533",
+    "runtime/state.sqlite3": "507ca867912f73ab2f84bc97c950542a2c952e3398f31bc3dfb5a27922c9feac"
+  },
+  "replay_identical": true,
+  "canonical_audit_matches_export": true,
+  "evidence_sha256": {
+    "milestone-2b-result.json": "bad6e30f1c5d79e153edb21dd4a3d5a84e86d48729724f162fdf78db4f94d51d",
+    "milestone-2b-audit.jsonl": "c1b998e483d2144f9ccf6585a3bb7c2ba5cd5f72c2bfbc2318210b158fdad591",
+    "milestone-2b-tests.txt": "f0ba645552653d1eea2a57a02173cc564b46bea4ef051b91f1718675151b14b5"
+  }
+}
