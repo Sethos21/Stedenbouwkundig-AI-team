@@ -40,6 +40,21 @@ test_transaction_failure_after_writes_rolls_back_audit_and_domain (test_design_w
 test_two_store_conflict_cannot_commit_stale_proposal (test_design_workflow.DesignTests.test_two_store_conflict_cannot_commit_stale_proposal) ... ok
 test_upstream_change_reopens_stale_resolutions (test_design_workflow.DesignTests.test_upstream_change_reopens_stale_resolutions) ... ok
 test_workflow_scoped_roles_and_agent_capabilities (test_design_workflow.DesignTests.test_workflow_scoped_roles_and_agent_capabilities) ... ok
+test_f1_missing_required_specialist_object_keeps_finding_open (test_milestone_2b1.RepairTests.test_f1_missing_required_specialist_object_keeps_finding_open) ... ok
+test_f1_original_geometry_keeps_specialist_findings_open (test_milestone_2b1.RepairTests.test_f1_original_geometry_keeps_specialist_findings_open) ... ok
+test_f1_resolution_has_geometry_and_revision_evidence (test_milestone_2b1.RepairTests.test_f1_resolution_has_geometry_and_revision_evidence) ... ok
+test_f1_textual_resolution_of_conflicting_geometry_is_rejected (test_milestone_2b1.RepairTests.test_f1_textual_resolution_of_conflicting_geometry_is_rejected) ... ok
+test_f1_unknown_finding_is_not_automatically_resolved (test_milestone_2b1.RepairTests.test_f1_unknown_finding_is_not_automatically_resolved) ... ok
+test_f2_failure_after_state_write_rolls_back_and_audits_all_human_routes (test_milestone_2b1.RepairTests.test_f2_failure_after_state_write_rolls_back_and_audits_all_human_routes) ... ok
+test_f2_failure_after_success_audit_rolls_back_success_and_decision (test_milestone_2b1.RepairTests.test_f2_failure_after_success_audit_rolls_back_success_and_decision) ... ok
+test_f2_unavailable_fault_audit_never_commits_decision (test_milestone_2b1.RepairTests.test_f2_unavailable_fault_audit_never_commits_decision) ... ok
+test_f3_limit_package_uses_registered_references (test_milestone_2b1.RepairTests.test_f3_limit_package_uses_registered_references) ... ok
+test_f3_new_hypothesis_rejects_old_variant_reference (test_milestone_2b1.RepairTests.test_f3_new_hypothesis_rejects_old_variant_reference) ... ok
+test_f3_package_refs_resolve_and_integration_has_hypothesis_lineage (test_milestone_2b1.RepairTests.test_f3_package_refs_resolve_and_integration_has_hypothesis_lineage) ... ok
+test_f4_changes_during_test_run_invalidate_evidence (test_milestone_2b1.RepairTests.test_f4_changes_during_test_run_invalidate_evidence) ... ok
+test_f4_empty_or_nonzero_success_output_is_not_evidence (test_milestone_2b1.RepairTests.test_f4_empty_or_nonzero_success_output_is_not_evidence) ... ok
+test_f4_old_success_log_cannot_mask_current_test_failure (test_milestone_2b1.RepairTests.test_f4_old_success_log_cannot_mask_current_test_failure) ... ok
+test_f4_success_binds_actual_run_and_code_identity (test_milestone_2b1.RepairTests.test_f4_success_binds_actual_run_and_code_identity) ... ok
 test_approved_review_fails_and_is_audited (test_openai_provider.OpenAIProviderTests.test_approved_review_fails_and_is_audited) ... ok
 test_cli_missing_key_fails_before_creating_task (test_openai_provider.OpenAIProviderTests.test_cli_missing_key_fails_before_creating_task) ... ok
 test_full_openai_workflow_waits_and_persists_provenance (test_openai_provider.OpenAIProviderTests.test_full_openai_workflow_waits_and_persists_provenance) ... ok
@@ -99,6 +114,6 @@ test_unknown_task_and_invalid_decision_are_rejected (test_runtime.RuntimeTests.t
 test_verified_source_inside_fixture_output_is_denied (test_runtime.RuntimeTests.test_verified_source_inside_fixture_output_is_denied) ... ok
 
 ----------------------------------------------------------------------
-Ran 99 tests in 44.105s
+Ran 114 tests in 50.822s
 
 OK

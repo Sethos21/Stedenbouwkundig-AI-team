@@ -184,3 +184,25 @@ def check_design_approval(task):
                 or review["revision_id"] != integration["revision_id"]
                 or review["verdict"] not in {"PASS", "PASS_WITH_FINDINGS"}):
             raise ValueError("Actuele voldoende vakreview ontbreekt")
+
+
+def decision_variants(task):
+    """Resolve proposal-local IDs to registered objects and explicit lineage."""
+    hypothesis = current_output(task, "A03_HYPOTHESIS")
+    revision = hypothesis["revision_id"]
+    registered = {o["object_id"] for o in task["objects"]}
+    integration_revision = task["active_revisions"].get("A03_INTEGRATION")
+    integration = next((o for o in task["outputs"] if o["revision_id"] == integration_revision), None)
+    variants = []
+    for index, variant in enumerate(hypothesis["output"]["variants"], 1):
+        variant_id = f"{revision}/variant/{index}"
+        object_ids = [f"{revision}/{local_id}" for local_id in variant["object_ids"]]
+        if not set(object_ids) <= registered:
+            raise ValueError("Hypothesevariant verwijst naar ontbrekende modelobjecten")
+        derived = integration is not None and integration["output"].get("hypothesis_variant_id") == variant_id
+        variants.append(dict(name=variant["name"], strategy=variant["strategy"], variant_id=variant_id,
+                             hypothesis_revision_id=revision, object_ids=object_ids,
+                             integration_revision_id=integration_revision if derived else None,
+                             integrated_object_ids=[o["object_id"] for o in task["objects"]
+                                 if derived and o["revision_id"] == integration_revision]))
+    return variants

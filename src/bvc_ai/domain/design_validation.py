@@ -2,8 +2,9 @@
 import math
 import json
 import re
-from bvc_ai.domain.design import DESIGN_TYPES, SOURCE_TYPES, ENV_THEMES, Severity, Verdict, REVIEW_STEPS
+from bvc_ai.domain.design import DESIGN_TYPES, SOURCE_TYPES, ENV_THEMES, Severity, Verdict, REVIEW_STEPS, decision_variants
 from bvc_ai.domain.policies import K00Policy
+from bvc_ai.domain.design_verification import resolution_evidence
 
 
 def exact(value, keys):
@@ -37,7 +38,7 @@ def forbidden(value):
 def validate_proposal(step, proposal, task, inputs):
     if len(json.dumps(proposal, allow_nan=False)) > 200000:
         raise ValueError("Voorstel te groot")
-    exact(proposal, {"summary", "objects", "findings", "conditions", "variants", "responses", "review"})
+    exact(proposal, {"summary", "objects", "findings", "conditions", "variants", "responses", "review", "hypothesis_variant_id"})
     forbidden(proposal)
     nonempty(proposal["summary"])
     for key in ("objects", "findings", "conditions", "variants", "responses"):
@@ -129,6 +130,11 @@ def validate_proposal(step, proposal, task, inputs):
         response_ids.append(response["finding_id"])
     if step == "A03_INTEGRATION" and (set(response_ids) != obligations or len(response_ids) != len(obligations)):
         raise ValueError("Integratie moet alle open findings expliciet behandelen")
+    if step == "A03_INTEGRATION":
+        if proposal["hypothesis_variant_id"] not in {v["variant_id"] for v in decision_variants(task)}:
+            raise ValueError("Integratie vereist een actuele, geregistreerde hypothesevariant")
+    elif proposal["hypothesis_variant_id"] is not None:
+        raise PermissionError("Alleen integratie kiest een hypothesevariant")
     review = proposal["review"]
     if step in REVIEW_STEPS:
         exact(review, {"revision_id", "input_revisions", "verdict", "rationale", "resolved_findings"})
@@ -149,5 +155,7 @@ def validate_proposal(step, proposal, task, inputs):
             finding = next((f for f in task["findings"] if f["finding_id"] == fid), None)
             if finding is None or finding["created_by"] != actor or fid not in addressed or fid not in obligations:
                 raise PermissionError("Alleen eigenaar mag aantoonbaar verwerkte finding oplossen")
+            if resolution_evidence(task, finding, inputs["A03_INTEGRATION"]) is None:
+                raise ValueError("Finding niet automatisch geverifieerd; laat open voor specialistische/menselijke verificatie")
     elif review is not None:
         raise PermissionError("Review buiten reviewstap")

@@ -12,8 +12,9 @@ class HumanApprovalService:
         self.store = store
 
     def decide(self, task_id, human_actor, decision, notes="", *, finding_id=None, idempotency_key=None):
-        actor = human_actor.strip()
+        actor = "unknown"
         try:
+            actor = human_actor.strip()
             if not actor or actor.upper() in {f"A{i:02}" for i in range(1, 9)}:
                 raise PermissionError("Een menselijke actor is verplicht; agentidentiteiten zijn verboden")
             if decision not in {"APPROVED", "REJECTED", "ACCEPTED_RISK"}:
@@ -31,9 +32,18 @@ class HumanApprovalService:
                 task.update(status=decision, updated_at=approval["timestamp"], human_approval=approval)
                 self.store._save(task)
                 self.store.event(task_id, actor, "human_approved" if decision == "APPROVED" else "human_rejected", approval=approval)
-        except (ValueError, PermissionError) as exc:
+        except Exception as exc:
+            # The decision transaction has exited and rolled back before this
+            # independent audit transaction. Never retry or save the decision.
             with self.store.db:
-                self.store.event(task_id, actor, "blocked_transition", reason=str(exc), target=decision)
+                self.store.db.execute("BEGIN IMMEDIATE")
+                if isinstance(exc, (ValueError, PermissionError)):
+                    self.store.event(task_id, actor, "blocked_transition", reason=str(exc), target=decision)
+                else:
+                    self.store.event(task_id, actor, "human_decision_failed", target=decision,
+                                     finding_id=finding_id, idempotency_key=idempotency_key,
+                                     error_type=type(exc).__name__,
+                                     reason="Menselijke transactie mislukt; geen besluit opgeslagen")
             raise
 
     def _decide_design(self, task, actor, decision, notes, finding_id, key):

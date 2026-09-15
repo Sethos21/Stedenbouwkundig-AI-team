@@ -7,9 +7,10 @@ from bvc_ai.domain.models import now
 from bvc_ai.domain.design import (
     STEPS, REVIEW_STEPS, ROLES, AgentTask, DesignObject, Finding, ReviewResult,
     Handoff, DecisionRequest, RevisionDependency, current_output, open_findings,
-    check_critical, check_design_approval,
+    check_critical, check_design_approval, decision_variants,
 )
 from bvc_ai.domain.design_validation import validate_proposal
+from bvc_ai.domain.design_verification import resolution_evidence
 
 
 class DesignSession:
@@ -120,7 +121,7 @@ class DesignWorkflow:
                     task["decision_requests"].append(asdict(DecisionRequest(
                         "iteration-limit/4", dict(task["active_revisions"]),
                         "Drie automatische ontwerpcycli verbruikt. Beoordeel open herstelpunten en bepaal een nieuw ontwerpbesluit; er volgt geen automatische vierde integratie.",
-                        current_output(task, "A03_HYPOTHESIS")["output"]["variants"],
+                        decision_variants(task),
                         [r for r in task["reviews"] if r["review_id"] not in task["stale_reviews"]],
                         deepcopy(open_findings(task)),
                         [f for f in open_findings(task) if f["classification"] == "ENVIRONMENTAL_RISK"],
@@ -198,6 +199,11 @@ class DesignWorkflow:
             self.store.event(task["task_id"], actor, "finding_created", finding=finding)
         for obj in proposal["objects"]:
             properties = deepcopy(obj["properties"])
+            if step == "A03_INTEGRATION":
+                variant = next(v for v in decision_variants(task) if v["variant_id"] == proposal["hypothesis_variant_id"])
+                properties.update(hypothesis_variant_id=variant["variant_id"],
+                                  hypothesis_revision_id=variant["hypothesis_revision_id"],
+                                  hypothesis_object_ids=variant["object_ids"])
             if obj["object_type"] == "DEVELOPMENT_FIELD":
                 coordinates = task["geometry_registry"][obj["geometry_ref"]]["coordinates"]
                 area = abs(sum(a[0]*b[1] - b[0]*a[1] for a, b in zip(coordinates, coordinates[1:] + coordinates[:1]))) / 2
@@ -225,18 +231,18 @@ class DesignWorkflow:
                         self.store.event(task["task_id"], actor, "finding_reviewed", change=change)
             for fid in item["resolved_findings"]:
                 finding = next(f for f in task["findings"] if f["finding_id"] == fid)
-                change = dict(finding_id=fid, previous=finding["status"], target="RESOLVED", review_id=revision, actor=actor)
+                change = dict(finding_id=fid, previous=finding["status"], target="RESOLVED", review_id=revision, actor=actor,
+                              verification=resolution_evidence(task, finding, inputs["A03_INTEGRATION"]))
                 task["finding_history"].append(change)
                 finding["status"] = "RESOLVED"
                 self.store.event(task["task_id"], actor, "finding_resolved", change=change)
         active_verdicts = {r["verdict"] for r in task["reviews"] if r["review_id"] in task["active_revisions"].values()}
         task["status"] = "BLOCKED" if "BLOCKED" in active_verdicts else "A03_INTEGRATION" if "REVISE" in active_verdicts else "READY"
         if step == "A01_PACKAGE":
-            hypotheses = current_output(task, "A03_HYPOTHESIS")
             conditions = [c for o in task["outputs"] if o["revision_id"] in task["active_revisions"].values() for c in o["output"]["conditions"]]
             request = asdict(DecisionRequest(revision, inputs,
                 "Welke TESTDATA-variant en welke resterende risico's en onderzoeksvragen wilt u expliciet beoordelen? Geen uitvoerings- of onderzoeksgoedkeuring is verleend.",
-                hypotheses["output"]["variants"], [r for r in task["reviews"] if r["review_id"] not in task["stale_reviews"]],
+                decision_variants(task), [r for r in task["reviews"] if r["review_id"] not in task["stale_reviews"]],
                 deepcopy(open_findings(task)), [f for f in open_findings(task) if f["classification"] == "ENVIRONMENTAL_RISK"],
                 [c for c in conditions if c["classification"] in {"UNCERTAIN", "RESEARCH_REQUIRED"}],
                 [o["revision_id"] for o in task["outputs"]]))

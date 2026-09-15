@@ -33,9 +33,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.795331+00:00",
+        "timestamp": "2026-09-15T08:10:30.524664+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -64,9 +65,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.131770+00:00",
+        "timestamp": "2026-09-15T08:10:30.877667+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -147,9 +149,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.810332+00:00",
+        "timestamp": "2026-09-15T08:10:30.542669+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -214,9 +217,10 @@
             }
           ],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.895331+00:00",
+        "timestamp": "2026-09-15T08:10:30.619670+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -279,9 +283,10 @@
               "explanation": "Zuidgrens bouwveld y=60; toegang y=30..50 blijft vrij. A05-toegangsobject behouden via inputrevision."
             }
           ],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": "A03_HYPOTHESIS/v1/variant/1"
         },
-        "timestamp": "2026-09-14T10:35:49.984703+00:00",
+        "timestamp": "2026-09-15T08:10:30.710667+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -325,9 +330,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.923330+00:00",
+        "timestamp": "2026-09-15T08:10:30.648665+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -369,9 +375,10 @@
             "resolved_findings": [
               "A04/v1/F1"
             ]
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.011703+00:00",
+        "timestamp": "2026-09-15T08:10:30.744667+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -415,9 +422,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.952704+00:00",
+        "timestamp": "2026-09-15T08:10:30.680666+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -459,9 +467,10 @@
             "resolved_findings": [
               "A05/v1/F1"
             ]
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.044704+00:00",
+        "timestamp": "2026-09-15T08:10:30.777667+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -498,9 +507,10 @@
           ],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.834330+00:00",
+        "timestamp": "2026-09-15T08:10:30.564666+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -555,9 +565,10 @@
             "verdict": "PASS_WITH_FINDINGS",
             "rationale": "Indieningsreview TESTDATA: ruimtelijke verwerking traceerbaar; beleid, milieuonderzoek en parkeeronderbouwing ontbreken nog. Geen vergunningoordeel.",
             "resolved_findings": []
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.098704+00:00",
+        "timestamp": "2026-09-15T08:10:30.843673+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -652,9 +663,10 @@
           ],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.863331+00:00",
+        "timestamp": "2026-09-15T08:10:30.593672+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -694,9 +706,10 @@
             "verdict": "PASS_WITH_FINDINGS",
             "rationale": "Bouwveld ligt zuidelijker, maar indicatieve geluidrisico's en alle formele onderzoeksvragen blijven open.",
             "resolved_findings": []
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.070704+00:00",
+        "timestamp": "2026-09-15T08:10:30.810669+00:00",
         "source_status": "TESTDATA"
       }
     ]
@@ -788,9 +801,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.795331+00:00",
+        "timestamp": "2026-09-15T08:10:30.524664+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -869,9 +883,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.810332+00:00",
+        "timestamp": "2026-09-15T08:10:30.542669+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -906,9 +921,10 @@
           ],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.834330+00:00",
+        "timestamp": "2026-09-15T08:10:30.564666+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1001,9 +1017,10 @@
           ],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.863331+00:00",
+        "timestamp": "2026-09-15T08:10:30.593672+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1066,9 +1083,10 @@
             }
           ],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.895331+00:00",
+        "timestamp": "2026-09-15T08:10:30.619670+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1110,9 +1128,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.923330+00:00",
+        "timestamp": "2026-09-15T08:10:30.648665+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1154,9 +1173,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:49.952704+00:00",
+        "timestamp": "2026-09-15T08:10:30.680666+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1219,9 +1239,10 @@
               "explanation": "Zuidgrens bouwveld y=60; toegang y=30..50 blijft vrij. A05-toegangsobject behouden via inputrevision."
             }
           ],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": "A03_HYPOTHESIS/v1/variant/1"
         },
-        "timestamp": "2026-09-14T10:35:49.984703+00:00",
+        "timestamp": "2026-09-15T08:10:30.710667+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1263,9 +1284,10 @@
             "resolved_findings": [
               "A04/v1/F1"
             ]
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.011703+00:00",
+        "timestamp": "2026-09-15T08:10:30.744667+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1307,9 +1329,10 @@
             "resolved_findings": [
               "A05/v1/F1"
             ]
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.044704+00:00",
+        "timestamp": "2026-09-15T08:10:30.777667+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1349,9 +1372,10 @@
             "verdict": "PASS_WITH_FINDINGS",
             "rationale": "Bouwveld ligt zuidelijker, maar indicatieve geluidrisico's en alle formele onderzoeksvragen blijven open.",
             "resolved_findings": []
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.070704+00:00",
+        "timestamp": "2026-09-15T08:10:30.810669+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1404,9 +1428,10 @@
             "verdict": "PASS_WITH_FINDINGS",
             "rationale": "Indieningsreview TESTDATA: ruimtelijke verwerking traceerbaar; beleid, milieuonderzoek en parkeeronderbouwing ontbreken nog. Geen vergunningoordeel.",
             "resolved_findings": []
-          }
+          },
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.098704+00:00",
+        "timestamp": "2026-09-15T08:10:30.843673+00:00",
         "source_status": "TESTDATA"
       },
       {
@@ -1435,9 +1460,10 @@
           "conditions": [],
           "variants": [],
           "responses": [],
-          "review": null
+          "review": null,
+          "hypothesis_variant_id": null
         },
-        "timestamp": "2026-09-14T10:35:50.131770+00:00",
+        "timestamp": "2026-09-15T08:10:30.877667+00:00",
         "source_status": "TESTDATA"
       }
     ],
@@ -1650,6 +1676,11 @@
         "properties": {
           "description": "Compacte variant: zuidwaarts verschoven, oostelijke groenstrook en zuidelijke toegang vrijgehouden",
           "density_per_ha": 40,
+          "hypothesis_variant_id": "A03_HYPOTHESIS/v1/variant/1",
+          "hypothesis_revision_id": "A03_HYPOTHESIS/v1",
+          "hypothesis_object_ids": [
+            "A03_HYPOTHESIS/v1/compact"
+          ],
           "area_m2": 23800.0,
           "capacity": 95,
           "capacity_basis": "synthetic polygon area * assumed density; derived, not input"
@@ -1675,7 +1706,12 @@
           "fixture/boundary"
         ],
         "properties": {
-          "description": "Centrale ontmoetingsruimte naast landschappelijke verbinding"
+          "description": "Centrale ontmoetingsruimte naast landschappelijke verbinding",
+          "hypothesis_variant_id": "A03_HYPOTHESIS/v1/variant/1",
+          "hypothesis_revision_id": "A03_HYPOTHESIS/v1",
+          "hypothesis_object_ids": [
+            "A03_HYPOTHESIS/v1/compact"
+          ]
         },
         "required_reviews": [
           "A04",
@@ -2492,16 +2528,27 @@
           {
             "name": "Compact",
             "strategy": "Compact centraal woonveld met brede oostelijke groenruimte",
+            "variant_id": "A03_HYPOTHESIS/v1/variant/1",
+            "hypothesis_revision_id": "A03_HYPOTHESIS/v1",
             "object_ids": [
-              "compact"
+              "A03_HYPOTHESIS/v1/compact"
+            ],
+            "integration_revision_id": "A03_INTEGRATION/v1",
+            "integrated_object_ids": [
+              "A03_INTEGRATION/v1/integrated",
+              "A03_INTEGRATION/v1/central"
             ]
           },
           {
             "name": "Lineair",
             "strategy": "Langgerekte oostelijke bebouwing met centrale open ruimte",
+            "variant_id": "A03_HYPOTHESIS/v1/variant/2",
+            "hypothesis_revision_id": "A03_HYPOTHESIS/v1",
             "object_ids": [
-              "linear"
-            ]
+              "A03_HYPOTHESIS/v1/linear"
+            ],
+            "integration_revision_id": null,
+            "integrated_object_ids": []
           }
         ],
         "specialist_judgments": [
@@ -2731,14 +2778,92 @@
         "previous": "OPEN",
         "target": "RESOLVED",
         "review_id": "A04_REVIEW/v1",
-        "actor": "A04"
+        "actor": "A04",
+        "verification": {
+          "rule_id": "synthetic/A04/clear-strip/v1",
+          "integration_revision_id": "A03_INTEGRATION/v1",
+          "input_revisions": {
+            "A01_START": "A01_START/v1",
+            "A02": "A02/v1",
+            "A06": "A06/v1",
+            "A08_GATE": "A08_GATE/v1",
+            "A03_HYPOTHESIS": "A03_HYPOTHESIS/v1",
+            "A04": "A04/v1",
+            "A05": "A05/v1"
+          },
+          "checked_objects": [
+            {
+              "object_id": "A03_INTEGRATION/v1/integrated",
+              "geometry_ref": "design/integrated",
+              "bounds": [
+                60,
+                60,
+                230,
+                200
+              ]
+            },
+            {
+              "object_id": "A03_INTEGRATION/v1/central",
+              "geometry_ref": "design/central",
+              "bounds": [
+                200,
+                210,
+                230,
+                240
+              ]
+            }
+          ],
+          "specialist_object_ids": [
+            "A04/v1/green"
+          ],
+          "source_status": "TESTDATA"
+        }
       },
       {
         "finding_id": "A05/v1/F1",
         "previous": "OPEN",
         "target": "RESOLVED",
         "review_id": "A05_REVIEW/v1",
-        "actor": "A05"
+        "actor": "A05",
+        "verification": {
+          "rule_id": "synthetic/A05/clear-strip/v1",
+          "integration_revision_id": "A03_INTEGRATION/v1",
+          "input_revisions": {
+            "A01_START": "A01_START/v1",
+            "A02": "A02/v1",
+            "A06": "A06/v1",
+            "A08_GATE": "A08_GATE/v1",
+            "A03_HYPOTHESIS": "A03_HYPOTHESIS/v1",
+            "A04": "A04/v1",
+            "A05": "A05/v1"
+          },
+          "checked_objects": [
+            {
+              "object_id": "A03_INTEGRATION/v1/integrated",
+              "geometry_ref": "design/integrated",
+              "bounds": [
+                60,
+                60,
+                230,
+                200
+              ]
+            },
+            {
+              "object_id": "A03_INTEGRATION/v1/central",
+              "geometry_ref": "design/central",
+              "bounds": [
+                200,
+                210,
+                230,
+                240
+              ]
+            }
+          ],
+          "specialist_object_ids": [
+            "A05/v1/access"
+          ],
+          "source_status": "TESTDATA"
+        }
       }
     ],
     "idempotency": {
@@ -3149,6 +3274,6 @@
         "crs": "SYNTHETIC_LOCAL_METRES"
       }
     },
-    "updated_at": "2026-09-14T10:35:50.134770+00:00"
+    "updated_at": "2026-09-15T08:10:30.879670+00:00"
   }
 }

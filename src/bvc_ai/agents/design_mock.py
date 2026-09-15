@@ -1,5 +1,6 @@
 """Deterministic synthetic proposal data; no tools, approval or state mutation."""
 from bvc_ai.domain.design import ENV_THEMES, REVIEW_STEPS
+from bvc_ai.domain.design_verification import resolution_evidence
 
 
 def object_proposal(local_id, object_type, geometry_ref, description, density=None):
@@ -17,7 +18,7 @@ def finding(description, effect, severity="MAJOR", classification="STEERING"):
 
 def design_proposal(step, context, inputs):
     result = dict(summary=f"{step}: uitsluitend synthetische TESTDATA; geen formeel onderzoek of toestemming.",
-                  objects=[], findings=[], conditions=[], variants=[], responses=[], review=None)
+                  objects=[], findings=[], conditions=[], variants=[], responses=[], review=None, hypothesis_variant_id=None)
     if step == "A02":
         result["objects"] = [object_proposal("boundary", "PROJECT_BOUNDARY", "fixture/boundary", "Synthetische projectgrens"),
                              object_proposal("existing", "EXISTING_FEATURE", "fixture/existing", "Immutable synthetische watergang")]
@@ -44,6 +45,7 @@ def design_proposal(step, context, inputs):
         result["objects"] = [object_proposal("access", "PROPOSED_ACCESS", "design/access", "Zuidelijke toegang; parkeeroplossing vereist latere uitwerking")]
         result["findings"] = [finding("Toegang doorsnijdt centraal veld in hypothese", "Houd zuidstrook y=30..50 vrij voor toegang", "MINOR")]
     elif step == "A03_INTEGRATION":
+        result["hypothesis_variant_id"] = inputs["A03_HYPOTHESIS"] + "/variant/1"
         result["objects"] = [object_proposal("integrated", "DEVELOPMENT_FIELD", "design/integrated", "Compacte variant: zuidwaarts verschoven, oostelijke groenstrook en zuidelijke toegang vrijgehouden", 40),
                              object_proposal("central", "CENTRAL_PLACE", "design/central", "Centrale ontmoetingsruimte naast landschappelijke verbinding")]
         result["responses"] = [dict(finding_id=f["finding_id"], explanation={
@@ -55,7 +57,7 @@ def design_proposal(step, context, inputs):
             for f in context["findings"] if f["status"] not in {"RESOLVED", "ACCEPTED_RISK"}]
     elif step in REVIEW_STEPS:
         actor = step.split("_")[0]
-        resolved = [f["finding_id"] for f in context["findings"] if f["created_by"] == actor and f["status"] in {"OPEN", "UNRESOLVED", "BLOCKED"}] if actor in {"A04", "A05"} else []
+        resolved = [f["finding_id"] for f in context["findings"] if f["created_by"] == actor and f["status"] in {"OPEN", "UNRESOLVED", "BLOCKED"} and resolution_evidence(context, f, inputs["A03_INTEGRATION"]) is not None] if actor in {"A04", "A05"} else []
         result["review"] = dict(revision_id=inputs["A03_INTEGRATION"], input_revisions=inputs,
              verdict="PASS_WITH_FINDINGS", rationale={
                  "A04": "Integratie houdt de oostelijke groenstrook vrij en behoudt de voorgestelde landschappelijke drager; detailuitwerking volgt.",
@@ -63,6 +65,9 @@ def design_proposal(step, context, inputs):
                  "A08": "Bouwveld ligt zuidelijker, maar indicatieve geluidrisico's en alle formele onderzoeksvragen blijven open.",
                  "A07": "Indieningsreview TESTDATA: ruimtelijke verwerking traceerbaar; beleid, milieuonderzoek en parkeeronderbouwing ontbreken nog. Geen vergunningoordeel.",
              }[actor], resolved_findings=resolved)
+        if actor in {"A04", "A05"} and any(f["created_by"] == actor and f["status"] in {"OPEN", "UNRESOLVED", "BLOCKED"}
+                                           and f["finding_id"] not in resolved for f in context["findings"]):
+            result["review"]["rationale"] = "Verwerking niet automatisch aantoonbaar; findings blijven open voor specialistische/menselijke verificatie."
         if actor == "A07":
             result["findings"] = [finding("Formele milieu- en parkeeronderbouwing ontbreekt voor indiening", "Bouwgrenzen en ontsluiting blijven indicatief tot onderbouwing beschikbaar is", "MAJOR", "RESEARCH_REQUIRED")]
     return result
