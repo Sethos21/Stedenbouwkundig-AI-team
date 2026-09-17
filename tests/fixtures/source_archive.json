@@ -1,0 +1,58 @@
+{
+  "source_status": "TESTDATA",
+  "description": "Synthetic offline storage fixture; not PDOK/BAG data and not the Mastenbroekweg scope.",
+  "crs": "SYNTHETIC_LOCAL_METRES",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      0,
+      0
+    ]
+  },
+  "analysis_geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -10,
+          -10
+        ],
+        [
+          10,
+          -10
+        ],
+        [
+          10,
+          10
+        ],
+        [
+          -10,
+          10
+        ],
+        [
+          -10,
+          -10
+        ]
+      ]
+    ]
+  },
+  "raw_response": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "id": "test-feature-1",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            0,
+            0
+          ]
+        },
+        "properties": {
+          "source_status": "TESTDATA"
+        }
+      }
+    ]
+  }
+}

@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 from dataclasses import asdict
 from bvc_ai.domain.models import AuditEvent, now
+from bvc_ai.infrastructure.source_schema import migrate
 
 class Store:
     """Single-host storage. State and canonical audit commit atomically."""
@@ -11,9 +12,11 @@ class Store:
         self.directory.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(self.directory / "state.sqlite3", timeout=10)
         self.db.execute("PRAGMA journal_mode=DELETE")
-        self.db.execute("CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY, body TEXT NOT NULL)")
-        self.db.execute("CREATE TABLE IF NOT EXISTS audit (seq INTEGER PRIMARY KEY, body TEXT NOT NULL)")
-        self.db.commit()
+        try:
+            migrate(self.db)
+        except Exception:
+            self.db.close()
+            raise
 
     def get(self, task_id):
         row = self.db.execute("SELECT body FROM tasks WHERE id=?", (task_id,)).fetchone()
