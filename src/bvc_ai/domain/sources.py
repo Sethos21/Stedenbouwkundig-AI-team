@@ -20,6 +20,7 @@ class ImportStatus(StrEnum):
 
 
 class PointInTimeConsistency(StrEnum):
+    UNKNOWN = "UNKNOWN"
     NOT_GUARANTEED = "NOT_GUARANTEED"
     PROVIDER_GUARANTEED = "PROVIDER_GUARANTEED"
 

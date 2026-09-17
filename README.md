@@ -17,7 +17,7 @@ Open PowerShell in deze projectmap:
 .\test.ps1
 ```
 
-De meegeleverde projectlokale Python-installatie staat in .tools/python en wordt niet opgenomen in Git. Geen pip-installatie of externe Pythonpackages nodig. Op een ander systeem volstaat Python 3.12 of nieuwer:
+De meegeleverde projectlokale Python-installatie staat in .tools/python en wordt niet opgenomen in Git. Voor de legacy CLI zijn geen externe Pythonpackages nodig. De volledige testsuite gebruikt vanaf Milestone 2C Fase 2 Shapely en NumPy; installeer deze projectlokaal met `scripts/install_source_dependencies.ps1`. Dit maakt `.tools/source-venv`; beide PowerShell-startscripts gebruiken deze omgeving wanneer aanwezig. Zie [Fase-2-contracten en installatie](docs/milestone-2c-phase2.md). Op een ander systeem: Python 3.12 met `requirements.txt` geïnstalleerd in een lokale virtuele omgeving:
 
 ```text
 python bvc_ai.py demo gis-001
