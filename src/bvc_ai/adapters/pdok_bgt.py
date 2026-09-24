@@ -1,8 +1,11 @@
-"""Single-page PDOK BGT JSON-FG mapping; no network, storage or promotion authority."""
+"""Bounded PDOK BGT JSON-FG fetching and mapping; no network, storage or promotion authority."""
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from math import isfinite
+import time
+import re
 from decimal import Decimal
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urljoin, urlsplit, parse_qsl
 
 from bvc_ai.adapters.source_transport import (
     CapturedResponse, GetRequest, GetTransport, HttpResponse, ResponseOrigin,
@@ -74,6 +77,62 @@ class PageResult:
     # Deliberately no COMPLETE flag or SourceSnapshot publication.
 
 
+@dataclass(frozen=True)
+class FetchBudgets:
+    max_pages: int = 100
+    max_features: int = 100000
+    max_bytes: int = 64 * 1024 * 1024
+    max_seconds: float = 120.0
+    request_timeout: float = 15.0
+    max_retries: int = 2
+    retry_delay: float = 0.25
+
+    def __post_init__(self):
+        for value in (self.max_pages, self.max_features, self.max_bytes):
+            if type(value) is not int or value < 1:
+                raise ValueError("Positive integer budget required")
+        if type(self.max_retries) is not int or not 0 <= self.max_retries <= 10:
+            raise ValueError("Retries must be in 0..10")
+        for value in (self.max_seconds, self.request_timeout, self.retry_delay):
+            if type(value) not in (int, float) or not isfinite(value) or value <= 0:
+                raise ValueError("Positive finite time budget required")
+
+
+@dataclass(frozen=True)
+class FetchResult:
+    status: ImportStatus
+    pagination_exhausted: bool
+    pages: tuple[SourcePage, ...]
+    features: tuple[SourceFeature, ...]
+    geometries: tuple[GeometryRecord, ...]
+    captures: tuple[CapturedResponse, ...]
+    manifest_json: str
+    failure_reason: str | None
+    # Exhaustion is transport evidence, not validated completeness or a
+    # point-in-time guarantee. No snapshot/publication capability is provided.
+
+
+def _continuation(href, current_url):
+    required(href)
+    if (any(ord(c) <= 32 or ord(c) >= 127 for c in href)
+            or "\\" in href or "#" in href
+            or re.search(r"%(?![0-9a-fA-F]{2})", href)):
+        raise ValueError("Invalid continuation URL")
+    raw = urlsplit(href)
+    # Query-only references or the exact absolute endpoint. Never normalize
+    # traversal/encoded path tricks into an apparently acceptable endpoint.
+    if href.startswith("?"):
+        return urljoin(current_url, href)
+    if (raw.scheme == "https" and raw.netloc == "api.pdok.nl"
+            and raw.path == urlsplit(ITEMS_URL).path):
+        return href
+    raise ValueError("Continuation outside allowed PDOK pand items scope")
+
+
+def _request_identity(url):
+    parts = urlsplit(url)
+    return parts.path, tuple(sorted(parse_qsl(parts.query, keep_blank_values=True)))
+
 class PDOKBGTAdapter:
     def __init__(self, transport: GetTransport, *, collection_metadata_json: str, clock=now):
         """Collection metadata is supplied by the trusted caller, never inferred.
@@ -114,6 +173,7 @@ class PDOKBGTAdapter:
         required(snapshot_id)
         request = self.build_request(extent, limit=limit)
         started = self.clock()
+        tick = time.monotonic()
         try:
             response = self.transport.get(request)
         except (OSError, TimeoutError) as exc:
@@ -127,10 +187,159 @@ class PDOKBGTAdapter:
             started, self.clock())
         try:
             response.__post_init__()
-            return self._parse(capture, snapshot_id, limit)
+            if len(response.body) > request.max_response_bytes:
+                raise ValueError("Byte budget exceeded")
+            if time.monotonic() - tick >= request.timeout_seconds:
+                raise ValueError("Request timeout exceeded")
+            parsed = self._parse(capture, snapshot_id, limit)
+            if time.monotonic() - tick >= request.timeout_seconds:
+                raise ValueError("Request timeout exceeded")
+            return parsed
         except (ValueError, UnicodeError, RecursionError) as exc:
             # No partial page/features escape a failed mapping.
             return PageResult(ImportStatus.FAILED, capture, failure_reason=str(exc))
+
+    def fetch(self, snapshot_id: str, extent: FetchExtent, *, limit=1000,
+              budgets=None, monotonic=time.monotonic, sleep=time.sleep):
+        """Bounded query traversal. Successful results remain VALIDATING.
+
+        Partial pages/captures are evidence; failed fetches expose no feature or
+        geometry bundle for downstream use. Existing archive completeness
+        validation remains mandatory in a future trusted import service.
+        """
+        required(snapshot_id)
+        budgets = budgets if budgets is not None else FetchBudgets()
+        if not isinstance(budgets, FetchBudgets):
+            raise ValueError("FetchBudgets required")
+        budgets.__post_init__()
+        request = self.build_request(extent, limit=limit)
+        start = monotonic()
+        pages, features, geometries, captures, attempts = [], [], [], [], []
+        seen, seen_cursors, identities = set(), set(), set()
+        received_bytes = 0
+        continuation = None
+
+        def remaining():
+            return budgets.max_seconds - (monotonic() - start)
+
+        def finish(reason=None):
+            return FetchResult(
+                ImportStatus.INCOMPLETE if reason else ImportStatus.VALIDATING,
+                reason is None, tuple(pages), () if reason else tuple(features),
+                () if reason else tuple(geometries), tuple(captures),
+                _json_text({"attempts": attempts, "page_count": len(pages),
+                            "feature_count": len(features), "received_bytes": received_bytes,
+                            "pending_continuation": continuation, "failure_reason": reason,
+                            "pagination_exhausted": reason is None,
+                            "point_in_time_consistency": "NOT_GUARANTEED"}), reason)
+
+        while True:
+            if remaining() <= 0:
+                return finish("Time budget exceeded")
+            if len(pages) >= budgets.max_pages:
+                return finish("Page budget exceeded")
+            if received_bytes >= budgets.max_bytes:
+                return finish("Byte budget exceeded")
+            if len(features) >= budgets.max_features:
+                return finish("Feature budget exceeded with pending continuation")
+            identity = _request_identity(request.url)
+            if identity in seen:
+                return finish("Continuation cycle")
+            cursor_values = tuple(v for k, v in request.parameters if k == "cursor")
+            if cursor_values and cursor_values in seen_cursors:
+                return finish("Continuation cursor cycle")
+            if cursor_values:
+                seen_cursors.add(cursor_values)
+            seen.add(identity)
+            parsed = None
+            for retry in range(budgets.max_retries + 1):
+                available = remaining()
+                if available <= 0:
+                    return finish("Time budget exceeded")
+                if received_bytes >= budgets.max_bytes:
+                    return finish("Byte budget exceeded")
+                request = replace(request, timeout_seconds=min(budgets.request_timeout, available),
+                                  max_response_bytes=budgets.max_bytes - received_bytes)
+                attempt = {"page_number": len(pages) + 1, "retry": retry,
+                           "request_url": request.url, "incoming_continuation": continuation,
+                           "timeout_seconds": request.timeout_seconds,
+                           "max_response_bytes": request.max_response_bytes}
+                attempts.append(attempt)
+                started = self.clock()
+                tick = monotonic()
+                try:
+                    response = self.transport.get(request)
+                except (OSError, TimeoutError) as exc:
+                    attempt["failure"] = type(exc).__name__
+                    return finish("Transport failure: " + type(exc).__name__)
+                if not isinstance(response, HttpResponse):
+                    attempt["failure"] = "Invalid transport response"
+                    return finish(attempt["failure"])
+                # Preserve every received body, including errors, before parsing.
+                capture = CapturedResponse(
+                    request, response, RawResponse(raw_response_hash(response.body), response.body),
+                    started, self.clock())
+                captures.append(capture)
+                received_bytes += len(response.body)
+                attempt.update(http_status=response.status, raw_response_hash=capture.raw.raw_response_hash,
+                               response_bytes=len(response.body))
+                if remaining() <= 0:
+                    return finish("Time budget exceeded")
+                if monotonic() - tick >= request.timeout_seconds:
+                    return finish("Request timeout exceeded")
+                if received_bytes > budgets.max_bytes:
+                    return finish("Byte budget exceeded")
+                try:
+                    response.__post_init__()
+                    if response.status == 429 or 500 <= response.status <= 599:
+                        if retry == budgets.max_retries:
+                            return finish("Retry exhaustion: HTTP " + str(response.status))
+                        delay = budgets.retry_delay * (2 ** retry)
+                        retry_after = [v for k, v in response.headers if k.lower() == "retry-after"]
+                        if retry_after:
+                            # Deliberately narrow offline profile: unsupported dates
+                            # fail closed instead of guessing provider timing.
+                            if len(retry_after) != 1 or not re.fullmatch(r"[0-9]{1,9}", retry_after[0]):
+                                return finish("Unsupported Retry-After")
+                            delay = max(delay, int(retry_after[0]))
+                        attempt["retry_delay_seconds"] = delay
+                        if delay >= remaining():
+                            return finish("Time budget insufficient for retry")
+                        sleep(delay)
+                        continue
+                    parsed = self._parse(capture, snapshot_id, limit)
+                except (ValueError, UnicodeError, RecursionError) as exc:
+                    attempt["failure"] = str(exc)
+                    return finish("Response validation failure: " + str(exc))
+                break
+            if remaining() <= 0:
+                return finish("Time budget exceeded")
+            outgoing = parsed.page.next_url
+            continuation = outgoing
+            attempt["next_link"] = outgoing
+            attempt["page_metadata"] = strict_json(parsed.metadata_json)
+            # Retain failed/unresolved links in the manifest and raw capture.
+            try:
+                next_url = _continuation(outgoing, request.url) if outgoing is not None else None
+            except ValueError as exc:
+                return finish(str(exc))
+            page_number = len(pages) + 1
+            pages.append(replace(parsed.page, page_number=page_number, next_url=next_url))
+            attempt["resolved_next_url"] = next_url
+            if len(features) + len(parsed.features) > budgets.max_features:
+                return finish("Feature budget exceeded")
+            for feature in parsed.features:
+                if feature.source_id in identities:
+                    return finish("Duplicate feature id across pages")
+                identities.add(feature.source_id)
+            features.extend(replace(feature, page_number=page_number) for feature in parsed.features)
+            geometries.extend(parsed.geometries)
+            if remaining() <= 0:
+                return finish("Time budget exceeded")
+            if next_url is None:
+                return finish()
+            request = GetRequest(next_url, tuple(parse_qsl(urlsplit(next_url).query,
+                                                          keep_blank_values=True)), request.headers)
 
     def _parse(self, capture, snapshot_id, limit):
         response = capture.response

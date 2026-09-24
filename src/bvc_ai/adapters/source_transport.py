@@ -16,6 +16,8 @@ class GetRequest:
     url: str
     parameters: tuple[tuple[str, str], ...]
     headers: tuple[tuple[str, str], ...]
+    timeout_seconds: float = 15.0
+    max_response_bytes: int = 8 * 1024 * 1024
     method: str = field(default="GET", init=False)
 
 
@@ -44,7 +46,10 @@ class HttpResponse:
 
 class GetTransport(Protocol):
     def get(self, request: GetRequest) -> HttpResponse:
-        """Return exact bytes and headers; do not redirect or parse the body."""
+        """Return exact bytes/headers, without redirects or parsing. Implementations MUST
+        enforce timeout_seconds over the entire request/body read and enforce
+        max_response_bytes while reading; raise TimeoutError/OSError on interruption.
+        This is a trusted contract, not cancellation of arbitrary Python code."""
         ...
 
 
