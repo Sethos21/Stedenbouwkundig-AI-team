@@ -179,8 +179,9 @@ class PDOKBGTAdapter:
         except (OSError, TimeoutError) as exc:
             return PageResult(ImportStatus.FAILED, None,
                               failure_reason="Transport failure: " + type(exc).__name__)
-        if not isinstance(response, HttpResponse):
-            raise ValueError("Transport must return HttpResponse")
+        if not isinstance(response, HttpResponse) or type(response.body) is not bytes:
+            return PageResult(ImportStatus.FAILED, None,
+                              failure_reason="Invalid transport response")
         # Capture before reading content type, decoding JSON or mapping features.
         capture = CapturedResponse(
             request, response, RawResponse(raw_response_hash(response.body), response.body),
@@ -245,7 +246,7 @@ class PDOKBGTAdapter:
             identity = _request_identity(request.url)
             if identity in seen:
                 return finish("Continuation cycle")
-            cursor_values = tuple(v for k, v in request.parameters if k == "cursor")
+            cursor_values = tuple(sorted(v for k, v in request.parameters if k == "cursor"))
             if cursor_values and cursor_values in seen_cursors:
                 return finish("Continuation cursor cycle")
             if cursor_values:
@@ -272,7 +273,7 @@ class PDOKBGTAdapter:
                 except (OSError, TimeoutError) as exc:
                     attempt["failure"] = type(exc).__name__
                     return finish("Transport failure: " + type(exc).__name__)
-                if not isinstance(response, HttpResponse):
+                if not isinstance(response, HttpResponse) or type(response.body) is not bytes:
                     attempt["failure"] = "Invalid transport response"
                     return finish(attempt["failure"])
                 # Preserve every received body, including errors, before parsing.
@@ -314,6 +315,8 @@ class PDOKBGTAdapter:
                 break
             if remaining() <= 0:
                 return finish("Time budget exceeded")
+            if monotonic() - tick >= request.timeout_seconds:
+                return finish("Request timeout exceeded")
             outgoing = parsed.page.next_url
             continuation = outgoing
             attempt["next_link"] = outgoing
