@@ -1,4 +1,4 @@
-"""Trusted, networkless PDOK pand MINIMAL_PROOF import orchestration.
+"""Trusted PDOK pand MINIMAL_PROOF import orchestration with explicit live opt-in.
 
 Uses the existing archive, transaction, A02 revision and stale mechanisms.
 The capability is never passed to providers, sessions or the read-only adapter.
@@ -10,6 +10,9 @@ from dataclasses import replace
 from bvc_ai.adapters.pdok_bgt import PDOKBGTAdapter, ITEMS_URL, PARSER_VERSION
 from bvc_ai.adapters.source_transport import ResponseOrigin
 from bvc_ai.application.design_workflow import DesignWorkflow
+from bvc_ai.application.live_source_validation import (
+    LIVE_PROFILE, validate_live_analysis, validate_live_fetch,
+)
 from bvc_ai.domain.models import now
 from bvc_ai.domain.design import current_output
 from bvc_ai.domain.policies import K00Policy
@@ -37,9 +40,13 @@ class SourceImportError(ValueError):
 
 class SourceImportService:
     def __init__(self, store, transport, *, collection_metadata_json, capability=None,
-                 clock=now, monotonic=time.monotonic, sleep=time.sleep):
+                 clock=now, monotonic=time.monotonic, sleep=time.sleep, live_mastenbroekweg=False):
         if capability is not _A02_SOURCE_IMPORT_CAPABILITY:
             raise PermissionError('Trusted A02 source-import capability required')
+        if type(live_mastenbroekweg) is not bool:
+            raise ValueError('Explicit boolean live opt-in required')
+        self._live = live_mastenbroekweg
+        self._origin = ResponseOrigin.PROVIDER_RESPONSE if self._live else ResponseOrigin.TESTDATA
         self._store = store
         self._sources = SourceStore(store)
         self._adapter = PDOKBGTAdapter(transport, collection_metadata_json=collection_metadata_json,
@@ -61,7 +68,9 @@ class SourceImportService:
                 raise ValueError('Phase 4 MINIMAL_PROOF requires explicit TESTDATA context')
             analysis = self._sources.geometry(extent.analysis_geometry_ref)
             validate_geometry_record(analysis, source_crs=extent.crs)
-            if strict_json(analysis.provenance_json).get('source_status') != 'TESTDATA':
+            if self._live:
+                validate_live_analysis(analysis, extent)
+            elif strict_json(analysis.provenance_json).get('source_status') != 'TESTDATA':
                 raise ValueError('Explicit TESTDATA analysis provenance required')
             phase = 'fetch'
             fetched = self._adapter.fetch(snapshot_id, extent, limit=limit, budgets=budgets,
@@ -73,6 +82,8 @@ class SourceImportService:
                     or fetched.pagination_exhausted is not True or fetched.failure_reason is not None):
                 raise ValueError('Incomplete fetch cannot be promoted')
             self._validate_provenance(fetched)
+            if self._live:
+                validate_live_fetch(fetched, self._adapter, extent, analysis, limit)
             geometries = (analysis,) + fetched.geometries
             page_hashes = {page.raw_response_hash for page in fetched.pages}
             raw = {c.raw.raw_response_hash: c.raw for c in fetched.captures}
@@ -87,7 +98,8 @@ class SourceImportService:
                 'Pagination exhaustion does not establish point-in-time consistency',
                 len(fetched.pages), len(fetched.features), '0' * 64,
                 CANONICALIZATION_VERSION, PARSER_VERSION, VALIDATOR_VERSION,
-                json.dumps({'source_status': 'TESTDATA', 'profile': 'PDOK_PAND_MINIMAL_PROOF',
+                json.dumps({'source_status': self._origin.value,
+                            'profile': LIVE_PROFILE if self._live else 'PDOK_PAND_MINIMAL_PROOF',
                             'collection_metadata': json.loads(self._adapter.collection_metadata_json)}))
             snapshot = replace(snapshot, snapshot_manifest_hash=snapshot_manifest_hash(
                 snapshot, fetched.pages, fetched.features, geometries))
@@ -139,7 +151,7 @@ class SourceImportService:
                     return RevisionBinding(task_id, binding[0], archived.snapshot_id)
                 phase = 'promotion'
                 features = self._sources.features(archived.snapshot_id)
-                proposal = dict(summary='Validated TESTDATA PDOK pand MINIMAL_PROOF',
+                proposal = dict(summary='Validated ' + self._origin.value + ' PDOK pand MINIMAL_PROOF',
                                 objects=[], findings=[], conditions=[], variants=[], responses=[],
                                 review=None, hypothesis_variant_id=None)
                 for feature in features:
@@ -149,13 +161,14 @@ class SourceImportService:
                         local_id=local_id, object_type='EXISTING_FEATURE',
                         geometry_ref=feature.geometry_ref, geometry_status='EXISTING_VALIDATED',
                         source_basis=[feature.geometry_ref],
-                        properties={'description': 'Validated TESTDATA pand',
+                        properties={'description': 'Validated ' + self._origin.value + ' pand',
                                     'source_id': feature.source_id, 'snapshot_id': archived.snapshot_id}))
                 key = 'source-import/' + archived.snapshot_id
                 if key in task['idempotency']:
                     raise ValueError('Conflicting source-import idempotency identity')
                 self._workflow._apply(task, 'A02', 'A02', self._workflow.inputs(task, 'A02'),
-                                      proposal, key, archived.snapshot_manifest_hash)
+                                      proposal, key, archived.snapshot_manifest_hash,
+                                      source_status=self._origin.value)
                 revision = task['active_revisions']['A02']
                 output = task['outputs'][-1]['output']
                 output.update(source_snapshot_id=archived.snapshot_id,
@@ -170,7 +183,7 @@ class SourceImportService:
                                   snapshot_id=archived.snapshot_id, revision_id=revision,
                                   snapshot_manifest_hash=archived.snapshot_manifest_hash,
                                   previous=ImportStatus.VALIDATING, target=ImportStatus.COMPLETE,
-                                  geometry_status='EXISTING_VALIDATED', source_status='TESTDATA',
+                                  geometry_status='EXISTING_VALIDATED', source_status=self._origin.value,
                                   query_scope_complete=proof.query_scope_complete,
                                   point_in_time_consistency=proof.point_in_time_consistency)
             return result
@@ -210,8 +223,8 @@ class SourceImportService:
                     if c.response.status == 200}
         pages = {p.page_number: p for p in fetched.pages}
         for capture in fetched.captures:
-            if capture.response.origin != ResponseOrigin.TESTDATA:
-                raise ValueError('This networkless Phase 4 profile requires TESTDATA evidence')
+            if capture.response.origin != self._origin:
+                raise ValueError('Response origin does not match explicit import profile')
         for page in fetched.pages:
             capture = captures.get((page.request_url, page.raw_response_hash))
             relevant = {'content-type', 'content-crs', 'etag', 'last-modified'}
@@ -227,7 +240,7 @@ class SourceImportService:
         for feature in fetched.features:
             page = pages[feature.page_number]
             provenance = strict_json(feature.provenance_json)
-            expected = dict(provider='PDOK', dataset='BGT', collection='pand', source_status='TESTDATA',
+            expected = dict(provider='PDOK', dataset='BGT', collection='pand', source_status=self._origin.value,
                             feature_id=feature.source_id, request_url=page.request_url,
                             raw_response_hash=page.raw_response_hash,
                             collection_metadata=strict_json(self._adapter.collection_metadata_json),
@@ -241,7 +254,7 @@ class SourceImportService:
                 raise ValueError('Geometry/feature provenance mismatch')
             evidence = strict_json(geometry.crs_metadata.evidence)
             expected_evidence = {
-                'source_status': 'TESTDATA', 'Content-Crs': provenance['content_crs'],
+                'source_status': self._origin.value, 'Content-Crs': provenance['content_crs'],
                 'coordRefSys': provenance.get('coordRefSys'),
                 'collection_metadata': expected['collection_metadata'],
             }

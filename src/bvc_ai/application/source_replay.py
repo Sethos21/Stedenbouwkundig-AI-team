@@ -9,6 +9,9 @@ from bvc_ai.domain.sources import SourceSnapshot, GeometryRecord, ImportStatus
 from bvc_ai.domain.source_hashing import snapshot_manifest_hash
 from bvc_ai.domain.source_validation import validate_completeness
 from bvc_ai.infrastructure.source_store import SourceStore
+from bvc_ai.application.live_source_validation import (
+    LIVE_PROFILE, validate_live_analysis, validate_live_capture,
+)
 
 
 @dataclass(frozen=True)
@@ -74,13 +77,17 @@ class SourceReplayService:
         snapshot, analysis = evidence.snapshot, evidence.analysis
         snapshot.__post_init__()
         provenance = json.loads(snapshot.provenance_json)
+        live = provenance.get('profile') == LIVE_PROFILE
+        origin = ResponseOrigin.PROVIDER_RESPONSE if live else ResponseOrigin.TESTDATA
+        if live:
+            validate_live_analysis(analysis, snapshot.fetch_extent)
         if (snapshot.status != ImportStatus.COMPLETE or snapshot.provider != 'PDOK'
                 or snapshot.dataset != 'BGT' or snapshot.collection != 'pand'
                 or snapshot.endpoint != ITEMS_URL or snapshot.parser_version != PARSER_VERSION
-                or provenance.get('source_status') != 'TESTDATA'
-                or provenance.get('profile') != 'PDOK_PAND_MINIMAL_PROOF'
+                or provenance.get('source_status') != origin
+                or provenance.get('profile') != (LIVE_PROFILE if live else 'PDOK_PAND_MINIMAL_PROOF')
                 or analysis.geometry_ref != snapshot.fetch_extent.analysis_geometry_ref
-                or json.loads(analysis.provenance_json).get('source_status') != 'TESTDATA'):
+                or (not live and json.loads(analysis.provenance_json).get('source_status') != 'TESTDATA')):
             raise ValueError('Unsupported or inconsistent replay profile')
         adapter = PDOKBGTAdapter(None, collection_metadata_json=json.dumps(provenance['collection_metadata']))
         parameters = json.loads(snapshot.request_parameters_json)
@@ -111,9 +118,11 @@ class SourceReplayService:
         expected_url = initial.url
         pages, features, geometries, raw = [], [], [analysis], {}
         for capture in evidence.captures:
+            if live:
+                validate_live_capture(capture, expected_url, replay=True)
             capture.raw.__post_init__()
             capture.response.__post_init__()
-            if (capture.response.origin != ResponseOrigin.TESTDATA
+            if (capture.response.origin != origin
                     or capture.response.body != capture.raw.body
                     or capture.request.url != expected_url
                     or capture.request.parameters != tuple(parse_qsl(

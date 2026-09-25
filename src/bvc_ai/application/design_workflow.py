@@ -179,10 +179,10 @@ class DesignWorkflow:
                 self.store.event(task["task_id"], "A01", "finding_reopened", change=change)
         self.store.event(task["task_id"], "A01", "dependencies_invalidated", upstream_revision=old, stale_revisions=sorted(affected))
 
-    def _apply(self, task, step, actor, inputs, proposal, key, fingerprint):
+    def _apply(self, task, step, actor, inputs, proposal, key, fingerprint, *, source_status="TESTDATA"):
         revision = f"{step}/v{1 + sum(o['step'] == step for o in task['outputs'])}"
         self._invalidate(task, step)
-        output = asdict(AgentTask(task["task_id"], actor, step, revision, inputs, deepcopy(proposal), now()))
+        output = asdict(AgentTask(task["task_id"], actor, step, revision, inputs, deepcopy(proposal), now(), source_status))
         task["outputs"].append(output)
         task["active_revisions"][step] = revision
         for dep, upstream in inputs.items():
@@ -211,7 +211,7 @@ class DesignWorkflow:
                                   capacity_basis="synthetic polygon area * assumed density; derived, not input")
             entity = asdict(DesignObject(f"{revision}/{obj['local_id']}", task["project_id"], obj["object_type"],
                               obj["geometry_ref"], obj["geometry_status"], revision, actor, obj["source_basis"],
-                              properties, [] if actor == "A02" else ["A04", "A05", "A08", "A07"], new_findings))
+                              properties, [] if actor == "A02" else ["A04", "A05", "A08", "A07"], new_findings, source_status))
             task["objects"].append(entity)
             self.store.event(task["task_id"], actor, "design_object_registered", object=entity)
         if step == "A03_INTEGRATION":
@@ -251,7 +251,7 @@ class DesignWorkflow:
             task["status"] = "AWAITING_HUMAN_APPROVAL"
         task["idempotency"][key] = {"fingerprint": fingerprint, "result": revision, "input_revisions": inputs}
         self.store.event(task["task_id"], actor, "step_completed", step=step, revision_id=revision,
-                         input_revisions=inputs, idempotency_key=key, state=task["status"], source_status="TESTDATA")
+                         input_revisions=inputs, idempotency_key=key, state=task["status"], source_status=source_status)
 
     def run(self, task_id="DESIGN-TEST-001"):
         task = self.store.get(task_id)

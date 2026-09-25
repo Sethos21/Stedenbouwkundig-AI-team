@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-09-25T13:45:41.264675+00:00",
+  "purpose": "MILESTONE_2C_MINIMAL_PROOF",
+  "bbox": "176492.301,360605.561,176992.301,361105.561",
+  "crs": "EPSG:28992",
+  "geometry_role": "TESTCASE_ONLY_ANALYSIS_GEOMETRY",
+  "address": "Mastenbroekweg 2, 6006 PT Weert, Nederland",
+  "bag_centroid_rd": [
+    176742.301,
+    360855.561
+  ],
+  "task_context": "TESTDATA workflow scaffolding; A02 evidence is live provider data",
+  "collection_metadata_basis": "Caller-declared RD contract expectation; not live-fetched metadata",
+  "replay": "PASS",
+  "result": "PASS",
+  "page_count": 1,
+  "feature_count": 241,
+  "snapshot_id": "phase6/mastenbroekweg/20260925T134541264675Z",
+  "revision_id": "A02/v1",
+  "snapshot_manifest_hash": "375076580961948a1f165941746b86ac48ce50f386172a9f0d8c2afefa658172",
+  "captures": [
+    {
+      "request_url": "https://api.pdok.nl/lv/bgt/ogc/v1/collections/pand/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+      "http_status": 200,
+      "content_type": "application/vnd.ogc.fg+json",
+      "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+      "coordRefSys": "http://www.opengis.net/def/crs/EPSG/0/28992",
+      "type": "FeatureCollection",
+      "feature_count": 241,
+      "numberReturned": 241,
+      "next_link_present": false,
+      "received_bytes": 279431,
+      "raw_hash": "6510926f1a7fb81797f328c63f392c3a6e9fc2c76b7bd06245d723ad4cc92e11",
+      "origin": "UNVALIDATED_PROVIDER_RESPONSE"
+    }
+  ],
+  "replay_network": "socket/socket.create_connection/DNS blocked",
+  "trusted_promotion": {
+    "task_id": "DESIGN-TEST-001",
+    "actor": "A02",
+    "action": "source_import_completed",
+    "timestamp": "2026-09-25T13:45:43.447703+00:00",
+    "details": {
+      "snapshot_id": "phase6/mastenbroekweg/20260925T134541264675Z",
+      "revision_id": "A02/v1",
+      "snapshot_manifest_hash": "375076580961948a1f165941746b86ac48ce50f386172a9f0d8c2afefa658172",
+      "previous": "VALIDATING",
+      "target": "COMPLETE",
+      "geometry_status": "EXISTING_VALIDATED",
+      "source_status": "UNVALIDATED_PROVIDER_RESPONSE",
+      "query_scope_complete": true,
+      "point_in_time_consistency": "NOT_GUARANTEED"
+    }
+  },
+  "raw_geometry_provenance_manifest_equal": true,
+  "point_in_time_consistency": "NOT_GUARANTEED"
+}
