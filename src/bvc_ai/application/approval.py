@@ -11,6 +11,28 @@ class HumanApprovalService:
             raise PermissionError("Menselijke ingang vereist")
         self.store = store
 
+    def release_project(self, project_id, human_actor, reason):
+        """Explicit trusted CLI human decision; never called by project workflows."""
+        from dataclasses import replace
+        from bvc_ai.application.projects import project_operation
+        from bvc_ai.infrastructure.project_repository import ProjectRepository
+        from bvc_ai.domain.projects import ProjectStatus, check_project_transition, text
+        repository = ProjectRepository(self.store)
+        target = ProjectStatus.RELEASED
+        with project_operation(repository, project_id, human_actor, target):
+            actor = text(human_actor, "human_actor")
+            if actor.upper() in {f"A{i:02}" for i in range(1, 9)}:
+                raise PermissionError("Agentidentiteiten mogen onderzoek niet vrijgeven")
+            reason = text(reason, "reason")
+            project = repository.get(project_id)
+            check_project_transition(project.status, target, human=True)
+            updated = replace(project, status=target, updated_at=now())
+            repository._update(updated)
+            repository.event(project_id, actor, "project_human_released",
+                             previous=project.status, target=target, reason=reason,
+                             origin="TRUSTED_HUMAN_CLI", decision_at=updated.updated_at)
+        return updated
+
     def decide(self, task_id, human_actor, decision, notes="", *, finding_id=None, idempotency_key=None):
         actor = "unknown"
         try:

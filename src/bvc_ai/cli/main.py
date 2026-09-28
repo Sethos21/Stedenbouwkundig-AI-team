@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from uuid import uuid4
 from bvc_ai.infrastructure.store import Store
+from bvc_ai.application.projects import ProjectService
 from bvc_ai.application.workflow import Workflow
 from bvc_ai.application.design_workflow import DesignWorkflow
 from bvc_ai.application.approval import HumanApprovalService, _HUMAN_CAPABILITY
@@ -41,6 +42,20 @@ def main(argv=None):
         sub.add_argument("--actor", required=True)
         sub.add_argument("--reason", default="")
         sub.add_argument("--idempotency-key")
+    project_create = commands.add_parser("project-create")
+    project_create.add_argument("name")
+    project_create.add_argument("--research-type")
+    project_create.add_argument("--address")
+    project_create.add_argument("--location", help="Vrije locatietekst; geen geocoding of gevalideerde geometrie")
+    for name in ("project-show", "project-audit", "project-transition", "project-release"):
+        sub = commands.add_parser(name)
+        sub.add_argument("project_id")
+        if name == "project-transition":
+            sub.add_argument("target")
+        if name in {"project-transition", "project-release"}:
+            sub.add_argument("--reason", required=True)
+        if name == "project-release":
+            sub.add_argument("--actor", required=True)
     args = parser.parse_args(argv)
     directory = (PROJECT / args.data).resolve()
     if not directory.is_relative_to(PROJECT):
@@ -66,7 +81,21 @@ def main(argv=None):
             if args.command == "smoke":
                 provider = InventorySmokeProvider(provider)
         store = Store(directory)
-        if design_demo:
+        if args.command.startswith("project-"):
+            projects = ProjectService(store)
+            if args.command == "project-create":
+                result = projects.create(args.name, research_type=args.research_type,
+                                         address=args.address, location=args.location).to_dict()
+            elif args.command == "project-show":
+                result = projects.load(args.project_id).to_dict()
+            elif args.command == "project-audit":
+                result = projects.repository.events(args.project_id)
+            elif args.command == "project-transition":
+                result = projects.transition(args.project_id, args.target, reason=args.reason).to_dict()
+            else:
+                result = HumanApprovalService(store, capability=_HUMAN_CAPABILITY).release_project(
+                    args.project_id, args.actor, args.reason).to_dict()
+        elif design_demo:
             workflow = DesignWorkflow(store, provider, PROJECT)
             workflow.create()
             workflow.run()
