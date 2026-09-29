@@ -1,0 +1,217 @@
+{
+  "timestamp": "2026-09-29T12:53:59.323083+00:00",
+  "run_id": "20260929T125359317086Z",
+  "address": "Mastenbroekweg 2, 6006 PT Weert, Nederland",
+  "bbox": "176492.301,360605.561,176992.301,361105.561",
+  "crs": "EPSG:28992",
+  "task_context": "TESTDATA scaffolding; source captures are live provider responses",
+  "collection_metadata_basis": "Declared RD contract from accepted 2D-1; not freshly fetched metadata",
+  "collections": [
+    {
+      "source_contract": "BAG/pand",
+      "snapshot_id": "2d/20260929T125359317086Z/BAG/pand",
+      "import_revision_id": "A02/v1",
+      "feature_count": 141,
+      "page_count": 1,
+      "snapshot_manifest_hash": "bca9d0e216be9409fc4455240328f62ee117019d07942e97b527b53245698bdd",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/pand/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 312593,
+          "raw_hash": "18721b1eee26cb0679ff07e3716b29c1b85327215006886936d1cd0df3f37568",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:53:59.434084+00:00",
+          "retrieval_finished_at": "2026-09-29T12:54:00.160099+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BAG/verblijfsobject",
+      "snapshot_id": "2d/20260929T125359317086Z/BAG/verblijfsobject",
+      "import_revision_id": "A02/v2",
+      "feature_count": 60,
+      "page_count": 1,
+      "snapshot_manifest_hash": "45751ced21146053c1f9227d15a2d18df1bdafd364d6e911434b4a4a10e1bb34",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 69455,
+          "raw_hash": "1e1013afeeba4c5b0246fb1d65d105ca15ca8b99ea43f0cfcc3cd8c68469ca07",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:54:02.426127+00:00",
+          "retrieval_finished_at": "2026-09-29T12:54:02.677130+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BGT/begroeidterreindeel",
+      "snapshot_id": "2d/20260929T125359317086Z/BGT/begroeidterreindeel",
+      "import_revision_id": "A02/v3",
+      "feature_count": 293,
+      "page_count": 1,
+      "snapshot_manifest_hash": "e361b55ad9fd0e01e331da61d5ef51bace2f0d15e1a1868795e83fbc2fee695f",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/begroeidterreindeel/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 3851152,
+          "raw_hash": "33c17c3ee008f40d640027cc4e3f816fac4a9ec3df1567c8d08e5a5e4c6a2c51",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:54:04.108217+00:00",
+          "retrieval_finished_at": "2026-09-29T12:54:10.157544+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BGT/onbegroeidterreindeel",
+      "snapshot_id": "2d/20260929T125359317086Z/BGT/onbegroeidterreindeel",
+      "import_revision_id": "A02/v4",
+      "feature_count": 194,
+      "page_count": 1,
+      "snapshot_manifest_hash": "5be396c2602b52073ec82e5b2354b5b66971d70331b3dfa7f5e75e26fb3bf374",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/onbegroeidterreindeel/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 6031318,
+          "raw_hash": "7610d5057c29c82c45a8f2c550f1cec1614e0daf162c5fc4504c3969936e3149",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:54:34.030963+00:00",
+          "retrieval_finished_at": "2026-09-29T12:54:39.967171+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BGT/ondersteunendwegdeel",
+      "snapshot_id": "2d/20260929T125359317086Z/BGT/ondersteunendwegdeel",
+      "import_revision_id": "A02/v5",
+      "feature_count": 90,
+      "page_count": 1,
+      "snapshot_manifest_hash": "f283be2b7daf39b0f03492001e3f8575648dea8a65d69650a8a9b25ae1e68246",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/ondersteunendwegdeel/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 1765857,
+          "raw_hash": "d8530c7bd5101e7de8f3c0d8cb0c648097bbb5403401f375c24c064754aedc87",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:55:30.230552+00:00",
+          "retrieval_finished_at": "2026-09-29T12:55:31.796573+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BGT/pand",
+      "snapshot_id": "2d/20260929T125359317086Z/BGT/pand",
+      "import_revision_id": "A02/v6",
+      "feature_count": 241,
+      "page_count": 1,
+      "snapshot_manifest_hash": "3d262b4b23c07de6f78ce884031f612f0fee12b6c83946fee816ef8b18f10be3",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/pand/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 279431,
+          "raw_hash": "bea9a7186dfac8048c8fa11a409d5fae8f006bcb7146592430933fa1c604e372",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:56:19.520773+00:00",
+          "retrieval_finished_at": "2026-09-29T12:56:21.279797+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BGT/waterdeel",
+      "snapshot_id": "2d/20260929T125359317086Z/BGT/waterdeel",
+      "import_revision_id": "A02/v7",
+      "feature_count": 54,
+      "page_count": 1,
+      "snapshot_manifest_hash": "53c2677a72f2d17158b6b2d7ab23d9ae661c5e24044f089221710553498fa311",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/waterdeel/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 1210288,
+          "raw_hash": "2b4b8208cd060df6f6086a1b479920384d4b8f28e8435ec3a39390d0700a3f9f",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:57:05.859146+00:00",
+          "retrieval_finished_at": "2026-09-29T12:57:07.778200+00:00"
+        }
+      ]
+    },
+    {
+      "source_contract": "BGT/wegdeel",
+      "snapshot_id": "2d/20260929T125359317086Z/BGT/wegdeel",
+      "import_revision_id": "A02/v8",
+      "feature_count": 342,
+      "page_count": 1,
+      "snapshot_manifest_hash": "05e32478db477e5a53df8c2acf8624ad2f43f96ba135c65923f5fd2c6e35bbc1",
+      "captures": [
+        {
+          "request_url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/wegdeel/items?bbox=176492.301%2C360605.561%2C176992.301%2C361105.561&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&f=jsonfg&limit=1000",
+          "http_status": 200,
+          "content_type": "application/vnd.ogc.fg+json",
+          "content_crs": "<http://www.opengis.net/def/crs/EPSG/0/28992>",
+          "received_bytes": 2476424,
+          "raw_hash": "890c8c56b11179b4278d77a4f9f3021fc07680fdde30739127eabccf7c4ee18b",
+          "origin": "UNVALIDATED_PROVIDER_RESPONSE",
+          "retrieval_started_at": "2026-09-29T12:57:57.844874+00:00",
+          "retrieval_finished_at": "2026-09-29T12:58:00.279048+00:00"
+        }
+      ]
+    }
+  ],
+  "replay": "PASS",
+  "result": "PASS",
+  "fetch_budgets": {
+    "max_pages": 100,
+    "max_features": 100000,
+    "max_bytes": 67108864,
+    "max_seconds": 120.0,
+    "request_timeout": 60.0,
+    "max_retries": 2,
+    "retry_delay": 0.25
+  },
+  "replay_network": "socket/connect/DNS blocked",
+  "basis_hash": "93fff8b675ebc737062ac40224071c333c99ccbde63b2012189caccf36f77510",
+  "revision_id": "A02/v8",
+  "complete": true,
+  "records": 1415,
+  "relations": {
+    "UNRESOLVED": 73,
+    "RESOLVED": 168
+  },
+  "uncertainties": {
+    "NO_OFFICIAL_REFERENCE_AVAILABLE": 201,
+    "UNRESOLVED": 73
+  },
+  "point_in_time_consistency": "NOT_GUARANTEED",
+  "reconstruction": "Exact raw/geometry/features/pages/snapshots; no tasks or trusted bindings",
+  "human_approval": null,
+  "active_agents": [
+    "A01",
+    "A02"
+  ],
+  "local_evidence_directory": "runtime/2d-live/20260929T125359317086Z",
+  "artifacts": {
+    "archive/state.sqlite3": "e3d11ce6836b650520901ccb6c1bb8bb19f06c9dac1aa780b3fb902863385656",
+    "offline-reconstruction/state.sqlite3": "534b0c9988fab41d0dc1d0cf9353bf7366b969dc26833c528ec2c0c11bbf1a9d",
+    "source-basis.json": "c527c2ea453f9cabe2936c9de21b5667a678ba969cff68abfc7066986e79e555",
+    "report.json": "7f60ff7b6a6aba7f113295e002b1ab692e37b9a86254c212a8e97612a94af3fa"
+  }
+}
