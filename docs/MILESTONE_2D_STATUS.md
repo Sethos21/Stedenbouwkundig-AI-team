@@ -5,7 +5,7 @@ Baseline: 03051103ddec842b2be3b6d6aa0aa5553b7444cc.
 Geaccepteerde 2C closure: 65dcc27d38b4a3c2a5462f6c39380eb1685b6893.
 Geaccepteerd 2D-4 checkpoint: 1c4ee6755c49872cd8dfe42b40d49bdc6f7838c4.
 Protocol uit 818e08415991b9fe0f4b3fc98762dc4e4c79478f veilig overgenomen in f9bf210.
-Huidige fase: 2D-5 PASS; volgende fase 2D-6. Geen open BLOCKED/DECISION_REQUIRED.
+Huidige fase: 2D-6 PASS; Milestone 2D afgerond. Geen open BLOCKED/DECISION_REQUIRED.
 
 | Fase | Status | Fasecommit | Verificatie |
 |---|---|---|---|
@@ -13,10 +13,11 @@ Huidige fase: 2D-5 PASS; volgende fase 2D-6. Geen open BLOCKED/DECISION_REQUIRED
 | 2D-2 | PASS | 399cfc34888ef45f2543d4ed397124a7d0dadc45 | Targeted 9/9; test.ps1 436/436 PASS |
 | 2D-3 | PASS | b982a52825167318a6babcf3891113e8de56f2a8 | Targeted 14/14; test.ps1 441/441 PASS |
 | 2D-4 | PASS | 1c4ee6755c49872cd8dfe42b40d49bdc6f7838c4 | Targeted 22/22; test.ps1 449/449 PASS |
-| 2D-5 | PASS | Commit die dit bestand vastlegt: Milestone 2D-5 - live source basis proof | Targeted 4/4; acht live collecties; offline replay/reconstructie PASS |
-| 2D-6 | NOT_STARTED | Geen | Volledige networkless regressie en closure volgen |
+| 2D-5 | PASS | 68d0ec6 | Targeted 4/4; acht live collecties; offline replay/reconstructie PASS |
+| 2D-6 | PASS | Commit die deze closure vastlegt | test.ps1 453/453 PASS, 96.948 s; netwerkguard, nul netwerkpogingen |
 
-Eigen checkpoint-SHA: `git log -1 --format=%H -- docs/milestone-2d-phase5.md`.
+Closure-SHA: `git log -1 --format=%H -- docs/MILESTONE_2D_VALIDATION.md`.
+Final-reviewbranch: milestone-2d-final-review. Geen mastermerge.
 Eerdere PASS-fasen niet opnieuw onderzocht/getest. Geen wijziging aan src/ in 2D-5.
 Faseverslagen: docs/milestone-2d-phase1-source-contract.md, milestone-2d-phase2.md t/m milestone-2d-phase5.md.
 
@@ -42,9 +43,11 @@ Faseverslagen: docs/milestone-2d-phase1-source-contract.md, milestone-2d-phase2.
 - Raw archieven blijven lokaal en zijn niet in Git; hashes en compact bewijs zijn gecommit.
 - Lokale master, Stedenbouwkundig-AI-team/ en phase3b-review.diff ongemoeid; origin/master uitsluitend gefetcht. Geen merge/rewrite.
 
-## Next action
+## Finale validatie en next action
 
-Voer 2D-6 uit: volledige regressie via test.ps1 met geerfde netwerkblokkering,
-compacte traceability-matrix in docs/MILESTONE_2D_VALIDATION.md en diffcheck.
-Na PASS: commit closure, maak/push milestone-2d-final-review zonder mastermerge.
-Daarna onafhankelijke ChatGPT/GitHub-review door Seth; geen volgende milestone.
+- docs/MILESTONE_2D_VALIDATION.md: compacte invariantmatrix, MILESTONE_2D: PASS.
+- docs/milestone-2d-phase6-proof.json: regressie-/guardbewijs, hashes en exacte guardbron.
+- Volledige test.ps1-suite 453/453 PASS, 96.948 s; nul socket/DNS-pogingen onder geerfde auditguard.
+- src/ onveranderd sinds geaccepteerd 2D-4-checkpoint; geen nieuwe functionaliteit in 2D-6.
+- Diffcheck PASS. Closure committen en milestone-2d-final-review pushen; stop na bevestigde push.
+- Daarna uitsluitend onafhankelijke ChatGPT/GitHub-review door Seth; geen volgende milestone of mastermerge.
