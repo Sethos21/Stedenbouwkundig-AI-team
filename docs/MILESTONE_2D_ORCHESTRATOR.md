@@ -81,18 +81,51 @@ STOP en rapporteer exact:
 
 `DECISION_REQUIRED: <korte titel>`
 
-Vraag Seth alleen als minstens één van deze situaties optreedt:
+De standaard is **zelfstandig beslissen binnen doel en trustgrenzen**. Een keuze is niet automatisch een gebruikersbeslissing alleen omdat er meerdere technisch geldige opties bestaan.
 
-- er zijn twee of meer materieel verschillende, geldige product-/architectuurkeuzes en de keuze bepaalt toekomstig gedrag;
-- een nieuwe externe databron/licentie/bronautoriteit moet worden gekozen;
+### 4.1 Eerst de additive-choice test
+
+Wanneer twee of meer officiële broncollecties, attributensets of technische opties ieder relevante, complementaire informatie leveren, vraag eerst:
+
+1. kunnen ze veilig naast elkaar bestaan zonder bestaande bronwaarheid te overschrijven?
+2. blijven identiteit en provenance afzonderlijk traceerbaar?
+3. vallen ze allemaal binnen reeds goedgekeurde bronautoriteit, endpoints, milestone-scope en trustgrenzen?
+4. voegt de combinatie geen nieuwe dependency, capability of fundamenteel productgedrag toe?
+5. is de extra complexiteit proportioneel en begrensd?
+
+Als alle antwoorden **ja** zijn, kies dan standaard de **combinatie / superset** in plaats van kunstmatig één optie weg te kiezen. Leg de reden vast en ga zelfstandig door.
+
+Voorbeeld: als officiële BAG `pand` gebouwcontext levert en `verblijfsobject` complementair gebruiksdoel/oppervlakte/adres/pandrelaties levert, en beide veilig als afzonderlijke bronobjecten met eigen provenance kunnen bestaan, neem beide op. Maak daar geen `DECISION_REQUIRED` van.
+
+Dit is **geen regel om altijd alles te verzamelen**. Redundante, irrelevante, conflicterende, kostbare, onbetrouwbare of scope-uitbreidende bronnen mogen niet automatisch worden toegevoegd.
+
+### 4.2 Zelfstandig technische keuzes maken
+
+Maak zonder Seth onder andere zelfstandig:
+- selectie tussen reeds toegestane officiële collecties als officiële semantiek + milestone-doel de keuze dragen;
+- keuze voor meerdere complementaire collecties volgens §4.1;
+- interne implementatiedetails en helpernamen;
+- teststructuur;
+- kleine refactors;
+- herstel van duidelijke bugs;
+- fail-closed behandeling die bestaand productgedrag niet verruimt.
+
+Documenteer zulke keuzes kort in het faseverslag/statusbestand.
+
+### 4.3 Echte beslisgates
+
+Vraag Seth alleen als minstens één van deze situaties overblijft:
+
+- opties zijn **wederzijds uitsluitend** en veranderen materieel productgedrag of toekomstig architectuurbeleid;
+- een nieuwe externe databron, licentie of bronautoriteit buiten de reeds goedgekeurde scope moet worden gekozen;
 - bronwaarheid, semantiek, CRS of providercontract kan niet betrouwbaar worden vastgesteld;
 - een benodigde wijziging raakt K00, Human Approval, capability ownership of een andere bestaande veiligheidsinvariant;
 - de gevraagde fase blijkt alleen haalbaar met duidelijke scope-uitbreiding;
 - een nieuwe dependency is echt noodzakelijk;
-- live brondata levert een inhoudelijke ambiguïteit op die niet fail-closed kan worden behandeld;
+- live brondata levert een inhoudelijke ambiguïteit op die niet veilig naast elkaar kan blijven bestaan of fail-closed kan worden behandeld;
 - bestaande bindende documentatie spreekt elkaar inhoudelijk tegen;
 - een destructieve Git-handeling/history rewrite/force push zou nodig zijn;
-- tests tonen een probleem waarvan meerdere oplossingsrichtingen productgedrag wijzigen.
+- tests tonen een probleem waarvan meerdere oplossingsrichtingen materieel productgedrag wijzigen.
 
 Geef dan:
 1. het feitelijke probleem;
@@ -100,8 +133,6 @@ Geef dan:
 3. consequentie per optie;
 4. jouw technisch voorkeursvoorstel;
 5. de ene concrete beslissing die Seth moet nemen.
-
-**Niet vragen** voor gewone implementatiedetails, namen van interne helpers, teststructuur, kleine refactors, herstel van duidelijke bugs of andere keuzes die geen product-/architectuurbeslissing zijn.
 
 Na Seths antwoord: leg de beslissing vast in het relevante faseverslag en hervat automatisch.
 
