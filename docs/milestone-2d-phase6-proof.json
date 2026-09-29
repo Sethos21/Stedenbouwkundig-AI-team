@@ -7,7 +7,7 @@
   "regression_log": ".tools\\2d-phase6-networkless-regression.txt",
   "regression_log_sha256": "3d64598de0b82a81155bf5dd8abfd54106b79b1d4f19fe6c3d70087cbd866e5a",
   "live_proof": "docs/milestone-2d-phase5-proof.json",
-  "live_proof_sha256": "e21d5e4eded1bb9496b737310383cc094b399fd2228297b150d2ad2c40fef729",
+  "live_proof_sha256": "3d62bc7051722db3199383a18c76b81c4edb116790bb8484460fb5216ff24752",
   "networkless": {
     "guard_processes": 21,
     "installed_events": 21,
