@@ -81,18 +81,51 @@ STOP en rapporteer exact:
 
 `DECISION_REQUIRED: <korte titel>`
 
-Vraag Seth alleen als minstens één van deze situaties optreedt:
+De standaard is **zelfstandig beslissen binnen doel en trustgrenzen**. Een keuze is niet automatisch een gebruikersbeslissing alleen omdat er meerdere technisch geldige opties bestaan.
 
-- er zijn twee of meer materieel verschillende, geldige product-/architectuurkeuzes en de keuze bepaalt toekomstig gedrag;
-- een nieuwe externe databron/licentie/bronautoriteit moet worden gekozen;
+### 4.1 Eerst de additive-choice test
+
+Wanneer twee of meer officiële broncollecties, attributensets of technische opties ieder relevante, complementaire informatie leveren, vraag eerst:
+
+1. kunnen ze veilig naast elkaar bestaan zonder bestaande bronwaarheid te overschrijven?
+2. blijven identiteit en provenance afzonderlijk traceerbaar?
+3. vallen ze allemaal binnen reeds goedgekeurde bronautoriteit, endpoints, milestone-scope en trustgrenzen?
+4. voegt de combinatie geen nieuwe dependency, capability of fundamenteel productgedrag toe?
+5. is de extra complexiteit proportioneel en begrensd?
+
+Als alle antwoorden **ja** zijn, kies dan standaard de **combinatie / superset** in plaats van kunstmatig één optie weg te kiezen. Leg de reden vast en ga zelfstandig door.
+
+Voorbeeld: als officiële BAG `pand` gebouwcontext levert en `verblijfsobject` complementair gebruiksdoel/oppervlakte/adres/pandrelaties levert, en beide veilig als afzonderlijke bronobjecten met eigen provenance kunnen bestaan, neem beide op. Maak daar geen `DECISION_REQUIRED` van.
+
+Dit is **geen regel om altijd alles te verzamelen**. Redundante, irrelevante, conflicterende, kostbare, onbetrouwbare of scope-uitbreidende bronnen mogen niet automatisch worden toegevoegd.
+
+### 4.2 Zelfstandig technische keuzes maken
+
+Maak zonder Seth onder andere zelfstandig:
+- selectie tussen reeds toegestane officiële collecties als officiële semantiek + milestone-doel de keuze dragen;
+- keuze voor meerdere complementaire collecties volgens §4.1;
+- interne implementatiedetails en helpernamen;
+- teststructuur;
+- kleine refactors;
+- herstel van duidelijke bugs;
+- fail-closed behandeling die bestaand productgedrag niet verruimt.
+
+Documenteer zulke keuzes kort in het faseverslag/statusbestand.
+
+### 4.3 Echte beslisgates
+
+Vraag Seth alleen als minstens één van deze situaties overblijft:
+
+- opties zijn **wederzijds uitsluitend** en veranderen materieel productgedrag of toekomstig architectuurbeleid;
+- een nieuwe externe databron, licentie of bronautoriteit buiten de reeds goedgekeurde scope moet worden gekozen;
 - bronwaarheid, semantiek, CRS of providercontract kan niet betrouwbaar worden vastgesteld;
 - een benodigde wijziging raakt K00, Human Approval, capability ownership of een andere bestaande veiligheidsinvariant;
 - de gevraagde fase blijkt alleen haalbaar met duidelijke scope-uitbreiding;
 - een nieuwe dependency is echt noodzakelijk;
-- live brondata levert een inhoudelijke ambiguïteit op die niet fail-closed kan worden behandeld;
+- live brondata levert een inhoudelijke ambiguïteit op die niet veilig naast elkaar kan blijven bestaan of fail-closed kan worden behandeld;
 - bestaande bindende documentatie spreekt elkaar inhoudelijk tegen;
 - een destructieve Git-handeling/history rewrite/force push zou nodig zijn;
-- tests tonen een probleem waarvan meerdere oplossingsrichtingen productgedrag wijzigen.
+- tests tonen een probleem waarvan meerdere oplossingsrichtingen materieel productgedrag wijzigen.
 
 Geef dan:
 1. het feitelijke probleem;
@@ -100,8 +133,6 @@ Geef dan:
 3. consequentie per optie;
 4. jouw technisch voorkeursvoorstel;
 5. de ene concrete beslissing die Seth moet nemen.
-
-**Niet vragen** voor gewone implementatiedetails, namen van interne helpers, teststructuur, kleine refactors, herstel van duidelijke bugs of andere keuzes die geen product-/architectuurbeslissing zijn.
 
 Na Seths antwoord: leg de beslissing vast in het relevante faseverslag en hervat automatisch.
 
@@ -291,6 +322,36 @@ Bij hervatten:
 4. verifieer Git tegen de geregistreerde checkpoint;
 5. hervat de eerste niet-PASS fase.
 Doe reeds geaccepteerd werk niet opnieuw zonder aanwijzing voor regressie.
+
+## 13A. Token- en contextzuinige uitvoering
+
+Gebruik context en uitvoeringsbudget doelgericht. Autonomie betekent niet dat reeds bewezen werk telkens opnieuw onderzocht of bewezen moet worden.
+
+### Hervatten vanaf checkpoint
+- Behandel een in `docs/MILESTONE_2D_STATUS.md` als PASS geregistreerde fase met commit en groene verificatie als geaccepteerd checkpoint.
+- Lees bij hervatten primair `AGENTS.md`, dit orchestratorbestand en `docs/MILESTONE_2D_STATUS.md`.
+- Lees daarna alleen code/documentatie die nodig is voor de eerstvolgende niet-PASS fase.
+- Reconstrueer of herbewijs eerdere PASS-fasen niet zonder concrete regressie-indicatie.
+- Gebruik commit `1c4ee6755c49872cd8dfe42b40d49bdc6f7838c4` als geaccepteerd uitvoeringscheckpoint voor 2D-1 t/m 2D-4 indien die commit in de lokale geschiedenis aanwezig is en de status daarmee overeenkomt.
+
+### Teststrategie
+- Draai tijdens een fase standaard alleen gerichte tests voor nieuw/geraakt gedrag plus de minimaal noodzakelijke aangrenzende regressie.
+- Draai niet automatisch na iedere fase de volledige regressiesuite.
+- Een extra volledige regressie vóór 2D-6 is alleen nodig als een wijziging aantoonbaar een brede architectuurgrens raakt of gerichte tests een bredere regressie suggereren.
+- De volledige networkless regressiesuite blijft verplicht in 2D-6.
+- Herhaal een reeds groene, relevante volledige regressie niet zonder codewijziging die dat oppervlak opnieuw raakt.
+
+### Documentatie en analyse
+- Faseverslagen beschrijven primair de delta: nieuw gedrag, nieuwe broncontracten/risico's, verificatie en beperkingen.
+- Herhaal geen uitgebreide 2C-architectuurbeschrijvingen als een verwijzing naar bestaande invariant volstaat.
+- Vermijd lange tussentijdse chatrapportages. Leg duurzame informatie compact vast in status/faseverslag.
+- Onderzoek reeds vastgestelde officiële bronsemantiek niet opnieuw tenzij nieuwe evidence of een contractafwijking dat noodzakelijk maakt.
+
+### Capaciteitsbewaking
+- Start geen nieuwe fase wanneer de resterende sessiecapaciteit onvoldoende lijkt om die fase tot een veilig checkpoint te brengen.
+- Bij lage capaciteit: rond alleen de lopende stap af, voer minimaal noodzakelijke verificatie uit, werk `MILESTONE_2D_STATUS.md` bij, commit geldige wijzigingen en STOP met `CHECKPOINT_READY`.
+- Een capaciteitscheckpoint is geen `BLOCKED` en geen `DECISION_REQUIRED`.
+- Een nieuwe Codex-sessie hervat vervolgens volgens §13 vanaf de eerste niet-PASS fase.
 
 ## 14. Eindrapport aan Seth
 
