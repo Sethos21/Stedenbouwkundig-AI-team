@@ -5,6 +5,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 from bvc_ai.adapters.pdok_bgt import PDOKBGTAdapter, ITEMS_URL, PARSER_VERSION, _continuation
 from bvc_ai.adapters.source_transport import CapturedResponse, GetRequest, HttpResponse, ResponseOrigin
+from bvc_ai.domain.source_profiles import source_profile
 from bvc_ai.domain.sources import SourceSnapshot, GeometryRecord, ImportStatus
 from bvc_ai.domain.source_hashing import snapshot_manifest_hash
 from bvc_ai.domain.source_validation import validate_completeness
@@ -77,19 +78,22 @@ class SourceReplayService:
         snapshot, analysis = evidence.snapshot, evidence.analysis
         snapshot.__post_init__()
         provenance = json.loads(snapshot.provenance_json)
-        live = provenance.get('profile') == LIVE_PROFILE
+        profile = source_profile(provenance.get('source_contract'))
+        live = provenance.get('profile') in (LIVE_PROFILE, 'PDOK_2D_LIVE')
+        expected_profile = (('PDOK_2D_LIVE' if live else 'PDOK_2D_TESTDATA') if profile.key
+                            else (LIVE_PROFILE if live else 'PDOK_PAND_MINIMAL_PROOF'))
         origin = ResponseOrigin.PROVIDER_RESPONSE if live else ResponseOrigin.TESTDATA
         if live:
             validate_live_analysis(analysis, snapshot.fetch_extent)
         if (snapshot.status != ImportStatus.COMPLETE or snapshot.provider != 'PDOK'
-                or snapshot.dataset != 'BGT' or snapshot.collection != 'pand'
-                or snapshot.endpoint != ITEMS_URL or snapshot.parser_version != PARSER_VERSION
+                or snapshot.dataset != profile.dataset or snapshot.collection != profile.collection
+                or snapshot.endpoint != profile.items_url or snapshot.parser_version != profile.parser_version
                 or provenance.get('source_status') != origin
-                or provenance.get('profile') != (LIVE_PROFILE if live else 'PDOK_PAND_MINIMAL_PROOF')
+                or provenance.get('profile') != expected_profile
                 or analysis.geometry_ref != snapshot.fetch_extent.analysis_geometry_ref
                 or (not live and json.loads(analysis.provenance_json).get('source_status') != 'TESTDATA')):
             raise ValueError('Unsupported or inconsistent replay profile')
-        adapter = PDOKBGTAdapter(None, collection_metadata_json=json.dumps(provenance['collection_metadata']))
+        adapter = PDOKBGTAdapter(None, collection_metadata_json=json.dumps(provenance['collection_metadata']), source_contract=profile.key)
         parameters = json.loads(snapshot.request_parameters_json)
         limit = int(parameters['limit'])
         initial = adapter.build_request(snapshot.fetch_extent, limit=limit)
@@ -119,7 +123,7 @@ class SourceReplayService:
         pages, features, geometries, raw = [], [], [analysis], {}
         for capture in evidence.captures:
             if live:
-                validate_live_capture(capture, expected_url, replay=True)
+                validate_live_capture(capture, expected_url, replay=True, source_contract=profile.key)
             capture.raw.__post_init__()
             capture.response.__post_init__()
             if (capture.response.origin != origin
@@ -134,7 +138,7 @@ class SourceReplayService:
             parsed = adapter._parse(capture, snapshot.snapshot_id, limit)
             number = len(pages) + 1
             outgoing = parsed.page.next_url
-            expected_url = _continuation(outgoing, capture.request.url) if outgoing is not None else None
+            expected_url = adapter.continuation(outgoing, capture.request.url, snapshot.fetch_extent, limit) if outgoing is not None else None
             pages.append(replace(parsed.page, page_number=number, next_url=expected_url))
             features.extend(replace(f, page_number=number) for f in parsed.features)
             geometries.extend(parsed.geometries)

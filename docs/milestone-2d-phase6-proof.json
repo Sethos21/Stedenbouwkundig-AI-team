@@ -1,0 +1,107 @@
+{
+  "timestamp": "2026-09-29T13:08:20.631971+00:00",
+  "result": "PASS",
+  "tests": 453,
+  "seconds": 96.948,
+  "command": "test.ps1",
+  "regression_log": ".tools\\2d-phase6-networkless-regression.txt",
+  "regression_log_sha256": "3d64598de0b82a81155bf5dd8abfd54106b79b1d4f19fe6c3d70087cbd866e5a",
+  "live_proof": "docs/milestone-2d-phase5-proof.json",
+  "live_proof_sha256": "3d62bc7051722db3199383a18c76b81c4edb116790bb8484460fb5216ff24752",
+  "networkless": {
+    "guard_processes": 21,
+    "installed_events": 21,
+    "blocked_events": 0,
+    "explanation": "One bootstrap process plus regression Python process and inherited CLI subprocesses. No socket audit events occurred.",
+    "guard_path": ".tools\\2d-phase6-network-guard\\sitecustomize.py",
+    "guard_sha256": "c8052357d70d2f7e802335fc844ea12e38558b33470b4ef2175c0d5c63bff3f7",
+    "guard_source": "\"\"\"Milestone 2D-6 validation-only audit guard; inherited by Python CLI subprocesses.\"\"\"\nimport json\nimport os\nfrom pathlib import Path\nimport sys\n\nlog = Path(__file__).resolve().parent / ('process-' + str(os.getpid()) + '.jsonl')\n\ndef record(kind, event=None):\n    with log.open('a', encoding='utf-8') as stream:\n        stream.write(json.dumps({'kind': kind, 'event': event, 'pid': os.getpid()}) + '\\n')\n\ndef deny_network(event, args):\n    if event.startswith('socket.'):\n        record('BLOCKED', event)\n        raise RuntimeError('MILESTONE_2D_NETWORKLESS: ' + event)\n\nsys.addaudithook(deny_network)\nrecord('INSTALLED')\n\n",
+    "process_logs": [
+      {
+        "file": "process-20672.jsonl",
+        "sha256": "ed380c52ee16790efe9dda21386b24bd78f8e351f7c23da4cd29183ccd8566d1"
+      },
+      {
+        "file": "process-23672.jsonl",
+        "sha256": "cd8cc575e35de3e910068a388952e4deb2fe4f6b6393f404748f4a6c520cb0e1"
+      },
+      {
+        "file": "process-37796.jsonl",
+        "sha256": "9250f50dcf4308aa55e55d3ad00dd2d2390e48e1c140c55ecc94d3a0088b3113"
+      },
+      {
+        "file": "process-40356.jsonl",
+        "sha256": "38c46bf5eaf56d758d2be4444d0ce626f86282be331ee3e21a1416c77d864b35"
+      },
+      {
+        "file": "process-42312.jsonl",
+        "sha256": "91218cfecca013967bbf4645f234d54532e67fc4a256bc5f02a2e0222d49b37c"
+      },
+      {
+        "file": "process-42452.jsonl",
+        "sha256": "5d4841a35d75ce65906e40b5a10ba73463b1e9f69bd9681f9606902f754fba0c"
+      },
+      {
+        "file": "process-52980.jsonl",
+        "sha256": "58052414f47104623a543e0e629ab36670c4d96ab468a0098a9643b4d3df7c18"
+      },
+      {
+        "file": "process-67396.jsonl",
+        "sha256": "201911bcd742a146d140f7467226295f0e0740681266833974c896f061867fc8"
+      },
+      {
+        "file": "process-67776.jsonl",
+        "sha256": "8e2b0bcf012fb8bc682c53cf86a28817d2b2821f65c1e827a7718421d98f9f7d"
+      },
+      {
+        "file": "process-69652.jsonl",
+        "sha256": "ce9826dc66e1f6f58858773a6298d32928d581962130fe0f97a9ceb8e852d012"
+      },
+      {
+        "file": "process-72308.jsonl",
+        "sha256": "9e0fa8369984cbdb56eba1c2dc65a69379cf065148445d06d639f30fa69ea367"
+      },
+      {
+        "file": "process-72920.jsonl",
+        "sha256": "41266f729e16b5c5ccf9797dc9a627b1e35dbdd9b5478e124a0df3f021be00b8"
+      },
+      {
+        "file": "process-76892.jsonl",
+        "sha256": "c863c4dcdfea0ad0fd87fbf38253191ab57cf24178aa8fa438e82bd5fa7f8e5d"
+      },
+      {
+        "file": "process-79076.jsonl",
+        "sha256": "bd89608969353e34a6d5e57bf25dc9f8d8f1b8307a2691307e1ada5a5bc62991"
+      },
+      {
+        "file": "process-80072.jsonl",
+        "sha256": "e9ae39a4bb76e95e66bd8ce10a63b7783d2c1860ea8dbc427ef70bcb38778f8f"
+      },
+      {
+        "file": "process-84188.jsonl",
+        "sha256": "78ab849a3a5f0720ed4fc9937bc52f6a4ea7be179f733f44a952a4f3996e2103"
+      },
+      {
+        "file": "process-84600.jsonl",
+        "sha256": "073e1a90d7d4660d8afb5e30d53c2a943f9427291f882c86f0cb312a8adfde87"
+      },
+      {
+        "file": "process-85108.jsonl",
+        "sha256": "bd6f07c577ce20f2d00710cfe1858eff58de8c12b322955a6a79e704fe621363"
+      },
+      {
+        "file": "process-85988.jsonl",
+        "sha256": "cd9260050b3443484fb2e728677d07730b511ff28263f38ffec83636d0823d5a"
+      },
+      {
+        "file": "process-87092.jsonl",
+        "sha256": "7e18a248a6ce9c87b512c5a0f800476aae7217ec515952ec8c773af2292aa2fd"
+      },
+      {
+        "file": "process-90716.jsonl",
+        "sha256": "0ebf8aee644ad250c84e118ac5429d581c28df14a096232e9a6d8ad816254a70"
+      }
+    ]
+  },
+  "source_code_unchanged_since_accepted_checkpoint": "1c4ee6755c49872cd8dfe42b40d49bdc6f7838c4"
+}
