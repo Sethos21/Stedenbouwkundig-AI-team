@@ -30,6 +30,15 @@ def profile_response(key, identity='one', next_link=None, empty=False):
     feature['properties']['version'] = 'synthetic-version'
     if source_profile(key).geometry_type == 'MultiPolygon':
         feature['place'] = dict(type='MultiPolygon', coordinates=[feature['place']['coordinates']])
+    if source_profile(key).dataset == 'BAG':
+        feature['properties'] = {'identificatie': '0123100000000001', 'status': 'synthetic-status',
+                                 'gebruiksdoel': 'synthetic-function'}
+        if key == 'BAG/pand':
+            feature['properties'].update(bouwjaar=2000, verblijfsobject=['synthetic-vbo-id'])
+        else:
+            feature['place'] = dict(type='Point', coordinates=[5, 5])
+            feature['properties'].update(oppervlakte=80, huisnummer=2, pand=['synthetic-pand-id'],
+                                         postcode='TEST', openbare_ruimte_naam='Synthetic Street')
     if empty:
         document.update(features=[], numberReturned=0)
     return replace(item, body=json.dumps(document).encode(), origin=ResponseOrigin.PROVIDER_RESPONSE)
@@ -78,7 +87,7 @@ class SourceProfileTests(unittest.TestCase):
         self.assertEqual(SourceReplayService(self.store).verify('empty').snapshot.feature_count, 0)
 
     def test_unknown_contract_and_metadata_mismatch(self):
-        for key in ('BGT/anything', 'BAG/pand', 'https://evil.example/', {}, 'bgt/pand'):
+        for key in ('BGT/anything', 'BAG/adres', 'https://evil.example/', {}, 'bgt/pand'):
             with self.assertRaises(ValueError):
                 source_profile(key)
         with self.assertRaises(ValueError):
