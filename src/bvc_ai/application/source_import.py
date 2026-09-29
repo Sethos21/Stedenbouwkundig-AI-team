@@ -40,7 +40,8 @@ class SourceImportError(ValueError):
 
 class SourceImportService:
     def __init__(self, store, transport, *, collection_metadata_json, capability=None,
-                 clock=now, monotonic=time.monotonic, sleep=time.sleep, live_mastenbroekweg=False):
+                 clock=now, monotonic=time.monotonic, sleep=time.sleep, live_mastenbroekweg=False,
+                 source_contract=None):
         if capability is not _A02_SOURCE_IMPORT_CAPABILITY:
             raise PermissionError('Trusted A02 source-import capability required')
         if type(live_mastenbroekweg) is not bool:
@@ -50,7 +51,8 @@ class SourceImportService:
         self._store = store
         self._sources = SourceStore(store)
         self._adapter = PDOKBGTAdapter(transport, collection_metadata_json=collection_metadata_json,
-                                      clock=clock)
+                                      clock=clock, source_contract=source_contract)
+        self._profile = self._adapter.profile
         # Only internal gate/apply helpers are used; no provider is constructed or called.
         self._workflow = DesignWorkflow(store, None, None)
         self._monotonic, self._sleep = monotonic, sleep
@@ -90,16 +92,18 @@ class SourceImportService:
             page_raw = tuple(raw[h] for h in page_hashes)
             request = self._adapter.build_request(extent, limit=limit)
             snapshot = SourceSnapshot(
-                snapshot_id, 'PDOK', 'BGT', 'pand', ITEMS_URL, extent,
+                snapshot_id, 'PDOK', self._profile.dataset, self._profile.collection, self._profile.items_url, extent,
                 'EPSG:28992', 'EPSG:28992', json.dumps(dict(request.parameters)),
                 'CURRENT_QUERY_NO_POINT_IN_TIME_GUARANTEE',
                 fetched.captures[0].retrieval_started_at, fetched.captures[-1].retrieval_finished_at,
                 ImportStatus.VALIDATING, PointInTimeConsistency.NOT_GUARANTEED,
                 'Pagination exhaustion does not establish point-in-time consistency',
                 len(fetched.pages), len(fetched.features), '0' * 64,
-                CANONICALIZATION_VERSION, PARSER_VERSION, VALIDATOR_VERSION,
+                CANONICALIZATION_VERSION, self._profile.parser_version, VALIDATOR_VERSION,
                 json.dumps({'source_status': self._origin.value,
-                            'profile': LIVE_PROFILE if self._live else 'PDOK_PAND_MINIMAL_PROOF',
+                            'profile': (('PDOK_2D_LIVE' if self._live else 'PDOK_2D_TESTDATA') if self._profile.key
+                                        else (LIVE_PROFILE if self._live else 'PDOK_PAND_MINIMAL_PROOF')),
+                            **({'source_contract': self._profile.key} if self._profile.key else {}),
                             'collection_metadata': json.loads(self._adapter.collection_metadata_json)}))
             snapshot = replace(snapshot, snapshot_manifest_hash=snapshot_manifest_hash(
                 snapshot, fetched.pages, fetched.features, geometries))
@@ -151,17 +155,17 @@ class SourceImportService:
                     return RevisionBinding(task_id, binding[0], archived.snapshot_id)
                 phase = 'promotion'
                 features = self._sources.features(archived.snapshot_id)
-                proposal = dict(summary='Validated ' + self._origin.value + ' PDOK pand MINIMAL_PROOF',
+                proposal = dict(summary='Validated ' + self._origin.value + ' PDOK ' + self._profile.dataset + ' ' + self._profile.collection + ' MINIMAL_PROOF',
                                 objects=[], findings=[], conditions=[], variants=[], responses=[],
                                 review=None, hypothesis_variant_id=None)
                 for feature in features:
-                    local_id = 'source/' + feature.source_id
+                    local_id = 'source/' + ((self._profile.key + '/') if self._profile.key else '') + feature.source_id
                     K00Policy.authorize(local_id, 'write', origin='derived', classification='derived')
                     proposal['objects'].append(dict(
                         local_id=local_id, object_type='EXISTING_FEATURE',
                         geometry_ref=feature.geometry_ref, geometry_status='EXISTING_VALIDATED',
                         source_basis=[feature.geometry_ref],
-                        properties={'description': 'Validated ' + self._origin.value + ' pand',
+                        properties={'description': 'Validated ' + self._origin.value + ' ' + self._profile.collection,
                                     'source_id': feature.source_id, 'snapshot_id': archived.snapshot_id}))
                 key = 'source-import/' + archived.snapshot_id
                 if key in task['idempotency']:
@@ -240,7 +244,7 @@ class SourceImportService:
         for feature in fetched.features:
             page = pages[feature.page_number]
             provenance = strict_json(feature.provenance_json)
-            expected = dict(provider='PDOK', dataset='BGT', collection='pand', source_status=self._origin.value,
+            expected = dict(provider='PDOK', dataset=self._profile.dataset, collection=self._profile.collection, source_status=self._origin.value,
                             feature_id=feature.source_id, request_url=page.request_url,
                             raw_response_hash=page.raw_response_hash,
                             collection_metadata=strict_json(self._adapter.collection_metadata_json),

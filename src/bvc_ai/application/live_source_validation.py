@@ -30,11 +30,11 @@ def validate_live_analysis(analysis, extent):
     validate_geometry_record(analysis, source_crs=extent.crs)
 
 
-def validate_live_capture(capture, expected_url, *, replay=False):
+def validate_live_capture(capture, expected_url, *, replay=False, source_contract=None):
     # Replay has no outgoing headers in the Phase 5 archive. This fixed Accept
     # is used solely to check URL scope, never asserted as archived evidence.
     request = replace(capture.request, headers=(('Accept', JSON_FG),)) if replay else capture.request
-    validate_live_request(request)
+    validate_live_request(request, source_contract)
     capture.raw.__post_init__()
     capture.response.__post_init__()
     if (capture.request.url != expected_url
@@ -49,7 +49,7 @@ def validate_live_fetch(fetched, adapter, extent, analysis, limit):
     pages, features, geometries = [], [], []
     reported_totals = []
     for capture in fetched.captures:
-        validate_live_capture(capture, expected_url)
+        validate_live_capture(capture, expected_url, source_contract=adapter.profile.key)
         if capture.response.status == 429 or 500 <= capture.response.status <= 599:
             continue
         parsed = adapter._parse(capture, fetched.pages[0].snapshot_id, limit)
@@ -58,7 +58,7 @@ def validate_live_fetch(fetched, adapter, extent, analysis, limit):
             reported_totals.append(document['numberMatched'])
         number = len(pages) + 1
         outgoing = parsed.page.next_url
-        expected_url = _continuation(outgoing, capture.request.url) if outgoing is not None else None
+        expected_url = adapter.continuation(outgoing, capture.request.url, extent, limit) if outgoing is not None else None
         pages.append(replace(parsed.page, page_number=number, next_url=expected_url))
         features.extend(replace(f, page_number=number) for f in parsed.features)
         geometries.extend(parsed.geometries)

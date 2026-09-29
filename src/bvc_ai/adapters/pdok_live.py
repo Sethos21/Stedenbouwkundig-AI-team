@@ -8,15 +8,17 @@ import time
 from urllib.parse import parse_qsl, urlsplit
 
 from bvc_ai.adapters.pdok_bgt import ITEMS_URL, JSON_FG, RD_URI, _continuation
+from bvc_ai.domain.source_profiles import source_profile
 from bvc_ai.adapters.source_transport import GetRequest, HttpResponse, ResponseOrigin
 
 BBOX = '176492.301,360605.561,176992.301,361105.561'
 
 
-def validate_live_request(request):
+def validate_live_request(request, source_contract=None):
+    profile = source_profile(source_contract)
     if not isinstance(request, GetRequest) or request.method != 'GET':
         raise ValueError('GET request required')
-    if _continuation(request.url, ITEMS_URL) != request.url:
+    if _continuation(request.url, profile.items_url, profile.items_url) != request.url:
         raise ValueError('Absolute PDOK endpoint required')
     pairs = tuple(parse_qsl(urlsplit(request.url).query, keep_blank_values=True))
     if pairs != request.parameters or len(dict(pairs)) != len(pairs):
@@ -45,8 +47,11 @@ class PDOKLiveGetTransport:
     cancellation before sending GET. An active socket is shut down on timeout.
     Python plugins remain trusted code, not a security sandbox.
     """
+    def __init__(self, *, source_contract=None):
+        self._source_contract = source_profile(source_contract).key
+
     def get(self, request):
-        validate_live_request(request)
+        validate_live_request(request, self._source_contract)
         deadline = time.monotonic() + request.timeout_seconds
         result = queue.Queue(maxsize=1)
         cancelled = threading.Event()

@@ -11,6 +11,7 @@ from bvc_ai.adapters.source_transport import (
     CapturedResponse, GetRequest, GetTransport, HttpResponse, ResponseOrigin,
 )
 from bvc_ai.domain.models import now
+from bvc_ai.domain.source_profiles import source_profile, check_feature_contract
 from bvc_ai.domain.sources import (
     CRSMetadata, FetchExtent, GeometryRecord, GeometryRole, ImportStatus,
     RawResponse, SourceFeature, SourcePage, required,
@@ -112,7 +113,7 @@ class FetchResult:
     # point-in-time guarantee. No snapshot/publication capability is provided.
 
 
-def _continuation(href, current_url):
+def _continuation(href, current_url, items_url=ITEMS_URL):
     required(href)
     if (any(ord(c) <= 32 or ord(c) >= 127 for c in href)
             or "\\" in href or "#" in href
@@ -124,7 +125,7 @@ def _continuation(href, current_url):
     if href.startswith("?"):
         return urljoin(current_url, href)
     if (raw.scheme == "https" and raw.netloc == "api.pdok.nl"
-            and raw.path == urlsplit(ITEMS_URL).path):
+            and raw.path == urlsplit(items_url).path):
         return href
     raise ValueError("Continuation outside allowed PDOK pand items scope")
 
@@ -134,16 +135,17 @@ def _request_identity(url):
     return parts.path, tuple(sorted(parse_qsl(parts.query, keep_blank_values=True)))
 
 class PDOKBGTAdapter:
-    def __init__(self, transport: GetTransport, *, collection_metadata_json: str, clock=now):
+    def __init__(self, transport: GetTransport, *, collection_metadata_json: str, clock=now, source_contract=None):
         """Collection metadata is supplied by the trusted caller, never inferred.
 
         Phase 3A does not fetch metadata or items over a real connection.
         Transport origin distinguishes synthetic test responses in provenance.
         """
+        self.profile = source_profile(source_contract)
         self.transport = transport
         self.clock = clock
         metadata = strict_json(collection_metadata_json)
-        if not isinstance(metadata, dict) or metadata.get("id") != COLLECTION:
+        if not isinstance(metadata, dict) or metadata.get("id") != self.profile.collection:
             raise ValueError("Explicit pand collection metadata required")
         crs_list = metadata.get("crs")
         if (not isinstance(crs_list, list) or not crs_list
@@ -166,8 +168,21 @@ class PDOKBGTAdapter:
             ("bbox-crs", RD_URI), ("crs", RD_URI), ("f", "jsonfg"), ("limit", str(limit)),
         )
         # No datetime/peildatum value is invented by this basic request profile.
-        return GetRequest(ITEMS_URL + "?" + urlencode(parameters), parameters,
+        return GetRequest(self.profile.items_url + "?" + urlencode(parameters), parameters,
                           (("Accept", JSON_FG),))
+
+    def continuation(self, href, current_url, extent, limit):
+        url = _continuation(href, current_url, self.profile.items_url)
+        if self.profile.key:
+            # Enforce fixed scope before the next transport call, including fake transports.
+            pairs = tuple(parse_qsl(urlsplit(url).query, keep_blank_values=True))
+            params = dict(pairs)
+            expected = dict(self.build_request(extent, limit=limit).parameters)
+            if (len(params) != len(pairs) or any(params.get(k) != v for k, v in expected.items())
+                    or set(params) - (set(expected) | {'cursor'})
+                    or ('cursor' in params and not params['cursor'])):
+                raise ValueError('Continuation changed source query scope')
+        return url
 
     def fetch_page(self, snapshot_id: str, extent: FetchExtent, *, limit=1000):
         required(snapshot_id)
@@ -323,7 +338,7 @@ class PDOKBGTAdapter:
             attempt["page_metadata"] = strict_json(parsed.metadata_json)
             # Retain failed/unresolved links in the manifest and raw capture.
             try:
-                next_url = _continuation(outgoing, request.url) if outgoing is not None else None
+                next_url = self.continuation(outgoing, request.url, extent, limit) if outgoing is not None else None
             except ValueError as exc:
                 return finish(str(exc))
             page_number = len(pages) + 1
@@ -392,11 +407,11 @@ class PDOKBGTAdapter:
                     raise ValueError("Multiple next links")
                 next_url = link["href"]  # Metadata only: never resolve or follow.
         metadata = {
-            "provider": "PDOK", "dataset": "BGT", "collection": COLLECTION,
-            "collection_metadata_url": COLLECTION_URL,
+            "provider": "PDOK", "dataset": self.profile.dataset, "collection": self.profile.collection,
+            "collection_metadata_url": self.profile.collection_url,
             "collection_metadata": strict_json(self.collection_metadata_json),
             "source_status": ResponseOrigin(response.origin).value,
-            "parser_version": PARSER_VERSION,
+            "parser_version": self.profile.parser_version,
             "request_url": capture.request.url,
             "request_parameters": dict(capture.request.parameters),
             "raw_response_hash": capture.raw.raw_response_hash,
@@ -423,6 +438,7 @@ class PDOKBGTAdapter:
             place = feature.get("place")
             if not isinstance(place, dict):
                 raise ValueError("JSON-FG place geometry required; no geometry fallback")
+            check_feature_contract(self.profile, properties, place)
             geometry_json = _json_text(place)
             provenance = dict(metadata, feature_id=identity, feature_metadata={
                 key: value for key, value in feature.items() if key not in ("place", "properties")})
@@ -434,7 +450,7 @@ class PDOKBGTAdapter:
             })
             crs = CRSMetadata("EPSG:28992", ("easting", "northing"), 2, "metres", evidence)
             digest = geometry_structural_hash(geometry_json, crs)
-            geometry_ref = ("pdok/bgt/pand/" + quote(identity, safe="") + "/"
+            geometry_ref = ("pdok/" + self.profile.dataset.lower() + "/" + self.profile.collection + "/" + quote(identity, safe="") + "/"
                             + capture.raw.raw_response_hash + "/" + digest)
             record = GeometryRecord(geometry_ref, geometry_json, crs, digest,
                                     CANONICALIZATION_VERSION, GeometryRole.SOURCE_GEOMETRY,
