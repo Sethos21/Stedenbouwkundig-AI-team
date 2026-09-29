@@ -10,6 +10,7 @@ from dataclasses import replace
 from bvc_ai.adapters.pdok_bgt import PDOKBGTAdapter, ITEMS_URL, PARSER_VERSION
 from bvc_ai.adapters.source_transport import ResponseOrigin
 from bvc_ai.application.design_workflow import DesignWorkflow
+from bvc_ai.application.source_basis import validated_members
 from bvc_ai.application.live_source_validation import (
     LIVE_PROFILE, validate_live_analysis, validate_live_fetch,
 )
@@ -140,6 +141,18 @@ class SourceImportService:
                     'SELECT revision_id FROM source_revision_bindings WHERE task_id=? AND snapshot_id=?',
                     (task_id, archived.snapshot_id)).fetchone()
                 if binding:
+                    if self._profile.key:
+                        active = current_output(task, 'A02')
+                        members = active['output'].get('source_set', {})
+                        expected = dict(snapshot_id=archived.snapshot_id,
+                                        manifest_hash=archived.snapshot_manifest_hash, import_revision_id=binding[0])
+                        if members.get(self._profile.key) == expected:
+                            validated_members(self._store, task, members, self._origin.value, extent)
+                            self._store.event(task_id, 'A02', 'source_import_noop',
+                                              snapshot_id=archived.snapshot_id, revision_id=binding[0],
+                                              active_revision_id=active['revision_id'],
+                                              snapshot_manifest_hash=archived.snapshot_manifest_hash)
+                            return RevisionBinding(task_id, binding[0], archived.snapshot_id)
                     if task['active_revisions'].get('A02') != binding[0]:
                         raise ValueError('Historical binding cannot be silently reactivated')
                     output = current_output(task, 'A02')['output']
@@ -155,18 +168,30 @@ class SourceImportService:
                     return RevisionBinding(task_id, binding[0], archived.snapshot_id)
                 phase = 'promotion'
                 features = self._sources.features(archived.snapshot_id)
+                members, carried = {}, {}
+                if self._profile.key and 'A02' in task['active_revisions']:
+                    active = current_output(task, 'A02')
+                    members = dict(active['output'].get('source_set', {}))
+                    # Replacement removes exactly this collection, preserving every other
+                    # source only after trusted publication and offline evidence readback.
+                    members.pop(self._profile.key, None)
+                    carried = validated_members(self._store, task, members, self._origin.value, extent)
                 proposal = dict(summary='Validated ' + self._origin.value + ' PDOK ' + self._profile.dataset + ' ' + self._profile.collection + ' MINIMAL_PROOF',
                                 objects=[], findings=[], conditions=[], variants=[], responses=[],
                                 review=None, hypothesis_variant_id=None)
-                for feature in features:
-                    local_id = 'source/' + ((self._profile.key + '/') if self._profile.key else '') + feature.source_id
-                    K00Policy.authorize(local_id, 'write', origin='derived', classification='derived')
-                    proposal['objects'].append(dict(
-                        local_id=local_id, object_type='EXISTING_FEATURE',
-                        geometry_ref=feature.geometry_ref, geometry_status='EXISTING_VALIDATED',
-                        source_basis=[feature.geometry_ref],
-                        properties={'description': 'Validated ' + self._origin.value + ' ' + self._profile.collection,
-                                    'source_id': feature.source_id, 'snapshot_id': archived.snapshot_id}))
+                bundles = [(self._profile.key, archived.snapshot_id, features)]
+                bundles.extend((key, result.snapshot.snapshot_id, result.features)
+                               for key, result in sorted(carried.items()))
+                for contract, sid, bundle_features in bundles:
+                    for feature in bundle_features:
+                        local_id = 'source/' + ((contract + '/') if contract else '') + feature.source_id
+                        K00Policy.authorize(local_id, 'write', origin='derived', classification='derived')
+                        proposal['objects'].append(dict(
+                            local_id=local_id, object_type='EXISTING_FEATURE',
+                            geometry_ref=feature.geometry_ref, geometry_status='EXISTING_VALIDATED',
+                            source_basis=[feature.geometry_ref],
+                            properties={'description': 'Validated ' + self._origin.value + ' ' + (contract or 'pand'),
+                                        'source_id': feature.source_id, 'snapshot_id': sid}))
                 key = 'source-import/' + archived.snapshot_id
                 if key in task['idempotency']:
                     raise ValueError('Conflicting source-import idempotency identity')
@@ -177,6 +202,10 @@ class SourceImportService:
                 output = task['outputs'][-1]['output']
                 output.update(source_snapshot_id=archived.snapshot_id,
                               snapshot_manifest_hash=archived.snapshot_manifest_hash)
+                if self._profile.key:
+                    members[self._profile.key] = dict(snapshot_id=archived.snapshot_id,
+                        manifest_hash=archived.snapshot_manifest_hash, import_revision_id=revision)
+                    output['source_set'] = members
                 task['updated_at'] = now()
                 self._store._save(task)
                 phase = 'binding'
@@ -189,7 +218,8 @@ class SourceImportService:
                                   previous=ImportStatus.VALIDATING, target=ImportStatus.COMPLETE,
                                   geometry_status='EXISTING_VALIDATED', source_status=self._origin.value,
                                   query_scope_complete=proof.query_scope_complete,
-                                  point_in_time_consistency=proof.point_in_time_consistency)
+                                  point_in_time_consistency=proof.point_in_time_consistency,
+                                  **({'source_set': members} if self._profile.key else {}))
             return result
         except Exception as exc:
             # Publication transaction has rolled back before failure audit.

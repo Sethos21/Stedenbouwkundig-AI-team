@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from uuid import uuid4
 from bvc_ai.infrastructure.store import Store
+from bvc_ai.application.source_basis import SourceBasisService
 from bvc_ai.application.workflow import Workflow
 from bvc_ai.application.design_workflow import DesignWorkflow
 from bvc_ai.application.approval import HumanApprovalService, _HUMAN_CAPABILITY
@@ -22,8 +23,11 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command", required=True)
     demo = commands.add_parser("demo")
     demo.add_argument("name", choices=["gis-001", "design-test-001"])
-    commands.add_parser("smoke", help="Eén A02-call, mockreview, eigen opslagmap")
+    commands.add_parser("smoke", help="EÃ©n A02-call, mockreview, eigen opslagmap")
     commands.add_parser("tasks")
+    basis = commands.add_parser("source-basis", help="Lees actueel gevalideerd A02-bronbeeld")
+    basis.add_argument("task_id")
+    basis.add_argument("--revision", help="Verwachte A02-revisie; weigert stale bronbeeld")
     report = commands.add_parser("design-report")
     report.add_argument("task_id")
     risk = commands.add_parser("accept-risk")
@@ -89,6 +93,8 @@ def main(argv=None):
             service = HumanApprovalService(store, capability=_HUMAN_CAPABILITY)
             service.decide(args.task_id, args.actor, "ACCEPTED_RISK", args.reason, finding_id=args.finding_id, idempotency_key=args.idempotency_key)
             result = store.get(args.task_id)
+        elif args.command == "source-basis":
+            result = SourceBasisService(store).build(args.task_id, expected_revision=args.revision)
         elif args.command == "tasks":
             result = store.list()
         elif args.command == "audit":
