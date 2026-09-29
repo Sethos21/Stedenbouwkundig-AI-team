@@ -9,7 +9,8 @@
 - K00 blijft immutable. Alle toekomstige GIS-adapters moeten de K00-policy toepassen; registreer alleen afgeleide lagen.
 - Wijzig specialistische broninhoud niet tijdens review. Reviews verwijzen naar de beoordeelde outputversie.
 - Houd statusovergangen expliciet en audit geblokkeerde overgangen en fouten.
-- Gebruik geen productiecredentials, externe integraties, downloads van GIS-bronnen of cloudwrites binnen deze milestone.
+- Gebruik geen productiecredentials, externe integraties, downloads van GIS-bronnen of cloudwrites binnen deze milestone, behalve de hieronder expliciet toegestane Milestone-2D-bronketen.
+- Milestone 2D (besluit Seth, 29 september 2026): read-only contractinspectie van officiële PDOK BGT/BAG-bronnen en begrensde live fetches binnen vooraf vastgelegde officiële endpoints/scopes zijn toegestaan, met lokale raw evidence, hashes, provenance en validatiebewijs en expliciete live opt-in voor de live proof. Alleen daarvoor noodzakelijke netwerktoegang; geen productiecredentials, cloudwrites, arbitrary URL/netwerktoegang, andere externe integraties of niet vooraf toegestane bronnen/endpoints. Capability-, provenance-, K00- en Human Approval-grenzen blijven onverkort gelden.
 - Schrijf caches, tooling, testbestanden en runtimegegevens alleen onder deze projectmap.
 - Voer na relevante wijzigingen test.ps1 uit. CLI-approvaltests gebruiken uitsluitend geïsoleerde tijdelijke opslag.
 - Keur de echte demo nooit goed namens de gebruiker. Laat runtime/GIS-001 wachten op de mens.

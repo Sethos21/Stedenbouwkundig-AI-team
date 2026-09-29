@@ -1,0 +1,667 @@
+{
+  "purpose": "MILESTONE_2D_CONTRACT_INSPECTION_ONLY",
+  "date": "2026-09-29",
+  "feature_fetches": 0,
+  "records": [
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:25 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "074200af1be3458457e120aa9ef13c62d9b3449d4fcd50a2062a36d2cf1be1c4",
+      "timestamp": "2026-09-29T07:33:25.466559+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "2.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:25 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "3026395a617fefc4810d193950404d3ca9e89d0b1898c455fc1c25ea6cfcb45c",
+      "timestamp": "2026-09-29T07:33:25.574557+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/pand/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:25 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "fd28712021ab1cb2410018da2190ad18b676f5290563f15aac9a1d078bba8a5e",
+      "timestamp": "2026-09-29T07:33:25.660625+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/wegdeel/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:25 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "4f405fe48f1b9ab9fa393610419fc61e5f2fc81004ef5f2405ad3994c47b03ba",
+      "timestamp": "2026-09-29T07:33:25.757564+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/ondersteunendwegdeel/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:25 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "f9c303edaf1abd797cc0d9e23caafcbf8cf279b058c59101228795c9a297b44e",
+      "timestamp": "2026-09-29T07:33:25.848559+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/waterdeel/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:25 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "dd71f07b302d659d8e3c746ae3c50f36f5f7134c09bb9cac015818f7579af7a4",
+      "timestamp": "2026-09-29T07:33:25.928568+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/begroeidterreindeel/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:26 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "685ea6b58d6cbd01a5b324bc0b9b2702a7832d06ee2551d24a81247912d09cb5",
+      "timestamp": "2026-09-29T07:33:26.012563+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bgt/ogc/v1/collections/onbegroeidterreindeel/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "1.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:26 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "bd40fdcead0449963b1fdfd97774d18cd73ed652ed54d55637c4caffff5ec7ce",
+      "timestamp": "2026-09-29T07:33:26.108565+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/pand/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "2.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Length",
+          "1741"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:26 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "d86df0198180362fec2d8fbb512ecd490283e501812a4e532ef703fa887c2de2",
+      "timestamp": "2026-09-29T07:33:26.232563+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "2.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:26 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Transfer-Encoding",
+          "chunked"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "a7d4ded3794f6e982a18e3d1180b70081cff8d5a6c2a2bba8fdf58f2196c75a7",
+      "timestamp": "2026-09-29T07:33:26.303567+00:00"
+    },
+    {
+      "url": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/adres/schema?f=json",
+      "status": 200,
+      "headers": [
+        [
+          "Access-Control-Allow-Origin",
+          "*"
+        ],
+        [
+          "Access-Control-Expose-Headers",
+          "Content-Crs,Link"
+        ],
+        [
+          "Api-Version",
+          "2.0.0"
+        ],
+        [
+          "Cache-Control",
+          "public, max-age=3600, no-transform"
+        ],
+        [
+          "Content-Length",
+          "1901"
+        ],
+        [
+          "Content-Security-Policy",
+          "default-src 'self'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://*.piwik.pro; connect-src 'self' https://*.pdok.nl https://*.piwik.pro; img-src 'self' data: https://*.pdok.nl; font-src 'self' https://cdn.jsdelivr.net;"
+        ],
+        [
+          "Content-Type",
+          "application/schema+json"
+        ],
+        [
+          "Date",
+          "Tue, 29 Sep 2026 07:33:26 GMT"
+        ],
+        [
+          "Referrer-Policy",
+          "origin"
+        ],
+        [
+          "Vary",
+          "Cookie, Accept, Accept-Encoding, Accept-Language"
+        ],
+        [
+          "X-Content-Type-Options",
+          "nosniff"
+        ],
+        [
+          "X-Frame-Options",
+          "DENY"
+        ],
+        [
+          "Strict-Transport-Security",
+          "max-age=31536000; includeSubDomains; preload"
+        ]
+      ],
+      "sha256": "cb203b0224b48c4ae608b93c62b2e4e867d1db08da23f14fcf87095d17875ec1",
+      "timestamp": "2026-09-29T07:33:26.397567+00:00"
+    }
+  ]
+}
