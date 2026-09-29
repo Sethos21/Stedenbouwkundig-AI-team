@@ -323,6 +323,36 @@ Bij hervatten:
 5. hervat de eerste niet-PASS fase.
 Doe reeds geaccepteerd werk niet opnieuw zonder aanwijzing voor regressie.
 
+## 13A. Token- en contextzuinige uitvoering
+
+Gebruik context en uitvoeringsbudget doelgericht. Autonomie betekent niet dat reeds bewezen werk telkens opnieuw onderzocht of bewezen moet worden.
+
+### Hervatten vanaf checkpoint
+- Behandel een in `docs/MILESTONE_2D_STATUS.md` als PASS geregistreerde fase met commit en groene verificatie als geaccepteerd checkpoint.
+- Lees bij hervatten primair `AGENTS.md`, dit orchestratorbestand en `docs/MILESTONE_2D_STATUS.md`.
+- Lees daarna alleen code/documentatie die nodig is voor de eerstvolgende niet-PASS fase.
+- Reconstrueer of herbewijs eerdere PASS-fasen niet zonder concrete regressie-indicatie.
+- Gebruik commit `1c4ee6755c49872cd8dfe42b40d49bdc6f7838c4` als geaccepteerd uitvoeringscheckpoint voor 2D-1 t/m 2D-4 indien die commit in de lokale geschiedenis aanwezig is en de status daarmee overeenkomt.
+
+### Teststrategie
+- Draai tijdens een fase standaard alleen gerichte tests voor nieuw/geraakt gedrag plus de minimaal noodzakelijke aangrenzende regressie.
+- Draai niet automatisch na iedere fase de volledige regressiesuite.
+- Een extra volledige regressie vóór 2D-6 is alleen nodig als een wijziging aantoonbaar een brede architectuurgrens raakt of gerichte tests een bredere regressie suggereren.
+- De volledige networkless regressiesuite blijft verplicht in 2D-6.
+- Herhaal een reeds groene, relevante volledige regressie niet zonder codewijziging die dat oppervlak opnieuw raakt.
+
+### Documentatie en analyse
+- Faseverslagen beschrijven primair de delta: nieuw gedrag, nieuwe broncontracten/risico's, verificatie en beperkingen.
+- Herhaal geen uitgebreide 2C-architectuurbeschrijvingen als een verwijzing naar bestaande invariant volstaat.
+- Vermijd lange tussentijdse chatrapportages. Leg duurzame informatie compact vast in status/faseverslag.
+- Onderzoek reeds vastgestelde officiële bronsemantiek niet opnieuw tenzij nieuwe evidence of een contractafwijking dat noodzakelijk maakt.
+
+### Capaciteitsbewaking
+- Start geen nieuwe fase wanneer de resterende sessiecapaciteit onvoldoende lijkt om die fase tot een veilig checkpoint te brengen.
+- Bij lage capaciteit: rond alleen de lopende stap af, voer minimaal noodzakelijke verificatie uit, werk `MILESTONE_2D_STATUS.md` bij, commit geldige wijzigingen en STOP met `CHECKPOINT_READY`.
+- Een capaciteitscheckpoint is geen `BLOCKED` en geen `DECISION_REQUIRED`.
+- Een nieuwe Codex-sessie hervat vervolgens volgens §13 vanaf de eerste niet-PASS fase.
+
 ## 14. Eindrapport aan Seth
 
 Tijdens autonome uitvoering geen lange voortgangsberichten nodig.
