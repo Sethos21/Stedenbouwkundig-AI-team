@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "address_replay": "PASS",
+  "source_replay": "PASS",
+  "reconstruction": "PASS",
+  "network": "socket/connect/DNS blocked",
+  "basis_hash": "5a26f286f6d1d5533c8a555a8bb543b1c63f88142601f7a40ba9b456c438fbe8",
+  "collections": 8,
+  "source_objects": 1908,
+  "human_approval": null,
+  "evidence_directory": "\\\\BERNHEZE-DC01\\gebruikers$\\seth\\Documents\\Codex Desktop\\AI ontwerpteam\\runtime\\2d-live\\20260930T080816485246Z",
+  "reconstruction_directory": "\\\\BERNHEZE-DC01\\gebruikers$\\seth\\Documents\\Codex Desktop\\AI ontwerpteam\\runtime\\2d-live\\20260930T080816485246Z\\verification-20260930T081308735670Z"
+}

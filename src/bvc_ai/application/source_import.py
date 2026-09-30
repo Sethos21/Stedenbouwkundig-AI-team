@@ -42,12 +42,12 @@ class SourceImportError(ValueError):
 class SourceImportService:
     def __init__(self, store, transport, *, collection_metadata_json, capability=None,
                  clock=now, monotonic=time.monotonic, sleep=time.sleep, live_mastenbroekweg=False,
-                 source_contract=None):
+                 source_contract=None, live_opt_in=False):
         if capability is not _A02_SOURCE_IMPORT_CAPABILITY:
             raise PermissionError('Trusted A02 source-import capability required')
-        if type(live_mastenbroekweg) is not bool:
+        if type(live_mastenbroekweg) is not bool or type(live_opt_in) is not bool:
             raise ValueError('Explicit boolean live opt-in required')
-        self._live = live_mastenbroekweg
+        self._live = live_mastenbroekweg or live_opt_in
         self._origin = ResponseOrigin.PROVIDER_RESPONSE if self._live else ResponseOrigin.TESTDATA
         self._store = store
         self._sources = SourceStore(store)

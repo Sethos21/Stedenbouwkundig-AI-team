@@ -1,0 +1,31 @@
+{
+  "file": "meppel-live-evidence.zip",
+  "bytes": 5923789,
+  "sha256": "20c015742513def9e93709f0f563a158f71761761f388ae2fd49f672dc5830fb",
+  "members": {
+    "archive/state.sqlite3": {
+      "bytes": 63365120,
+      "sha256": "988e8e1fbbd7dc5da0634f6a913e81f63834bd3826d8897890811a004fadeecf"
+    },
+    "report.json": {
+      "bytes": 14892,
+      "sha256": "6f832d9785bcf8fe1caee3c34170ae0536db9a4c85a6e11d3b49b554df455e32"
+    },
+    "source-basis.json": {
+      "bytes": 3533142,
+      "sha256": "c55285b28c7c9b2148b0e93c0ac70634bada2fa1f341ed379da9b52db263d680"
+    },
+    "address-evidence.json": {
+      "bytes": 2932,
+      "sha256": "b0d7f0157e244f20d70374e83de7b32bc26e9e873c26cdc27f9a35a89cf66e06"
+    },
+    "address-response.raw": {
+      "bytes": 548,
+      "sha256": "40cfe381f1f94192b32d8f8b03e0577f6523f1bc1421fa4a24052b138d7cde7d"
+    },
+    "verification-20260930T081308735670Z/verification.json": {
+      "bytes": 655,
+      "sha256": "96188c75aa048f3b1d60929779c529678fdfe910e7dfd8571ab888c7516abe8e"
+    }
+  }
+}

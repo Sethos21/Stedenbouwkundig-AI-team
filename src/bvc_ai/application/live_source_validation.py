@@ -15,6 +15,13 @@ ANALYSIS_ORIGIN = 'USER_SUPPLIED_TESTCASE'
 
 
 def validate_live_analysis(analysis, extent):
+    provenance = json.loads(analysis.provenance_json)
+    if provenance.get('purpose') == 'OFFICIAL_ADDRESS_ANALYSIS_V1':
+        expected_extent, expected_analysis = address_analysis(provenance['address_evidence'])
+        if extent != expected_extent or analysis != expected_analysis:
+            raise ValueError('Analysis differs from replayed official address evidence')
+        validate_geometry_record(analysis, source_crs=extent.crs)
+        return
     bounds = tuple(map(float, BBOX.split(',')))
     x1, y1, x2, y2 = bounds
     expected = {'type': 'Polygon', 'coordinates': [[[x1, y1], [x2, y1],
@@ -30,11 +37,12 @@ def validate_live_analysis(analysis, extent):
     validate_geometry_record(analysis, source_crs=extent.crs)
 
 
-def validate_live_capture(capture, expected_url, *, replay=False, source_contract=None):
+def validate_live_capture(capture, expected_url, *, replay=False, source_contract=None, extent=None):
     # Replay has no outgoing headers in the Phase 5 archive. This fixed Accept
     # is used solely to check URL scope, never asserted as archived evidence.
     request = replace(capture.request, headers=(('Accept', JSON_FG),)) if replay else capture.request
-    validate_live_request(request, source_contract)
+    validate_live_request(request, source_contract, expected_bbox=(
+        ','.join(str(n) for n in extent.bbox) if extent is not None else BBOX))
     capture.raw.__post_init__()
     capture.response.__post_init__()
     if (capture.request.url != expected_url
@@ -49,7 +57,7 @@ def validate_live_fetch(fetched, adapter, extent, analysis, limit):
     pages, features, geometries = [], [], []
     reported_totals = []
     for capture in fetched.captures:
-        validate_live_capture(capture, expected_url, source_contract=adapter.profile.key)
+        validate_live_capture(capture, expected_url, source_contract=adapter.profile.key, extent=extent)
         if capture.response.status == 429 or 500 <= capture.response.status <= 599:
             continue
         parsed = adapter._parse(capture, fetched.pages[0].snapshot_id, limit)
@@ -83,4 +91,29 @@ def mastenbroekweg_analysis():
                     'address': 'Mastenbroekweg 2, 6006 PT Weert, Nederland',
                     'user_supplied_bag_centroid_rd': [176742.301, 360855.561],
                     'boundary_status': 'NOT_A_PROJECT_PROPERTY_CADASTRAL_DESIGN_OR_POLICY_BOUNDARY'}))
+    return extent, analysis
+
+
+def address_analysis(evidence):
+    """Deterministic 500 m square from official RD point, carrying replayable evidence."""
+    from decimal import Decimal
+    from bvc_ai.adapters.pdok_location import replay_address
+    location = replay_address(evidence)
+    x, y = (Decimal(str(n)) for n in location.coordinates)
+    bounds = tuple(float(n) for n in (x - 250, y - 250, x + 250, y + 250))
+    extent = FetchExtent(bounds, 'EPSG:28992', 'address-analysis/' + evidence['raw_sha256'])
+    x1, y1, x2, y2 = bounds
+    payload = json.dumps({'type': 'Polygon', 'coordinates': [[[x1,y1],[x2,y1],
+                         [x2,y2],[x1,y2],[x1,y1]]]})
+    provenance = dict(source_status='DERIVED_TEST_ANALYSIS_GEOMETRY',
+        purpose='OFFICIAL_ADDRESS_ANALYSIS_V1', address_evidence=evidence,
+        source_coordinate=list(location.coordinates), source_crs=location.coordinate_crs,
+        coordinate_source=location.coordinate_source, transformation='NONE_NATIVE_RD',
+        bbox_method='AXIS_ALIGNED_RD_SQUARE_CENTROID_PLUS_MINUS_250_METRES',
+        boundary_status='NOT_A_PROJECT_PROPERTY_CADASTRAL_DESIGN_OR_POLICY_BOUNDARY')
+    crs = CRSMetadata('EPSG:28992', ('easting','northing'), 2, 'metres',
+                      json.dumps({'source_status': provenance['source_status'], 'crs': RD_URI}))
+    analysis = GeometryRecord(extent.analysis_geometry_ref, payload, crs,
+        geometry_structural_hash(payload, crs), CANONICALIZATION_VERSION,
+        GeometryRole.TESTCASE_ONLY_ANALYSIS_GEOMETRY, json.dumps(provenance))
     return extent, analysis

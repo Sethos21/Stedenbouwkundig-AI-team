@@ -1,4 +1,4 @@
-"""Opt-in, stateless HTTPS GET for the fixed PDOK pand request profile."""
+"""Stateless bounded HTTPS GET for validated, closed PDOK request profiles."""
 import http.client
 import math
 import queue
@@ -14,7 +14,7 @@ from bvc_ai.adapters.source_transport import GetRequest, HttpResponse, ResponseO
 BBOX = '176492.301,360605.561,176992.301,361105.561'
 
 
-def validate_live_request(request, source_contract=None):
+def validate_live_request(request, source_contract=None, *, expected_bbox=BBOX):
     profile = source_profile(source_contract)
     if not isinstance(request, GetRequest) or request.method != 'GET':
         raise ValueError('GET request required')
@@ -24,9 +24,9 @@ def validate_live_request(request, source_contract=None):
     if pairs != request.parameters or len(dict(pairs)) != len(pairs):
         raise ValueError('Exact unique request parameters required')
     params = dict(pairs)
-    expected = {'bbox': BBOX, 'bbox-crs': RD_URI, 'crs': RD_URI, 'f': 'jsonfg', 'limit': '1000'}
+    expected = {'bbox': expected_bbox, 'bbox-crs': RD_URI, 'crs': RD_URI, 'f': 'jsonfg', 'limit': '1000'}
     if any(params.get(k) != v for k, v in expected.items()):
-        raise ValueError('Explicit Mastenbroekweg RD query scope required')
+        raise ValueError('Exact validated analysis RD query scope required')
     if set(params) - (set(expected) | {'cursor'}):
         raise ValueError('Unsupported query parameter')
     if 'cursor' in params and not params['cursor']:
@@ -47,11 +47,20 @@ class PDOKLiveGetTransport:
     cancellation before sending GET. An active socket is shut down on timeout.
     Python plugins remain trusted code, not a security sandbox.
     """
-    def __init__(self, *, source_contract=None):
+    def __init__(self, *, source_contract=None, analysis_scope=None):
         self._source_contract = source_profile(source_contract).key
+        self._bbox = BBOX
+        if analysis_scope is not None:
+            from bvc_ai.application.live_source_validation import validate_live_analysis
+            extent, analysis = analysis_scope
+            validate_live_analysis(analysis, extent)
+            self._bbox = ','.join(str(n) for n in extent.bbox)
+
+    def _validate_request(self, request):
+        validate_live_request(request, self._source_contract, expected_bbox=self._bbox)
 
     def get(self, request):
-        validate_live_request(request, self._source_contract)
+        self._validate_request(request)
         deadline = time.monotonic() + request.timeout_seconds
         result = queue.Queue(maxsize=1)
         cancelled = threading.Event()
@@ -69,7 +78,7 @@ class PDOKLiveGetTransport:
                 connection.sock.settimeout(remaining())
                 parts = urlsplit(request.url)
                 connection.request('GET', parts.path + '?' + parts.query,
-                                   headers={'Accept': JSON_FG, 'Accept-Encoding': 'identity'})
+                                   headers={'Accept': request.headers[0][1], 'Accept-Encoding': 'identity'})
                 connection.sock.settimeout(remaining())
                 response = connection.getresponse()
                 headers = tuple(response.getheaders())
