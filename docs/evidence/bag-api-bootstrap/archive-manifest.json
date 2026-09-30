@@ -1,0 +1,13 @@
+{
+  "archive": "meppel-bag-api-live.zip",
+  "sha256": "516d98777d00b61bedaca980d7372207c028b9624b04b97dec6b7ca29aaaf7bd",
+  "files": {
+    "address-evidence.json": "34837a3d35160fe67dcfa8f64e31b3666ae68f3f8c4193163a347b35b40904c6",
+    "address-response.raw": "24225b5b67c7dee2596fdd22b3eadefdd2bffed98584169c46bdb502acd59ba2",
+    "report.json": "4afa638ae1ac31a22cc4933e60338608ff17eebfddede96c471d3f7de03cc19e",
+    "source-basis.json": "7d3f4230cebb7403a5222565b3f5599e375c2ed2da6a206323521dea08a788e1",
+    "archive/state.sqlite3": "c2ec0683e34760319f4e62a829fbb3eb56d991fa110b01d6d3e50a9c9ae0115c",
+    "verification-20260930T143332737175Z/verification.json": "62c6654e573f8e78ccfd71e022d182a0c5640d078eb16f1a9fd825804c67f696",
+    "baseline-address-evidence.json": "b0d7f0157e244f20d70374e83de7b32bc26e9e873c26cdc27f9a35a89cf66e06"
+  }
+}

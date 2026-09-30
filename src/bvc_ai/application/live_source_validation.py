@@ -94,11 +94,31 @@ def mastenbroekweg_analysis():
     return extent, analysis
 
 
+def replay_address_evidence(evidence):
+    from bvc_ai.adapters import bag_individual, pdok_location
+    adapter = bag_individual if evidence.get('contract') == bag_individual.CONTRACT else pdok_location
+    return adapter.replay_address(evidence)
+
+
+def compare_address_evidence(current, baseline):
+    """Compare literal identities and native RD XY; allow at most 1 cm rounding."""
+    left, right = replay_address_evidence(current), replay_address_evidence(baseline)
+    if (left.nummeraanduiding_id != right.nummeraanduiding_id
+            or left.adresseerbaarobject_id != right.adresseerbaarobject_id
+            or left.coordinate_crs != right.coordinate_crs
+            or any(abs(a-b) > 0.01 for a,b in zip(left.coordinates, right.coordinates))):
+        raise ValueError('OFFICIAL_BOOTSTRAP_COMPARISON_MISMATCH')
+    return dict(result='PASS', baseline_raw_sha256=baseline['raw_sha256'],
+                coordinate_tolerance_metres=0.01,
+                coordinate_delta_metres=[a-b for a,b in zip(left.coordinates, right.coordinates)],
+                identifiers_compared=['nummeraanduiding_id','adresseerbaarobject_id'],
+                other_identifiers='Not present in Locatieserver bootstrap evidence')
+
+
 def address_analysis(evidence):
     """Deterministic 500 m square from official RD point, carrying replayable evidence."""
     from decimal import Decimal
-    from bvc_ai.adapters.pdok_location import replay_address
-    location = replay_address(evidence)
+    location = replay_address_evidence(evidence)
     x, y = (Decimal(str(n)) for n in location.coordinates)
     bounds = tuple(float(n) for n in (x - 250, y - 250, x + 250, y + 250))
     extent = FetchExtent(bounds, 'EPSG:28992', 'address-analysis/' + evidence['raw_sha256'])
@@ -111,6 +131,9 @@ def address_analysis(evidence):
         coordinate_source=location.coordinate_source, transformation='NONE_NATIVE_RD',
         bbox_method='AXIS_ALIGNED_RD_SQUARE_CENTROID_PLUS_MINUS_250_METRES',
         boundary_status='NOT_A_PROJECT_PROPERTY_CADASTRAL_DESIGN_OR_POLICY_BOUNDARY')
+    if hasattr(location, 'source_coordinates'):
+        provenance.update(source_coordinates_full=list(location.source_coordinates),
+                          ordinate_selection='FIRST_TWO_NATIVE_RD_ORDINATES; Z_NOT_USED_FOR_2D_ANALYSIS')
     crs = CRSMetadata('EPSG:28992', ('easting','northing'), 2, 'metres',
                       json.dumps({'source_status': provenance['source_status'], 'crs': RD_URI}))
     analysis = GeometryRecord(extent.analysis_geometry_ref, payload, crs,

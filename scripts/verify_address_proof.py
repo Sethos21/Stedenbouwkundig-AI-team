@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from live_mastenbroekweg_2d import ROOT, Store, SourceStore, offline_proof, require
-from bvc_ai.adapters.pdok_location import replay_address
+from bvc_ai.application.live_source_validation import replay_address_evidence as replay_address
 from bvc_ai.domain.source_hashing import raw_response_hash
 
 

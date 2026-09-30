@@ -191,7 +191,7 @@ class AddressTests(unittest.TestCase):
                 return SequenceTransport([profile_response(source_contract)], Timer())
             with patch.object(proof, 'PDOKLocationTransport', return_value=SequenceTransport([response()],Timer())), \
                  patch.object(proof, 'PDOKLiveGetTransport', side_effect=transport):
-                result = proof.run_proof(Path(temp)/'proof', 'synthetic', live_opt_in=True, address_text=ADDRESS)
+                result = proof.run_proof(Path(temp)/'proof', 'synthetic', live_opt_in=True, address_text=ADDRESS, address_backend='locatieserver')
             self.assertEqual(result['result'], 'PASS_WITH_FINDINGS', result)
             self.assertEqual(result['records'], 8)
             self.assertEqual(result['address_resolution'], 'PASS')
@@ -206,7 +206,7 @@ class AddressTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=ROOT/'runtime/2d-live') as temp:
             with patch.object(proof, 'PDOKLocationTransport', return_value=SequenceTransport([response(numFound=0,docs=[])],Timer())), \
                  patch.object(proof, 'PDOKLiveGetTransport') as transport:
-                result = proof.run_proof(Path(temp)/'proof', 'synthetic', live_opt_in=True, address_text=ADDRESS)
+                result = proof.run_proof(Path(temp)/'proof', 'synthetic', live_opt_in=True, address_text=ADDRESS, address_backend='locatieserver')
             self.assertEqual(result['result'], 'BLOCKED')
             transport.assert_not_called()
             self.assertTrue((Path(temp)/'proof/address-evidence.json').exists())

@@ -78,7 +78,7 @@ def offline_proof(store, directory, snapshot_ids):
         return basis
 
 
-def run_proof(directory, run_id, *, live_opt_in=False, address_text=None):
+def run_proof(directory, run_id, *, live_opt_in=False, address_text=None, address_backend='bag', comparison_evidence=None):
     if live_opt_in is not True:
         raise ValueError('Explicit live opt-in required')
     directory = Path(directory).resolve()
@@ -96,10 +96,19 @@ def run_proof(directory, run_id, *, live_opt_in=False, address_text=None):
         if address_text is None:
             extent, analysis = mastenbroekweg_analysis()
         else:
-            location, address_evidence = resolve_address(address_text, PDOKLocationTransport(), live_opt_in=True)
+            if address_backend == 'bag':
+                from bvc_ai.adapters.bag_individual import resolve_address as bag_resolve, BAGLiveTransport
+                location, address_evidence = bag_resolve(address_text, BAGLiveTransport(), live_opt_in=True)
+            elif address_backend == 'locatieserver':
+                location, address_evidence = resolve_address(address_text, PDOKLocationTransport(), live_opt_in=True)
+            else:
+                raise ValueError('Unknown address bootstrap')
             (directory / 'address-evidence.json').write_text(json.dumps(address_evidence, indent=2), encoding='utf-8')
             import base64
             (directory / 'address-response.raw').write_bytes(base64.b64decode(address_evidence['raw_base64']))
+            if comparison_evidence is not None:
+                from bvc_ai.application.live_source_validation import compare_address_evidence
+                report['bootstrap_comparison'] = compare_address_evidence(address_evidence, comparison_evidence)
             extent, analysis = address_analysis(address_evidence)
             report.update(address_resolution='PASS', official_address=location.official_address,
                 official_identifiers=dict(location_id=location.location_id,
@@ -107,6 +116,10 @@ def run_proof(directory, run_id, *, live_opt_in=False, address_text=None):
                     adresseerbaarobject_id=location.adresseerbaarobject_id),
                 coordinate_source=location.coordinate_source, coordinates=location.coordinates,
                 coordinate_crs=location.coordinate_crs)
+            if hasattr(location, 'pand_ids'):
+                report['official_identifiers'].update(pand_ids=location.pand_ids,
+                    openbare_ruimte_id=location.openbare_ruimte_id, woonplaats_id=location.woonplaats_id)
+                report['source_coordinates_full'] = location.source_coordinates
         report.update(bbox=extent.bbox, crs=extent.crs,
                       analysis_geometry=json.loads(analysis.provenance_json))
         workflow = DesignWorkflow(store, DeterministicTestProvider(), ROOT)
