@@ -1,6 +1,7 @@
 """Read-only A02 source view. Neither publication nor promotion capability."""
 import hashlib
 import json
+import re
 from bvc_ai.domain.design import current_output
 from bvc_ai.domain.source_profiles import source_profile, BGT_COLLECTIONS, BAG_COLLECTIONS
 from bvc_ai.application.source_replay import SourceReplayService
@@ -51,6 +52,45 @@ def validated_members(store, task, members, origin, extent=None):
     return results
 
 
+def _bag_references(props, field, target):
+    """Literal references plus their original fields; never dereference URLs.
+
+    A present href array must be entirely valid. If both representations assert
+    different target sets, block the whole relation group rather than prefer one.
+    Null fields are absent (as in the archived BAG responses); explicit empty
+    arrays assert an empty set.
+    """
+    href_field = field + '.href'
+    attributes = props.get(field)
+    if attributes is not None and (not isinstance(attributes, list) or any(
+            not isinstance(raw, str) or not raw.strip() for raw in attributes)):
+        return [], 'INVALID_OFFICIAL_ATTRIBUTE'
+    prefix = source_profile(target).items_url + '/'
+    def attribute_id(raw):
+        return raw[len(prefix):] if raw.startswith(prefix) else raw
+    if props.get(href_field) is None:
+        return [(field, raw, attribute_id(raw), None) for raw in attributes or []], None
+    hrefs = props[href_field]
+    if not isinstance(hrefs, list) or any(not isinstance(raw, str) or not
+            re.fullmatch(re.escape(prefix) + r'[A-Za-z0-9][A-Za-z0-9_-]*', raw)
+            for raw in hrefs):
+        return [], 'INVALID_OFFICIAL_HREF'
+    href_ids = {raw[len(prefix):] for raw in hrefs}
+    if attributes is not None and {attribute_id(raw) for raw in attributes} != href_ids:
+        return [], 'CONFLICTING_OFFICIAL_REFERENCES'
+    grouped = {}
+    for name, values in ((field, attributes or []), (href_field, hrefs)):
+        for raw in values:
+            identity = attribute_id(raw)
+            evidence = dict(field=name, official_reference=raw)
+            entries = grouped.setdefault(identity, [])
+            if evidence not in entries:
+                entries.append(evidence)
+    return [(entries[0]['field'], entries[0]['official_reference'], identity,
+             entries if len(entries) > 1 else None)
+            for identity, entries in grouped.items()], None
+
+
 def official_relations(records):
     """Resolve literal official references only. No spatial/LLM matching or URL fetch."""
     by_feature, by_registration = {}, {}
@@ -67,29 +107,35 @@ def official_relations(records):
         if key == 'BGT/pand':
             field, target = 'bag_pnd', 'BAG/pand'
             raw = props.get(field)
-            refs = [raw] if isinstance(raw, str) and raw else []
+            refs = [(field, raw, raw, None)] if isinstance(raw, str) and raw else []
         elif key in ('BAG/pand', 'BAG/verblijfsobject'):
             field = 'verblijfsobject' if key == 'BAG/pand' else 'pand'
             target = 'BAG/' + field
-            refs = props.get(field) or []
+            refs, failure = _bag_references(props, field, target)
+            if failure:
+                uncertainties.append(dict(record_ref=record['record_ref'], field=field,
+                    reason=failure, official_fields={name: props[name]
+                        for name in (field, field + '.href') if name in props}))
+                continue
+            if field + '.href' in props and props.get(field) is None:
+                field += '.href'
         else:
             continue
         if not refs:
             uncertainties.append(dict(record_ref=record['record_ref'], field=field,
                                       reason='NO_OFFICIAL_REFERENCE_AVAILABLE'))
-        for raw in refs:
+        for reference_field, raw, identity, evidence in refs:
             if key == 'BGT/pand':
-                matches = by_registration.get((target, raw), [])
+                matches = [] if raw == '0000000000000000' else by_registration.get((target, raw), [])
             else:
-                prefix = source_profile(target).items_url + '/'
-                identity = raw[len(prefix):] if raw.startswith(prefix) else raw
                 matches = by_feature.get((target, identity), [])
             state = 'RESOLVED' if len(matches) == 1 else 'AMBIGUOUS' if matches else 'UNRESOLVED'
-            relations.append(dict(source_ref=record['record_ref'], field=field,
+            relations.append(dict(source_ref=record['record_ref'], field=reference_field,
                                   official_reference=raw, target_contract=target,
-                                  target_refs=matches, status=state, basis='OFFICIAL_ATTRIBUTE'))
+                                  target_refs=matches, status=state, basis='OFFICIAL_ATTRIBUTE',
+                                  **({'official_references': evidence} if evidence else {})))
             if state != 'RESOLVED':
-                uncertainties.append(dict(record_ref=record['record_ref'], field=field,
+                uncertainties.append(dict(record_ref=record['record_ref'], field=reference_field,
                                           official_reference=raw, reason=state))
     # Report asymmetric supplied relations as uncertainty; never synthesize an inverse.
     resolved = {(tuple(r['source_ref']), tuple(r['target_refs'][0])) for r in relations
