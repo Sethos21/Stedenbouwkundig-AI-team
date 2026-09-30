@@ -82,7 +82,7 @@
   "diff_check": "PASS: git diff --check; staged check before commit",
   "evidence_location": "runtime/2d-live/20260930T080816485246Z; portable archive in docs/evidence/meppel-contract",
   "commit": "Containing Git commit; exact hash in final execution report",
-  "pushed": "Final execution report verifies remote branch hash after push",
+  "pushed": false,
   "findings": [
     "3 literal BGT bag_pnd=0000000000000000 references unresolved",
     "Existing BAG .href relation mapping limitation: 525 records carry 614 nonempty references not consumed by current resolver",
@@ -95,7 +95,13 @@
     "Only existing eight collections; no downstream agents or milestone",
     "Existing BAG .href relation mapping unchanged as a reported source-chain limitation"
   ],
-  "result": "PASS_WITH_FINDINGS",
+  "result": "BLOCKED",
   "offline_reverification": "PASS with final parser and independent offline CLI",
-  "evidence_package_sha256": "20c015742513def9e93709f0f563a158f71761761f388ae2fd49f672dc5830fb"
+  "evidence_package_sha256": "20c015742513def9e93709f0f563a158f71761761f388ae2fd49f672dc5830fb",
+  "implementation_commit": "66082993c75f37b56e50c53f4d017606bd4d6dda",
+  "technical_result": "PASS_WITH_FINDINGS",
+  "delivery_status": "Only branch push blocked by automatic approval review",
+  "push_destination": "https://github.com/Sethos21/Stedenbouwkundig-AI-team.git",
+  "push_rejection": "Automatic approval review rejected export of project code and live evidence to a destination not yet verified as trusted; explicit payload/destination authorization requested.",
+  "destination_check": "git remote and ls-remote confirm configured origin; gh is unavailable, so repository visibility/ownership permissions could not be independently verified."
 }
