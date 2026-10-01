@@ -5,6 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 from bvc_ai.infrastructure.store import Store
 from bvc_ai.application.source_basis import SourceBasisService
+from bvc_ai.application.spatial_context import SpatialContextService
 from bvc_ai.application.workflow import Workflow
 from bvc_ai.application.design_workflow import DesignWorkflow
 from bvc_ai.application.approval import HumanApprovalService, _HUMAN_CAPABILITY
@@ -28,6 +29,9 @@ def main(argv=None):
     basis = commands.add_parser("source-basis", help="Lees actueel gevalideerd A02-bronbeeld")
     basis.add_argument("task_id")
     basis.add_argument("--revision", help="Verwachte A02-revisie; weigert stale bronbeeld")
+    spatial = commands.add_parser('spatial-context', help='Lees feitelijke A02 ruimtelijke basissituatie')
+    spatial.add_argument('task_id')
+    spatial.add_argument('--revision', help='Verwachte A02-revisie')
     report = commands.add_parser("design-report")
     report.add_argument("task_id")
     risk = commands.add_parser("accept-risk")
@@ -93,6 +97,8 @@ def main(argv=None):
             service = HumanApprovalService(store, capability=_HUMAN_CAPABILITY)
             service.decide(args.task_id, args.actor, "ACCEPTED_RISK", args.reason, finding_id=args.finding_id, idempotency_key=args.idempotency_key)
             result = store.get(args.task_id)
+        elif args.command == 'spatial-context':
+            result = SpatialContextService(store).build(args.task_id, expected_revision=args.revision)
         elif args.command == "source-basis":
             result = SourceBasisService(store).build(args.task_id, expected_revision=args.revision)
         elif args.command == "tasks":
