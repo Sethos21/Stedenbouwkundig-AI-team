@@ -1,0 +1,42 @@
+test_allowlist_rejects_mutated_requests_before_connection (test_pdok_location.AddressTests.test_allowlist_rejects_mutated_requests_before_connection) ... ok
+test_deterministic_analysis_and_tamper_rejection (test_pdok_location.AddressTests.test_deterministic_analysis_and_tamper_rejection) ... ok
+test_exact_match_and_networkless_address_replay (test_pdok_location.AddressTests.test_exact_match_and_networkless_address_replay) ... ok
+test_failed_resolution_never_starts_bag_bgt (test_pdok_location.AddressTests.test_failed_resolution_never_starts_bag_bgt) ... ok
+test_failure_evidence_for_network_timeout_and_bytes (test_pdok_location.AddressTests.test_failure_evidence_for_network_timeout_and_bytes) ... ok
+test_generic_eight_collection_import_replay_and_reconstruction (test_pdok_location.AddressTests.test_generic_eight_collection_import_replay_and_reconstruction) ... ok
+test_live_bag_bgt_transport_is_bound_to_validated_bbox (test_pdok_location.AddressTests.test_live_bag_bgt_transport_is_bound_to_validated_bbox) ... ok
+test_malformed_and_partial_response (test_pdok_location.AddressTests.test_malformed_and_partial_response) ... ok
+test_mastenbroekweg_regression_scope_unchanged (test_pdok_location.AddressTests.test_mastenbroekweg_regression_scope_unchanged) ... ok
+test_missing_invalid_coordinate_and_unexpected_crs (test_pdok_location.AddressTests.test_missing_invalid_coordinate_and_unexpected_crs) ... ok
+test_no_match_and_ambiguous_even_when_one_result_returned (test_pdok_location.AddressTests.test_no_match_and_ambiguous_even_when_one_result_returned) ... ok
+test_normal_address_text_without_location_hardcoding (test_pdok_location.AddressTests.test_normal_address_text_without_location_hardcoding) ... ok
+test_opt_in_and_invalid_input_before_transport (test_pdok_location.AddressTests.test_opt_in_and_invalid_input_before_transport) ... ok
+test_source_and_address_identity_must_match (test_pdok_location.AddressTests.test_source_and_address_identity_must_match) ... ok
+test_transport_uses_only_fixed_host_and_json_accept (test_pdok_location.AddressTests.test_transport_uses_only_fixed_host_and_json_accept) ... ok
+test_byte_cap_during_read (test_pdok_live.LiveTransportTests.test_byte_cap_during_read) ... ok
+test_cap_exact_boundary (test_pdok_live.LiveTransportTests.test_cap_exact_boundary) ... ok
+test_exact_bytes_headers_origin_and_get (test_pdok_live.LiveTransportTests.test_exact_bytes_headers_origin_and_get) ... ok
+test_redirect_is_returned_never_followed (test_pdok_live.LiveTransportTests.test_redirect_is_returned_never_followed) ... ok
+test_scope_and_metadata_rejected_before_connection (test_pdok_live.LiveTransportTests.test_scope_and_metadata_rejected_before_connection) ... ok
+test_total_deadline_including_blocked_connect_and_body (test_pdok_live.LiveTransportTests.test_total_deadline_including_blocked_connect_and_body) ... ok
+test_truncated_content_length_fails_closed (test_pdok_live.LiveTransportTests.test_truncated_content_length_fails_closed) ... ok
+test_changed_capture_metadata_or_raw_rejected (test_live_source_import.LiveImportTests.test_changed_capture_metadata_or_raw_rejected) ... ok
+test_default_gate_rejects_provider_origin (test_live_source_import.LiveImportTests.test_default_gate_rejects_provider_origin) ... ok
+test_explicit_live_origin_import_and_offline_replay (test_live_source_import.LiveImportTests.test_explicit_live_origin_import_and_offline_replay) ... ok
+test_live_continuation_must_preserve_query_scope (test_live_source_import.LiveImportTests.test_live_continuation_must_preserve_query_scope) ... ok
+test_live_gate_rejects_other_bbox_and_project_geometry (test_live_source_import.LiveImportTests.test_live_gate_rejects_other_bbox_and_project_geometry) ... ok
+test_live_gate_rejects_testdata_origin (test_live_source_import.LiveImportTests.test_live_gate_rejects_testdata_origin) ... ok
+test_live_multipage_and_retry_replay (test_live_source_import.LiveImportTests.test_live_multipage_and_retry_replay) ... ok
+test_live_reimport_noop_and_archive_immutable (test_live_source_import.LiveImportTests.test_live_reimport_noop_and_archive_immutable) ... ok
+test_live_reparse_rejects_changed_mapping (test_live_source_import.LiveImportTests.test_live_reparse_rejects_changed_mapping) ... ok
+test_provider_contract_failures_do_not_promote (test_live_source_import.LiveImportTests.test_provider_contract_failures_do_not_promote) ... ok
+test_replay_rejects_origin_relabel_and_bytes (test_live_source_import.LiveImportTests.test_replay_rejects_origin_relabel_and_bytes) ... ok
+test_eight_contracts_complete_basis_and_offline_reconstruction (test_live_proof_2d.Proof2DTests.test_eight_contracts_complete_basis_and_offline_reconstruction) ... ok
+test_failed_collection_stops_and_preserves_report_without_pass (test_live_proof_2d.Proof2DTests.test_failed_collection_stops_and_preserves_report_without_pass) ... ok
+test_non_json_failure_evidence_still_reports_blocked (test_live_proof_2d.Proof2DTests.test_non_json_failure_evidence_still_reports_blocked) ... ok
+test_opt_in_and_directory_guard_before_transport_or_writes (test_live_proof_2d.Proof2DTests.test_opt_in_and_directory_guard_before_transport_or_writes) ... ok
+
+----------------------------------------------------------------------
+Ran 37 tests in 7.385s
+
+OK

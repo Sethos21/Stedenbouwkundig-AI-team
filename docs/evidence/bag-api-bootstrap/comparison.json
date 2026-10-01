@@ -1,0 +1,24 @@
+{
+  "result": "PASS",
+  "bootstrap": {
+    "result": "PASS",
+    "baseline_raw_sha256": "40cfe381f1f94192b32d8f8b03e0577f6523f1bc1421fa4a24052b138d7cde7d",
+    "coordinate_tolerance_metres": 0.01,
+    "coordinate_delta_metres": [
+      0.0,
+      0.0
+    ],
+    "identifiers_compared": [
+      "nummeraanduiding_id",
+      "adresseerbaarobject_id"
+    ],
+    "other_identifiers": "Not present in Locatieserver bootstrap evidence"
+  },
+  "pand_id": "0119100000022766",
+  "old_pand_feature": "aa620c27-3c14-5664-931c-46de33c0238c",
+  "old_vbo_feature": "e46c6c18-7d0a-596c-8e2c-1c38b45e9abc",
+  "old_vbo_literal_pand_href": [
+    "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/pand/items/aa620c27-3c14-5664-931c-46de33c0238c"
+  ],
+  "old_basis_raw_sha256": "c55285b28c7c9b2148b0e93c0ac70634bada2fa1f341ed379da9b52db263d680"
+}

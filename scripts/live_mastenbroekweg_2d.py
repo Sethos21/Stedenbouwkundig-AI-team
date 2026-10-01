@@ -11,10 +11,11 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from bvc_ai.adapters.pdok_bgt import RD_URI, FetchBudgets
-from bvc_ai.adapters.pdok_live import PDOKLiveGetTransport, BBOX
+from bvc_ai.adapters.pdok_live import PDOKLiveGetTransport
 from bvc_ai.agents.provider import DeterministicTestProvider
 from bvc_ai.application.design_workflow import DesignWorkflow
-from bvc_ai.application.live_source_validation import mastenbroekweg_analysis
+from bvc_ai.application.live_source_validation import mastenbroekweg_analysis, address_analysis
+from bvc_ai.adapters.pdok_location import resolve_address, PDOKLocationTransport, AddressResolutionError
 from bvc_ai.application.source_import import SourceImportService, SourceImportError, _A02_SOURCE_IMPORT_CAPABILITY
 from bvc_ai.application.source_replay import SourceReplayService
 from bvc_ai.application.source_basis import SourceBasisService, REQUIRED_CONTRACTS
@@ -77,21 +78,50 @@ def offline_proof(store, directory, snapshot_ids):
         return basis
 
 
-def run_proof(directory, run_id, *, live_opt_in=False):
+def run_proof(directory, run_id, *, live_opt_in=False, address_text=None, address_backend='bag', comparison_evidence=None):
     if live_opt_in is not True:
         raise ValueError('Explicit live opt-in required')
     directory = Path(directory).resolve()
     require(directory.is_relative_to((ROOT / 'runtime/2d-live').resolve()), 'Proof must stay under runtime/2d-live')
     directory.mkdir(parents=True, exist_ok=False)
-    extent, analysis = mastenbroekweg_analysis()
     report = dict(timestamp=datetime.now(timezone.utc).isoformat(), run_id=run_id,
-                  address='Mastenbroekweg 2, 6006 PT Weert, Nederland', bbox=BBOX, crs=extent.crs,
+                  address=address_text or 'Mastenbroekweg 2, 6006 PT Weert, Nederland',
+                  address_resolution='NOT_RUN',
                   task_context='TESTDATA scaffolding; source captures are live provider responses',
                   collection_metadata_basis='Declared RD contract from accepted 2D-1; not freshly fetched metadata',
                   collections=[], replay='NOT_RUN', result='BLOCKED',
                   fetch_budgets=vars(PROOF_BUDGETS))
     store = Store(directory / 'archive')
     try:
+        if address_text is None:
+            extent, analysis = mastenbroekweg_analysis()
+        else:
+            if address_backend == 'bag':
+                from bvc_ai.adapters.bag_individual import resolve_address as bag_resolve, BAGLiveTransport
+                location, address_evidence = bag_resolve(address_text, BAGLiveTransport(), live_opt_in=True)
+            elif address_backend == 'locatieserver':
+                location, address_evidence = resolve_address(address_text, PDOKLocationTransport(), live_opt_in=True)
+            else:
+                raise ValueError('Unknown address bootstrap')
+            (directory / 'address-evidence.json').write_text(json.dumps(address_evidence, indent=2), encoding='utf-8')
+            import base64
+            (directory / 'address-response.raw').write_bytes(base64.b64decode(address_evidence['raw_base64']))
+            if comparison_evidence is not None:
+                from bvc_ai.application.live_source_validation import compare_address_evidence
+                report['bootstrap_comparison'] = compare_address_evidence(address_evidence, comparison_evidence)
+            extent, analysis = address_analysis(address_evidence)
+            report.update(address_resolution='PASS', official_address=location.official_address,
+                official_identifiers=dict(location_id=location.location_id,
+                    nummeraanduiding_id=location.nummeraanduiding_id,
+                    adresseerbaarobject_id=location.adresseerbaarobject_id),
+                coordinate_source=location.coordinate_source, coordinates=location.coordinates,
+                coordinate_crs=location.coordinate_crs)
+            if hasattr(location, 'pand_ids'):
+                report['official_identifiers'].update(pand_ids=location.pand_ids,
+                    openbare_ruimte_id=location.openbare_ruimte_id, woonplaats_id=location.woonplaats_id)
+                report['source_coordinates_full'] = location.source_coordinates
+        report.update(bbox=extent.bbox, crs=extent.crs,
+                      analysis_geometry=json.loads(analysis.provenance_json))
         workflow = DesignWorkflow(store, DeterministicTestProvider(), ROOT)
         workflow.create()
         workflow.step(TID, 'A01_START', '2d/start')
@@ -101,9 +131,12 @@ def run_proof(directory, run_id, *, live_opt_in=False):
         for key in sorted(REQUIRED_CONTRACTS):
             profile = source_profile(key)
             report['current_collection'] = key
-            importer = SourceImportService(store, PDOKLiveGetTransport(source_contract=key),
+            transport_args = dict(source_contract=key)
+            if address_text is not None:
+                transport_args['analysis_scope'] = (extent, analysis)
+            importer = SourceImportService(store, PDOKLiveGetTransport(**transport_args),
                 collection_metadata_json=json.dumps({'id': profile.collection, 'crs': [RD_URI]}),
-                capability=_A02_SOURCE_IMPORT_CAPABILITY, source_contract=key, live_mastenbroekweg=True)
+                capability=_A02_SOURCE_IMPORT_CAPABILITY, source_contract=key, live_opt_in=True)
             binding = importer.import_source(TID, '2d/' + run_id + '/' + key, extent, budgets=PROOF_BUDGETS)
             evidence = SourceReplayService(store).evidence(binding.snapshot_id)
             snapshot = evidence.snapshot
@@ -120,9 +153,14 @@ def run_proof(directory, run_id, *, live_opt_in=False):
             point_in_time_consistency=basis['point_in_time_consistency'],
             reconstruction='Exact raw/geometry/features/pages/snapshots; no tasks or trusted bindings',
             human_approval=None, active_agents=['A01', 'A02'])
+        if address_text is not None:
+            report['result'] = 'PASS_WITH_FINDINGS' if basis['uncertainties'] else 'PASS'
         report.pop('current_collection')
     except Exception as exc:
         report.update(reason=str(exc), error_type=type(exc).__name__)
+        if isinstance(exc, AddressResolutionError):
+            report['address_resolution'] = 'BLOCKED'
+            (directory / 'address-evidence.json').write_text(json.dumps(exc.evidence, indent=2), encoding='utf-8')
         if isinstance(exc, SourceImportError):
             report.update(failure_phase=exc.phase, reason=str(exc.__cause__))
             if exc.fetch_result:

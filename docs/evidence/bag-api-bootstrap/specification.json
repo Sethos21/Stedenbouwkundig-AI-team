@@ -1,0 +1,22 @@
+{
+  "url": "https://api.bag.kadaster.nl/lvbag/individuelebevragingen/v2/openapi.yaml",
+  "sha256": "c0c7ac37d9488374671250cf6c796495ed7005047871107254d66ab7c9981946",
+  "headers": [
+    [
+      "Api-Version",
+      "2.9.2"
+    ],
+    [
+      "Last-Modified",
+      "Tue, 01 Jan 1980 00:00:01 GMT"
+    ],
+    [
+      "Content-Type",
+      "application/octet-stream"
+    ],
+    [
+      "Date",
+      "Wed, 30 Sep 2026 14:22:01 GMT"
+    ]
+  ]
+}

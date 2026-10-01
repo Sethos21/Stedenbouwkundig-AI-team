@@ -1,0 +1,41 @@
+{
+  "decision": "Seth: execute supplied DECISION APPROVED prompt, 2026-09-30",
+  "official_documentation": "https://api.pdok.nl/bzk/locatieserver/search/v3_1/openapi.json",
+  "official_field_documentation": "https://github.com/PDOK/locatieserver/wiki/API-Locatieserver",
+  "allowed_runtime_endpoint": "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free",
+  "method": "GET",
+  "media_type": "application/json",
+  "purpose": "ADDRESS RESOLUTION ONLY; not general GIS or BAG/BGT source replacement",
+  "request_scope": {
+    "fq": "type:adres AND bron:BAG AND postcode:<parsed postcode> AND huisnummer:<parsed number>",
+    "q": "parsed street/house/suffix/postcode/city",
+    "rows": 2,
+    "start": 0,
+    "wt": "json",
+    "fl": "id,bron,type,weergavenaam,straatnaam,huisnummer,huisletter,huisnummertoevoeging,postcode,woonplaatsnaam,nummeraanduiding_id,adresseerbaarobject_id,centroide_rd"
+  },
+  "budgets": {
+    "requests": 1,
+    "retries": 0,
+    "redirects": 0,
+    "max_bytes": 131072,
+    "total_request_seconds": 20
+  },
+  "match_rule": "numFound=1 AND numFoundExact=true AND one doc AND exact normalized components; scores not used",
+  "coordinate_contract": "centroide_rd is native RD New, EPSG:28992, WKT POINT, easting/northing metres; no inferred CRS or transformation",
+  "analysis": "centroid +/-250 metres; same function as accepted Mastenbroekweg proof; TESTCASE_ONLY_ANALYSIS_GEOMETRY",
+  "downstream_contracts": [
+    "BAG/pand",
+    "BAG/verblijfsobject",
+    "BGT/begroeidterreindeel",
+    "BGT/onbegroeidterreindeel",
+    "BGT/ondersteunendwegdeel",
+    "BGT/pand",
+    "BGT/waterdeel",
+    "BGT/wegdeel"
+  ],
+  "provenance": "exact response base64 + SHA256 + URL/status/headers/origin/start/end + resolved identifiers embedded in immutable analysis provenance; replay reparses it",
+  "trust_limit": "Local Python/files trusted; hashes are integrity evidence, not authentication against malicious plugins. Process isolation/authentication required before exposing external callers.",
+  "metadata_limit": "OpenAPI docs do not require all result fields. Application intentionally accepts a narrower fail-closed profile.",
+  "no_additional_sources": true
+}

@@ -123,7 +123,8 @@ class SourceReplayService:
         pages, features, geometries, raw = [], [], [analysis], {}
         for capture in evidence.captures:
             if live:
-                validate_live_capture(capture, expected_url, replay=True, source_contract=profile.key)
+                validate_live_capture(capture, expected_url, replay=True, source_contract=profile.key,
+                                      extent=snapshot.fetch_extent)
             capture.raw.__post_init__()
             capture.response.__post_init__()
             if (capture.response.origin != origin

@@ -1,0 +1,35 @@
+{
+  "url": "https://api.pdok.nl/bzk/locatieserver/search/v3_1/openapi.json",
+  "status": 200,
+  "headers": [
+    [
+      "Access-Control-Allow-Origin",
+      "*"
+    ],
+    [
+      "Content-Type",
+      "application/json"
+    ],
+    [
+      "Date",
+      "Wed, 30 Sep 2026 08:01:35 GMT"
+    ],
+    [
+      "Referrer-Policy",
+      "origin"
+    ],
+    [
+      "X-Content-Type-Options",
+      "nosniff"
+    ],
+    [
+      "Transfer-Encoding",
+      "chunked"
+    ],
+    [
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload"
+    ]
+  ],
+  "sha256": "480e69690267852fea18bfe544321d95ae49c271f64b494002172dc7ac03e6a3"
+}

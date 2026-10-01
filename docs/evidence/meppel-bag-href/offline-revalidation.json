@@ -1,0 +1,207 @@
+{
+  "test": "MEPPEL_BAG_HREF_CORRECTION",
+  "result": "PASS_WITH_FINDINGS",
+  "source_package_sha256": "20c015742513def9e93709f0f563a158f71761761f388ae2fd49f672dc5830fb",
+  "original_basis_hash": "5a26f286f6d1d5533c8a555a8bb543b1c63f88142601f7a40ba9b456c438fbe8",
+  "derived_basis_hash": "8a5a3b511a308ec0e4079b7e8d843d340237ab5b1200cce4f864cf0c42ba21a0",
+  "href_records_examined": 525,
+  "href_references_examined": 614,
+  "href_references_validly_processed": 614,
+  "href_relations_resolved": 604,
+  "href_relations_unresolved": 10,
+  "relations_resolved_total": 936,
+  "remaining_unresolved_relations": 13,
+  "records_without_usable_official_relation": 155,
+  "usable_definition": "At least one syntactically valid literal reference; target availability reported separately",
+  "relation_bearing_records_without_resolved_target": 167,
+  "bgt_sentinel_relations": {
+    "count": 3,
+    "status": "UNRESOLVED"
+  },
+  "synthetic_relations_created": 0,
+  "replay": "PASS",
+  "reconstruction": "PASS",
+  "address_replay": "PASS",
+  "network": "socket/connect/DNS blocked; no live fetch",
+  "source_archive_byte_identical": true,
+  "source_records_and_snapshot_hashes_unchanged": true,
+  "source_objects": 1908,
+  "collections": 8,
+  "human_approval": null,
+  "uncertainties": {
+    "UNRESOLVED": 13,
+    "NO_OFFICIAL_REFERENCE_AVAILABLE": 155
+  },
+  "unresolved_relations": [
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "00e5621d-51b5-5648-a631-d9598e6c4e98"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/ea42bbd3-ed5c-5956-9294-f52bc2403b4d",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "24cb548e-8eb1-56cc-9255-7b9a0eb77ce0"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/7223a122-e65c-515d-b36a-c4b700c1dd61",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "3b419d52-999e-55c3-9dab-fda526e2e2c7"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/d4e6c945-1c34-596e-8752-c094c47cbf2b",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "648ba429-c89d-59f5-bafd-3572b32c6d5f"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/0af7d4cf-f561-5649-93df-e1d0f0a9b505",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "64d0b40f-8f64-54bd-bc68-ddd53175dc73"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/7795a7cb-5733-5531-8b0a-38ad8f811bae",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "759ee858-8ce0-5282-af5c-689835999f3b"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/367ec37f-f97f-5aca-a142-6f1df3229860",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "8612b547-ddf1-5029-830b-62d92c9778db"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/a557a331-9f1a-50ec-9c97-08fcf9eb7dd0",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "bdf60f92-89af-5d05-bfd5-72016c05d898"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/d694c895-d9b9-5cb4-a1c8-a333742699f1",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "bf866c68-c70f-514b-9aa3-b3029e8b03c3"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/d8931c88-b092-5571-b518-7d621b2beeae",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BAG/pand",
+        "2d/20260930T080816485246Z/BAG/pand",
+        "ed664dc5-dffa-56a2-b578-832e0b137298"
+      ],
+      "field": "verblijfsobject.href",
+      "official_reference": "https://api.pdok.nl/kadaster/bag/ogc/v2/collections/verblijfsobject/items/583d28c3-7772-5d32-8833-5c28ddc5bb45",
+      "target_contract": "BAG/verblijfsobject",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BGT/pand",
+        "2d/20260930T080816485246Z/BGT/pand",
+        "2581799e-4326-5087-ad98-6329a6a23ecb"
+      ],
+      "field": "bag_pnd",
+      "official_reference": "0000000000000000",
+      "target_contract": "BAG/pand",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BGT/pand",
+        "2d/20260930T080816485246Z/BGT/pand",
+        "394af2b1-ddc9-5f4c-a433-3106b1f9ed17"
+      ],
+      "field": "bag_pnd",
+      "official_reference": "0000000000000000",
+      "target_contract": "BAG/pand",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    },
+    {
+      "source_ref": [
+        "BGT/pand",
+        "2d/20260930T080816485246Z/BGT/pand",
+        "a1652033-80a6-5824-9f8d-fb66e93c6c1e"
+      ],
+      "field": "bag_pnd",
+      "official_reference": "0000000000000000",
+      "target_contract": "BAG/pand",
+      "target_refs": [],
+      "status": "UNRESOLVED",
+      "basis": "OFFICIAL_ATTRIBUTE"
+    }
+  ],
+  "local_evidence_directory": "runtime\\2d-live\\bag-href-20260930T133414956391Z"
+}

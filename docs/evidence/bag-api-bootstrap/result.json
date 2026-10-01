@@ -1,0 +1,93 @@
+{
+  "timestamp": "2026-09-30T14:30:30.194625+00:00",
+  "run_id": "20260930T143030188624Z",
+  "address": "K.E. Borgerlaan 4, 7942 HC Meppel",
+  "address_resolution": "PASS",
+  "task_context": "TESTDATA scaffolding; source captures are live provider responses",
+  "collection_metadata_basis": "Declared RD contract from accepted 2D-1; not freshly fetched metadata",
+  "replay": "PASS",
+  "result": "PASS_WITH_FINDINGS",
+  "bootstrap_comparison": {
+    "result": "PASS",
+    "baseline_raw_sha256": "40cfe381f1f94192b32d8f8b03e0577f6523f1bc1421fa4a24052b138d7cde7d",
+    "coordinate_tolerance_metres": 0.01,
+    "coordinate_delta_metres": [
+      0.0,
+      0.0
+    ],
+    "identifiers_compared": [
+      "nummeraanduiding_id",
+      "adresseerbaarobject_id"
+    ],
+    "other_identifiers": "Not present in Locatieserver bootstrap evidence"
+  },
+  "official_address": "K.E. Borgerlaan 4, 7942HC Meppel",
+  "official_identifiers": {
+    "location_id": "0119200000011044",
+    "nummeraanduiding_id": "0119200000011044",
+    "adresseerbaarobject_id": "0119010000011488",
+    "pand_ids": [
+      "0119100000022766"
+    ],
+    "openbare_ruimte_id": "0119300000000269",
+    "woonplaats_id": "1082"
+  },
+  "coordinate_source": "BAG_INDIVIDUAL_V2.adresseerbaarObjectGeometrie.punt",
+  "coordinates": [
+    208874.379,
+    524096.822
+  ],
+  "coordinate_crs": "EPSG:28992",
+  "source_coordinates_full": [
+    208874.379,
+    524096.822,
+    0.0
+  ],
+  "bbox": [
+    208624.379,
+    523846.822,
+    209124.379,
+    524346.822
+  ],
+  "crs": "EPSG:28992",
+  "replay_network": "socket/connect/DNS blocked",
+  "basis_hash": "6cf33f3ac6803ae2152f56523a23629dc06562fb62f66287505dadb85320c4b9",
+  "revision_id": "A02/v8",
+  "complete": true,
+  "records": 1908,
+  "relations": {
+    "RESOLVED": 936,
+    "UNRESOLVED": 13
+  },
+  "uncertainties": {
+    "UNRESOLVED": 13,
+    "NO_OFFICIAL_REFERENCE_AVAILABLE": 155
+  },
+  "point_in_time_consistency": "NOT_GUARANTEED",
+  "reconstruction": "Exact raw/geometry/features/pages/snapshots; no tasks or trusted bindings",
+  "human_approval": null,
+  "active_agents": [
+    "A01",
+    "A02"
+  ],
+  "start_head": "8e473f850b2ed0c70dd491bfd2ee6341ed301e7d",
+  "branch": "test/meppel-ke-borgerlaan-4",
+  "endpoints": [
+    "GET https://api.bag.kadaster.nl/lvbag/individuelebevragingen/v2/adressenuitgebreid"
+  ],
+  "authentication": "X-Api-Key header; runtime BAG_API_KEY; not archived",
+  "missing_targets_check": "NOT_PERFORMED: 10 OGC feature UUIDs have no literal BAG registration identifier in existing evidence",
+  "limitations": [
+    "Only exact complete Dutch addresses and Verblijfsobject points supported",
+    "13 unresolved OGC relations retained, including 3 zero sentinel references",
+    "155 OGC records have no official reference",
+    "OGC point-in-time consistency not guaranteed"
+  ],
+  "protected_boundaries": "K00, Human Approval, trusted import, source promotion/hashing, eight source contracts and href resolver unchanged",
+  "targeted_tests": "PASS: 24 tests",
+  "full_regression": "PASS: 493 tests via test.ps1",
+  "offline_verification": "PASS: socket/connect/DNS blocked",
+  "secrets": "PASS: see secret-scan.json",
+  "diff_check": "PASS",
+  "master_unchanged": true
+}

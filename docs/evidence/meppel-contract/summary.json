@@ -1,0 +1,107 @@
+{
+  "test": "MEPPEL_GENERALIZATION_TEST",
+  "baseline": "4598666",
+  "branch": "test/meppel-ke-borgerlaan-4",
+  "address_resolution": "PASS",
+  "official_address": "K.E. Borgerlaan 4, 7942HC Meppel",
+  "official_identifiers": {
+    "location_id": "adr-b7e0379b6c6d66cbe6de4e2dc7de2ecb",
+    "nummeraanduiding_id": "0119200000011044",
+    "adresseerbaarobject_id": "0119010000011488"
+  },
+  "coordinate_source": "PDOK_LOCATIESERVER.centroide_rd",
+  "coordinates": [
+    208874.379,
+    524096.822
+  ],
+  "coordinate_crs": "EPSG:28992",
+  "analysis_geometry": {
+    "bbox": [
+      208624.379,
+      523846.822,
+      209124.379,
+      524346.822
+    ],
+    "method": "RD centroid +/-250 m; 500 x 500 m",
+    "transformation": "NONE_NATIVE_RD",
+    "role": "TESTCASE_ONLY_ANALYSIS_GEOMETRY",
+    "boundary_status": "NOT_PROPERTY_CADASTRAL_POLICY_DESIGN_BOUNDARY"
+  },
+  "collections_requested": [
+    "BAG/pand",
+    "BAG/verblijfsobject",
+    "BGT/begroeidterreindeel",
+    "BGT/onbegroeidterreindeel",
+    "BGT/ondersteunendwegdeel",
+    "BGT/pand",
+    "BGT/waterdeel",
+    "BGT/wegdeel"
+  ],
+  "collections_completed": {
+    "BAG/pand": 378,
+    "BAG/verblijfsobject": 302,
+    "BGT/begroeidterreindeel": 218,
+    "BGT/onbegroeidterreindeel": 115,
+    "BGT/ondersteunendwegdeel": 22,
+    "BGT/pand": 335,
+    "BGT/waterdeel": 41,
+    "BGT/wegdeel": 497
+  },
+  "source_objects": 1908,
+  "source_basis_complete": true,
+  "relations_resolved": 332,
+  "relations_unresolved": 3,
+  "records_without_official_reference": {
+    "existing_resolver_reported": 680,
+    "raw_BAG_without_nonempty_href": 155,
+    "raw_BAG_with_unhandled_official_href": 525,
+    "unhandled_href_reference_count": 614,
+    "explanation": "Existing resolver reads pand/verblijfsobject, live provider supplies pand.href/verblijfsobject.href. Do not equate 680 with absence in the source."
+  },
+  "address_basis_link": {
+    "status": "EXACT_OFFICIAL_IDENTIFIER_MATCH",
+    "bag_vbo_feature_id": "e46c6c18-7d0a-596c-8e2c-1c38b45e9abc",
+    "identificatie": "0119010000011488",
+    "hoofdadres_identificatie": "0119200000011044"
+  },
+  "replay": "PASS; sockets/connect/DNS blocked",
+  "reconstruction": "PASS; exact raw/geometry/features/pages/snapshots in separate task-free storage",
+  "human_approval": "NONE; runtime/GIS-001 untouched, no APPROVED/REJECTED assigned",
+  "production_code_changes": [
+    "Narrow address adapter and provenance replay",
+    "Validated generic bbox in PDOK transport/import/replay",
+    "Generic live CLI and offline verification CLI; existing Mastenbroekweg runner remains compatible"
+  ],
+  "hardcoded_assumptions_removed": [
+    "Fixed Mastenbroekweg bbox gate for resolved-address runs",
+    "Location-specific import opt-in name via generic live_opt_in alias",
+    "Fixed analysis provenance for address runs"
+  ],
+  "targeted_tests": "37 PASS",
+  "full_regression": "PASS: test.ps1, 468 tests in 99.576 s",
+  "diff_check": "PASS: git diff --check; staged check before commit",
+  "evidence_location": "runtime/2d-live/20260930T080816485246Z; portable archive in docs/evidence/meppel-contract",
+  "commit": "Containing Git commit; exact hash in final execution report",
+  "pushed": false,
+  "findings": [
+    "3 literal BGT bag_pnd=0000000000000000 references unresolved",
+    "Existing BAG .href relation mapping limitation: 525 records carry 614 nonempty references not consumed by current resolver",
+    "155 BAG pand records have no nonempty official verblijfsobject.href reference; no inverse or guessed relation added"
+  ],
+  "remaining_limitations": [
+    "No point-in-time consistency guarantee",
+    "Conservative parser requires street, number, postcode and city; no fuzzy or synonym fallback",
+    "No cadastral/property/policy/design boundary",
+    "Only existing eight collections; no downstream agents or milestone",
+    "Existing BAG .href relation mapping unchanged as a reported source-chain limitation"
+  ],
+  "result": "BLOCKED",
+  "offline_reverification": "PASS with final parser and independent offline CLI",
+  "evidence_package_sha256": "20c015742513def9e93709f0f563a158f71761761f388ae2fd49f672dc5830fb",
+  "implementation_commit": "66082993c75f37b56e50c53f4d017606bd4d6dda",
+  "technical_result": "PASS_WITH_FINDINGS",
+  "delivery_status": "Only branch push blocked by automatic approval review",
+  "push_destination": "https://github.com/Sethos21/Stedenbouwkundig-AI-team.git",
+  "push_rejection": "Automatic approval review rejected export of project code and live evidence to a destination not yet verified as trusted; explicit payload/destination authorization requested.",
+  "destination_check": "git remote and ls-remote confirm configured origin; gh is unavailable, so repository visibility/ownership permissions could not be independently verified."
+}
