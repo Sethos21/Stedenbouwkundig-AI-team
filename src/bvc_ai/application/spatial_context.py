@@ -7,6 +7,7 @@ import json
 from shapely.geometry import shape
 
 from bvc_ai.application.source_basis import SourceBasisService
+from bvc_ai.application.spatial_summary import summarize
 from bvc_ai.infrastructure.source_store import SourceStore
 
 CATEGORIES = {
@@ -110,7 +111,7 @@ class SpatialContextService:
                 'COMPLETE_MEANS_REQUIRED_SOURCE_COLLECTIONS_NOT_REAL_WORLD_COMPLETENESS',
                 'POINT_IN_TIME_CONSISTENCY_NOT_GUARANTEED',
                 'BAG_AND_BGT_RECORDS_NOT_DEDUPLICATED',
-                'AREAS_ARE_FULL_SOURCE_GEOMETRIES_NOT_CLIPPED_OR_SUMMED',
+                'AREAS_ARE_FULL_SOURCE_GEOMETRIES_NOT_CLIPPED_OR_UNIONED',
                 'ROAD_CATEGORY_DOES_NOT_ASSERT_PAVING',
                 'MISSING_ATTRIBUTES_UNKNOWN_NOT_INFERRED',
                 'NO_DESIGN_POLICY_ENVIRONMENT_OR_SUITABILITY_CONCLUSIONS'],
@@ -118,6 +119,7 @@ class SpatialContextService:
         self._basis.verify(basis)
         # JSON-native arrays also in the Python API: identical after CLI round-trip.
         result = json.loads(json.dumps(result, ensure_ascii=False, allow_nan=False))
+        result['summary'] = summarize(result)
         result['context_hash'] = _hash(result)
         return result
 

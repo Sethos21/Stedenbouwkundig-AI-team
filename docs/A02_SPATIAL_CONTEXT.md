@@ -26,7 +26,7 @@ bronobjecten, K00, revisies of menselijke beslissingen gewijzigd.
   `provenance_refs` naar de betrokken bronobjecten. Onopgeloste, ambigue en
   ontbrekende relaties blijven staan; ruimtelijke nabijheid maakt geen relatie.
 - `scope` bewaart de technische fetch-bbox per bron. Deze is geen projectgrens.
-  Geometrieën worden niet geclipt, samengevoegd of opgeteld. De categorie
+  Geometrieën worden niet geclipt of samengevoegd. De categorie
   wegen/verharding bewijst geen verharding; het eventuele bronkenmerk blijft
   leidend. Compleet betekent dat alle acht broncollecties aanwezig zijn, niet
   dat de fysieke wereld volledig of op één tijdstip is geregistreerd.
@@ -40,3 +40,27 @@ controleert pakket- en bestandshashes, reconstrueert de gevalideerde source basi
 in geïsoleerde projectlokale opslag en controleert dat het databasebestand,
 bronobjecten, audit en taakstatus ongewijzigd blijven. De echte broncaptures
 blijven onderscheiden van de TESTDATA-taakcontext. Uitvoeren: `./test.ps1`.
+
+## Deterministische feitelijke samenvatting
+
+`summary` is onderdeel van de bestaande `context_hash` en bindt ook expliciet
+`basis_hash` en `revision_id`. De afleiding leest uitsluitend de bestaande
+A02-feiten. `by_collection` geeft per broncollectie het aantal bronrecords,
+het aantal polygonale oppervlaktefeiten en hun rekenkundige som in m2.
+Zonder polygonale feiten is de som `null`. Dit is geen geometrische union,
+gebiedsdekking of unieke gebouwoppervlakte; overlap kan aanwezig zijn.
+`by_category.collection_record_counts` rapporteert aantallen uitgesplitst naar
+broncollectie. BAG- en BGT-panden krijgen nergens een gecombineerd totaal.
+
+Per collectie zijn letterlijke verdelingen beschikbaar voor `gebruiksdoel`,
+`fysiek_voorkomen`, `functie`, `status` en `bouwjaar`, inclusief aanwezig/afwezig.
+Iedere volledige getypeerde waarde vormt één bucket: lijsten worden niet
+opgesplitst en strings niet geconverteerd. Het bouwjaarbereik gebruikt uitsluitend
+positieve gehele getallen; overige aanwezige waarden blijven in de verdeling en
+krijgen een expliciet uitgesloten aantal. Dit beoordeelt geen plausibiliteit.
+Relatietellingen tellen gerichte officiële referentierecords per status, geen
+unieke paren. Een terugverwijzing telt dus als een afzonderlijk bronfeit.
+
+De provenance-selectors verwijzen naar de broncollectie van `objects` en hun
+bestaande feit-provenance, respectievelijk naar `relations[].provenance_refs`.
+Er worden geen nieuwe bronfeiten, relaties of geometrieën toegevoegd.

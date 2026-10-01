@@ -19,6 +19,7 @@ from test_source_import import TID
 from bvc_ai.application.source_basis import SourceBasisService, REQUIRED_CONTRACTS
 from bvc_ai.application.spatial_context import SpatialContextService
 from bvc_ai.infrastructure.store import Store
+from bvc_ai.application.spatial_summary import summarize
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -68,6 +69,8 @@ class SpatialContextTests(unittest.TestCase):
         road = next(o for o in result['objects'] if o['record_ref'][0] == 'BGT/wegdeel')
         facts = {f['name']: f for f in road['facts']}
         self.assertEqual(facts['source_geometry_area']['value'], 96)
+        self.assertEqual(result['summary']['by_collection']['BGT/wegdeel']['source_geometry_area']['sum_m2'], 96)
+        self.assertIsNone(result['summary']['by_collection']['BAG/verblijfsobject']['source_geometry_area']['sum_m2'])
         self.assertEqual(facts['bounds']['value'], [0,0,10,10])
         vbo = next(o for o in result['objects'] if o['record_ref'][0] == 'BAG/verblijfsobject')
         self.assertFalse(any(f['name'] == 'source_geometry_area' for f in vbo['facts']))
@@ -81,7 +84,7 @@ class SpatialContextTests(unittest.TestCase):
         service = self.populate()
         result = service.build(TID)
         changed = deepcopy(result)
-        changed['objects'][0]['facts'][0]['value'] = 'invented'
+        changed['summary']['by_collection']['BAG/pand']['record_count'] += 1
         with self.assertRaisesRegex(ValueError, 'Changed'):
             service.verify(changed)
         self.importer('BGT/wegdeel', [helpers.profile_response('BGT/wegdeel', 'new')]).import_source(
@@ -130,6 +133,23 @@ class MeppelSpatialContextTests(unittest.TestCase):
                             self.assertEqual(attributes[field], props[field])
                     for field, value in attributes.items():
                         self.assertEqual(value, props[field])
+                summary = result['summary']
+                self.assertEqual(summary['basis_hash'], basis['basis_hash'])
+                expected_counts = Counter(r['source_contract'] for r in basis['records'])
+                self.assertEqual({k:v['record_count'] for k,v in summary['by_collection'].items()},
+                                 dict(expected_counts))
+                self.assertEqual(summary['by_category']['bebouwing'], dict(collection_record_counts={
+                    k: expected_counts[k] for k in ('BAG/pand', 'BGT/pand')}))
+                self.assertEqual(summary['relations']['status_counts'],
+                                 dict(RESOLVED=936, UNRESOLVED=13, AMBIGUOUS=0))
+                for key, group in summary['by_collection'].items():
+                    values = [props['bouwjaar'] for ref, props in originals.items()
+                              if ref[0] == key and props.get('bouwjaar') is not None]
+                    year_range = group['attributes']['bouwjaar']['positive_integer_range']
+                    years = [v for v in values if type(v) is int and v > 0]
+                    self.assertEqual(year_range['minimum'], min(years) if years else None)
+                    self.assertEqual(year_range['maximum'], max(years) if years else None)
+                    self.assertEqual(group['attributes']['bouwjaar']['present_count'], len(values))
                 self.assertEqual(result['basis_hash'], basis['basis_hash'])
                 self.assertEqual(len(result['relations']), len(basis['relations']))
                 self.assertEqual(len(result['uncertainties']), len(basis['uncertainties']))
@@ -143,3 +163,41 @@ class MeppelSpatialContextTests(unittest.TestCase):
             finally:
                 store.close()
             self.assertEqual(database.read_bytes(), payload)
+
+
+class SpatialSummaryTests(unittest.TestCase):
+    def test_literal_distributions_separate_registries_empty_and_deterministic(self):
+        def obj(key, identity, area=None, **attrs):
+            facts = [dict(name='source_attribute', source_field=k, value=v) for k,v in attrs.items()]
+            if area is not None:
+                facts.append(dict(name='source_geometry_area', value=area))
+            return dict(record_ref=[key, 'snapshot', identity], facts=facts)
+        objects = [obj('BAG/pand', 'a', 96, bouwjaar=2000, gebruiksdoel=['woonfunctie','kantoorfunctie']),
+                   obj('BAG/pand', 'b', 4, bouwjaar=0, gebruiksdoel=['woonfunctie','kantoorfunctie']),
+                   obj('BAG/pand', 'c', 10, bouwjaar='1990', status=True),
+                   obj('BAG/pand', 'd', 20, bouwjaar=2020, status=1),
+                   obj('BAG/pand', 'e', 30, bouwjaar=True, status='1'),
+                   obj('BAG/pand', 'f', 40), obj('BGT/pand', 'g', 200)]
+        context = dict(objects=objects, basis_hash='bound-hash', revision_id='A02/v1',
+                       scope=[dict(source_contract=k) for k in ('BAG/pand', 'BGT/pand', 'BGT/waterdeel')],
+                       categories=dict(bebouwing=[o['record_ref'] for o in objects], water=[]),
+                       relations=[dict(status=s) for s in ('RESOLVED','RESOLVED','UNRESOLVED','AMBIGUOUS')])
+        before = deepcopy(context)
+        result = summarize(context)
+        self.assertEqual(context, before)
+        self.assertEqual(result['by_category']['bebouwing'],
+                         dict(collection_record_counts={'BAG/pand':6, 'BGT/pand':1}))
+        bag = result['by_collection']['BAG/pand']
+        self.assertEqual(bag['source_geometry_area']['sum_m2'], 200)
+        self.assertEqual(result['by_collection']['BGT/pand']['source_geometry_area']['sum_m2'], 200)
+        self.assertIsNone(result['by_collection']['BGT/waterdeel']['source_geometry_area']['sum_m2'])
+        self.assertEqual(bag['attributes']['gebruiksdoel'], dict(present_count=2, absent_count=4,
+            values=[dict(value=['woonfunctie','kantoorfunctie'], count=2)]))
+        self.assertEqual(len(bag['attributes']['status']['values']), 3)
+        self.assertEqual(bag['attributes']['bouwjaar']['positive_integer_range'],
+                         dict(count=2, minimum=2000, maximum=2020, excluded_present_count=3))
+        self.assertEqual(result['relations']['status_counts'], dict(RESOLVED=2, UNRESOLVED=1, AMBIGUOUS=1))
+        context['objects'].reverse()
+        context['scope'].reverse()
+        context['relations'].reverse()
+        self.assertEqual(summarize(context), result)
