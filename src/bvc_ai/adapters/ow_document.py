@@ -1,5 +1,6 @@
 """Closed OW regeling retrieval profile, pinned to official Presenteren 8.2.5."""
 from copy import deepcopy
+from bvc_ai.adapters.dso_diagnostics import mark, response_validation
 from datetime import timezone
 import hashlib
 import json
@@ -26,7 +27,7 @@ SCHEMAS = {'metadata': 'Regeling', 'structure': 'Documentstructuur',
 def contract():
     raw = (Path(__file__).resolve().parents[3] / 'docs/contracts/dso/presenteren-v8.openapi.json').read_bytes()
     if hashlib.sha256(raw).hexdigest() != CONTRACT_HASH:
-        raise ValueError('Changed Presenteren contract')
+        raise mark(ValueError('Changed Presenteren contract'), 'validatie', 'CONTRACT_VERSION_MISMATCH')
     return json.loads(raw)
 
 
@@ -151,6 +152,7 @@ def _link(href, uri, suffix, parameters):
         reject()
 
 
+@response_validation
 def parse_response(response, request, kind, selected):
     validate_request(request)
     if type(response) is not HttpResponse or response.status != 200 or len(response.body) > request.max_response_bytes:
@@ -160,6 +162,8 @@ def parse_response(response, request, kind, selected):
         if name.lower() in headers:
             reject()
         headers[name.lower()] = value
+    if headers.get('api-version') != VERSION:
+        raise mark(ValueError('DSO API version mismatch'), 'validatie', 'CONTRACT_VERSION_MISMATCH')
     if (headers.get('api-version') != VERSION
             or headers.get('content-type', '').split(';')[0].strip() != 'application/hal+json'
             or headers.get('content-encoding', 'identity') != 'identity'):

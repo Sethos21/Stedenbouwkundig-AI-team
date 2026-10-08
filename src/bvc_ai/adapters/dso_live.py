@@ -7,6 +7,7 @@ import threading
 import time
 
 from bvc_ai.adapters.dso_contract import canonical, read_json
+from bvc_ai.adapters.dso_diagnostics import mark
 from bvc_ai.adapters.dso_discovery import HOST, PATH, validate_request
 from bvc_ai.adapters.source_transport import HttpResponse, ResponseOrigin
 
@@ -30,9 +31,9 @@ class DSOLivePostTransport:
             raise PermissionError('Explicit DSO live opt-in required')
         key = os.environ.get('DSO_API_KEY')
         if not key:
-            raise ValueError('DSO_API_KEY is required for live discovery')
+            raise mark(ValueError('DSO_API_KEY is required for live discovery'), 'transport', 'AUTHENTICATION')
         if any(not 33 <= ord(c) <= 126 for c in key):
-            raise ValueError('Invalid DSO credential configuration')
+            raise mark(ValueError('Invalid DSO credential configuration'), 'transport', 'AUTHENTICATION')
         if key in request.url or key in getattr(request, 'body', b'').decode('utf-8'):
             raise ValueError('DSO request rejected')
         deadline = time.monotonic() + request.timeout_seconds
@@ -45,11 +46,12 @@ class DSOLivePostTransport:
         def remaining():
             seconds = deadline - time.monotonic()
             if cancelled.is_set() or seconds <= 0:
-                raise TimeoutError('DSO request deadline exceeded')
+                raise mark(TimeoutError('DSO request deadline exceeded'), 'transport', 'NETWORK_TRANSPORT')
             return seconds
 
         def receive():
             result = None
+            status, version = None, None
             try:
                 connection.connect()
                 connection.sock.settimeout(remaining())
@@ -59,8 +61,7 @@ class DSOLivePostTransport:
                                    body=getattr(request, 'body', None), headers=headers)
                 connection.sock.settimeout(remaining())
                 response = connection.getresponse()
-                if response.status != 200:
-                    raise ValueError('DSO HTTP request failed')
+                status = response.status
                 raw_headers = response.getheaders()
                 if any(key in name or key in value for name, value in raw_headers):
                     raise ValueError('DSO response rejected')
@@ -70,6 +71,10 @@ class DSOLivePostTransport:
                     if name in headers:
                         raise ValueError('DSO response rejected')
                     headers[name] = value
+                version = headers.get('api-version')
+                if status != 200:
+                    category = 'AUTHENTICATION' if status in (401, 403) else 'UNEXPECTED_HTTP_STATUS'
+                    raise mark(OSError('DSO HTTP request failed'), 'response', category, status, version)
                 if headers.get('content-encoding', 'identity') != 'identity':
                     raise ValueError('DSO response rejected')
                 chunks, size = [], 0
@@ -96,9 +101,18 @@ class DSOLivePostTransport:
                 result = HttpResponse(200, tuple((n, headers[n]) for n in
                                       ('content-type', 'api-version') if n in headers),
                                       body, ResponseOrigin.PROVIDER_RESPONSE)
-            except Exception:
-                # Do not export provider error bodies, headers or exception text.
-                result = None
+            except Exception as error:
+                # Discard original exception and traceback inside the worker.
+                data = getattr(error, 'dso_diagnostic', None)
+                if type(data) is dict:
+                    result = mark(OSError('DSO request failed'), data['phase'], data['category'],
+                                  data['http_status'], data['contract_version'])
+                elif isinstance(error, (OSError, http.client.HTTPException)):
+                    result = mark(OSError('DSO transport failed'), 'transport', 'NETWORK_TRANSPORT', status, version)
+                elif isinstance(error, ValueError):
+                    result = mark(OSError('DSO response rejected'), 'response', 'SCHEMA_VALIDATION', status, version)
+                else:
+                    result = mark(OSError('DSO internal failure'), 'transport', 'INTERNAL_APPLICATION', status, version)
             finally:
                 try:
                     connection.close()
@@ -111,10 +125,10 @@ class DSOLivePostTransport:
             try:
                 result = results.get(timeout=remaining())
             except queue.Empty:
-                raise TimeoutError('DSO request deadline exceeded') from None
+                raise mark(TimeoutError('DSO request deadline exceeded'), 'transport', 'NETWORK_TRANSPORT') from None
             remaining()
-            if result is None:
-                raise OSError('DSO discovery transport failed; details suppressed')
+            if isinstance(result, Exception):
+                raise result from None
             return result
         finally:
             cancelled.set()

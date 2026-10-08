@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 
 from bvc_ai.adapters.dso_contract import date_value
+from bvc_ai.adapters.dso_diagnostics import mark, report
 from bvc_ai.adapters.dso_live import DSOLivePostTransport, DSOLiveOWTransport
 from bvc_ai.adapters.ow_document import build_request
 from bvc_ai.application.dso_discovery import DSODiscoveryService
@@ -30,7 +31,7 @@ def meppel_point():
     return json.loads(raw)['resolved']['coordinates']
 
 
-def probe(day, available, identity=None, *, live=False):
+def _probe(day, available, identity=None, *, live=False):
     if live is not True:
         raise PermissionError('Explicit live opt-in required')
     date_value(day)
@@ -45,13 +46,28 @@ def probe(day, available, identity=None, *, live=False):
                              for d in discovery['documents']],
                   retrieval='NOT_REQUESTED')
     if identity is not None:
-        evidence = OWDocumentRetrievalService(DSOLiveOWTransport(live_opt_in=True)).retrieve(
-            discovery, identity, expected_discovery_hash=discovery['discovery_hash'])
+        try:
+            evidence = OWDocumentRetrievalService(DSOLiveOWTransport(live_opt_in=True)).retrieve(
+                discovery, identity, expected_discovery_hash=discovery['discovery_hash'])
+        except ValueError as error:
+            if not hasattr(error, 'dso_diagnostic'):
+                mark(error, 'validatie', 'SCHEMA_VALIDATION')
+            raise
         result.update(status='DISCOVERY_AND_RETRIEVAL_VALIDATED', retrieval='VALIDATED',
                       evidence_hash=evidence['evidence_hash'],
                       captures=len(evidence['source_evidence']),
                       components=len(evidence['derived_structure']['components']))
     return result
+
+
+
+def probe(day, available, identity=None, *, live=False):
+    try:
+        return _probe(day, available, identity, live=live)
+    except (ValueError, PermissionError) as error:
+        if not hasattr(error, 'dso_diagnostic'):
+            mark(error, 'discovery', 'SCHEMA_VALIDATION')
+        raise
 
 
 def main(argv=None):
@@ -69,8 +85,8 @@ def main(argv=None):
         key = os.environ.get('DSO_API_KEY')
         if key and (key in output or key in json.dumps(result, ensure_ascii=False)):
             raise ValueError('Credential reflection')
-    except Exception:
-        print('{"status":"FAILED_CLOSED","details":"SUPPRESSED"}')
+    except Exception as error:
+        print(json.dumps(dict(status='FAILED_CLOSED', details='SUPPRESSED', **report(error))))
         return 1
     print(output)
     return 0

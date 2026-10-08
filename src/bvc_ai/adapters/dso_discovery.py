@@ -1,5 +1,6 @@
 """Closed point-discovery profile for the official DSO Ontsluiten v2 API."""
 from copy import deepcopy
+from bvc_ai.adapters.dso_diagnostics import mark, response_validation
 from dataclasses import dataclass, field
 from decimal import Decimal
 import hashlib
@@ -71,6 +72,7 @@ def validate_request(request):
         raise ValueError('Invalid DSO discovery request')
 
 
+@response_validation
 def parse_response(response, request):
     validate_request(request)
     if type(response) is not HttpResponse or response.status != 200 or len(response.body) > request.max_response_bytes:
@@ -81,6 +83,8 @@ def parse_response(response, request):
         if name in headers:
             reject()
         headers[name] = value
+    if headers.get('api-version') != CONTRACT_VERSION:
+        raise mark(ValueError('DSO API version mismatch'), 'validatie', 'CONTRACT_VERSION_MISMATCH')
     if (headers.get('content-type', '').split(';')[0].strip() != 'application/hal+json'
             or headers.get('api-version') != CONTRACT_VERSION
             or headers.get('content-encoding', 'identity') != 'identity'):

@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from bvc_ai.adapters.dso_diagnostics import mark
 
 CONTRACT_URL = 'https://service.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2/openapi.json'
 CONTRACT_VERSION = '2.13.1'
@@ -58,7 +59,7 @@ def contract():
     path = Path(__file__).resolve().parents[3] / 'docs/contracts/dso/ontsluiten-v2.openapi.json'
     raw = path.read_bytes()
     if hashlib.sha256(raw).hexdigest() != CONTRACT_SHA256:
-        raise ValueError('Changed pinned DSO contract')
+        raise mark(ValueError('Changed pinned DSO contract'), 'validatie', 'CONTRACT_VERSION_MISMATCH')
     return json.loads(raw)
 
 

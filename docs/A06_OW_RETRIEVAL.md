@@ -147,3 +147,40 @@ Een succesvolle probe is geen Human Approval of juridische beoordeling.
 - PowerShell-parsercontrole en git diff --cached --check: geslaagd.
 - Geen live DSO-aanroepen vanuit Codex; live interoperabiliteit blijft te testen
   vanuit lokale Windows PowerShell na code-review.
+
+## Veilige diagnose van live interoperabiliteit
+
+De eerste probe gaf alleen FAILED_CLOSED/SUPPRESSED: de transportworker verving
+elke fout door None en de CLI verving vervolgens iedere exception door dezelfde
+melding. Daardoor zijn de oorzaak en HTTP-status van die eerdere live-test niet
+achteraf te reconstrueren. Deze uitbreiding voert zelf geen live test uit.
+
+Bij fouten blijft de exitcode 1 en blijven status=FAILED_CLOSED en
+details=SUPPRESSED behouden. Aanvullende vaste velden:
+
+- phase: discovery (voorbereiding/discoveryvalidatie), transport,
+  response (ontvangstcontrole) of validatie (contract/schema/documentbinding).
+- category: AUTHENTICATION (ontbrekende/ongeldige configuratie, HTTP 401/403),
+  NETWORK_TRANSPORT (onder meer DNS/TLS/timeout), UNEXPECTED_HTTP_STATUS
+  (andere niet-200-status, inclusief redirects), CONTRACT_VERSION_MISMATCH
+  (lokale contracthash of ontbrekende/afwijkende API-Version),
+  SCHEMA_VALIDATION (JSON/schema, responsegrenzen of documentbinding),
+  INTERNAL_APPLICATION (onverwachte applicatiefout).
+- http_status: uitsluitend een HTTP-status als getal, indien bekend; anders null.
+- contract_version: uitsluitend een versie met drie numerieke delen van elk
+  maximaal drie cijfers; bij ontbrekende, dubbelzinnige, onveilige of met de
+  DSO_API_KEY overeenkomende waarde null. Dit is de ontvangen API-Version,
+  geen bevestiging dat de versie ondersteund wordt.
+
+De transportworker exporteert geen oorspronkelijke exception of traceback.
+De CLI serialiseert uitsluitend de gesloten diagnostische velden, nooit
+exceptiontekst, request-/responseheaders of providerbody. HTTP-foutbodies worden
+niet gelezen. Een interne fout zonder betrouwbare fasecontext krijgt validatie
+als veilige terugvalfase. Diagnostiek voegt geen fallback, retry of request toe.
+Vaste endpoints, 4 MiB-limiet, 15-seconden-deadline en expliciete live-opt-in
+blijven ongewijzigd. A02, A06 V1, K00 en Human Approval zijn niet aangepast.
+
+Offline categorie-, redactie- en parsertests: tests/test_dso_diagnostics.py.
+Een lokale herhaling na review gebruikt dezelfde PowerShell-commando's als boven.
+
+Diagnoseverificatie: 37 gerichte DSO-tests geslaagd; volledige test.ps1: 544 tests geslaagd (175,510 seconden). Geen live DSO-test uitgevoerd.

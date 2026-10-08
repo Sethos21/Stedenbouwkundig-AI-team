@@ -2,6 +2,7 @@
 from contextlib import redirect_stdout
 import importlib.util
 import io
+import json
 import os
 from pathlib import Path
 import unittest
@@ -62,4 +63,8 @@ class ProbeTests(unittest.TestCase):
             with patch.dict(os.environ, {'DSO_API_KEY': 'test-secret-only'}), patch.object(
                     probe, 'probe', **behavior), redirect_stdout(output):
                 self.assertEqual(probe.main(args), 1)
-            self.assertEqual(output.getvalue(), '{"status":"FAILED_CLOSED","details":"SUPPRESSED"}\n')
+            result = json.loads(output.getvalue())
+            self.assertEqual(result['status'], 'FAILED_CLOSED')
+            self.assertEqual(result['category'], 'INTERNAL_APPLICATION')
+            self.assertNotIn('private-provider-details', output.getvalue())
+            self.assertNotIn('test-secret-only', output.getvalue())
