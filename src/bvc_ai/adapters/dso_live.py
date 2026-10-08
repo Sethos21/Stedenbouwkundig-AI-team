@@ -17,6 +17,15 @@ class DSOLivePostTransport:
 
     def post(self, request):
         validate_request(request)
+        return self._send(request)
+
+    def _send(self, request):
+        # Both callers use closed profiles; this helper is never arbitrary HTTP.
+        if request.method == 'GET':
+            from bvc_ai.adapters.ow_document import validate_request as validate_ow
+            validate_ow(request)
+        else:
+            validate_request(request)
         if self._live_opt_in is not True:
             raise PermissionError('Explicit DSO live opt-in required')
         key = os.environ.get('DSO_API_KEY')
@@ -24,7 +33,7 @@ class DSOLivePostTransport:
             raise ValueError('DSO_API_KEY is required for live discovery')
         if any(not 33 <= ord(c) <= 126 for c in key):
             raise ValueError('Invalid DSO credential configuration')
-        if key in request.url or key in request.body.decode('utf-8'):
+        if key in request.url or key in getattr(request, 'body', b'').decode('utf-8'):
             raise ValueError('DSO request rejected')
         deadline = time.monotonic() + request.timeout_seconds
         results = queue.Queue(maxsize=1)
@@ -46,8 +55,8 @@ class DSOLivePostTransport:
                 connection.sock.settimeout(remaining())
                 headers = dict(request.headers)
                 headers.update({'X-API-Key': key, 'Accept-Encoding': 'identity'})
-                connection.request('POST', PATH + '?' + request.url.split('?', 1)[1],
-                                   body=request.body, headers=headers)
+                connection.request(request.method, request.url.split(HOST, 1)[1],
+                                   body=getattr(request, 'body', None), headers=headers)
                 connection.sock.settimeout(remaining())
                 response = connection.getresponse()
                 if response.status != 200:
@@ -119,3 +128,11 @@ class DSOLivePostTransport:
                 connection.close()
             except Exception:
                 pass
+
+
+class DSOLiveOWTransport(DSOLivePostTransport):
+    """Only the closed Presenteren OW GET profile; same credential boundary."""
+    def get(self, request):
+        from bvc_ai.adapters.ow_document import validate_request as validate_ow
+        validate_ow(request)
+        return self._send(request)
