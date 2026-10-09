@@ -7,7 +7,7 @@ import threading
 import time
 
 from bvc_ai.adapters.dso_contract import canonical, read_json
-from bvc_ai.adapters.dso_diagnostics import mark
+from bvc_ai.adapters.dso_diagnostics import mark, validation_error, validation_code
 from bvc_ai.adapters.dso_discovery import HOST, PATH, validate_request
 from bvc_ai.adapters.source_transport import HttpResponse, ResponseOrigin
 
@@ -113,6 +113,7 @@ class DSOLivePostTransport:
                     result = mark(OSError('DSO response rejected'), 'response', 'SCHEMA_VALIDATION', status, version)
                 else:
                     result = mark(OSError('DSO internal failure'), 'transport', 'INTERNAL_APPLICATION', status, version)
+                validation_error(result, validation_code(error))
             finally:
                 try:
                     connection.close()

@@ -1,0 +1,59 @@
+{
+  "inspected_at_utc": "2026-10-09T12:19:04.012768+00:00",
+  "scope": "PUBLIC_CONTRACT_DOCUMENTS_ONLY_NO_DSO_DATA_REQUESTS",
+  "contracts": [
+    {
+      "source_url": "https://service.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2/openapi.json",
+      "pinned_file": "docs/contracts/dso/ontsluiten-v2.openapi.json",
+      "current_file": "docs/evidence/a06-contract-audit/ontsluiten-current.openapi.json",
+      "pinned_version": "2.13.1",
+      "current_version": "2.13.1",
+      "pinned_sha256": "4b2c33dc2a91a8c9073042978636f5222802395c3f1664b82c0c425eb126e0b4",
+      "current_sha256": "92c8efcefa0ee88ed4e16f99060976de7b0538f031b1ef2faf0b121862f407b4",
+      "semantic_differences": [
+        {
+          "pointer": "/servers",
+          "pinned": [
+            {
+              "url": "https://service.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2",
+              "description": "productie"
+            },
+            {
+              "url": "https://service.pre.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2",
+              "description": "pre-productie"
+            },
+            {
+              "url": "/publiek/omgevingsinformatie/api/ontsluiten/v2"
+            }
+          ],
+          "current": [
+            {
+              "url": "https://service.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2",
+              "description": "productie"
+            },
+            {
+              "url": "https://service.pre.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2",
+              "description": "pre-productie"
+            },
+            {
+              "url": "/publiek/omgevingsinformatie/api/ontsluiten/v2"
+            },
+            {
+              "url": "/bff/ois/ontsluiten/v2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source_url": "https://developer.omgevingswet.overheid.nl/publish/pages/166112/omgevingsdocumenten-presenteren-v8.json",
+      "pinned_file": "docs/contracts/dso/presenteren-v8.openapi.json",
+      "current_file": "docs/evidence/a06-contract-audit/presenteren-current.openapi.json",
+      "pinned_version": "8.2.5",
+      "current_version": "8.2.5",
+      "pinned_sha256": "37d70096ae6bd338a6b7824da12512a6375644bf20171613da4fbc8843a2105d",
+      "current_sha256": "37d70096ae6bd338a6b7824da12512a6375644bf20171613da4fbc8843a2105d",
+      "semantic_differences": []
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 """Explicitly selected OW source evidence; no legal interpretation or approval."""
 from copy import deepcopy
+from bvc_ai.adapters.dso_diagnostics import validation_error
 import hashlib
 from urllib.parse import urlsplit
 
@@ -15,11 +16,11 @@ def validate_discovery(discovery, expected_hash):
     if (data.get('format') != 'BVC_A06_DSO_DISCOVERY_V1'
             or data.get('discovery_hash') != expected_hash
             or digest({k: v for k, v in data.items() if k != 'discovery_hash'}) != expected_hash):
-        raise ValueError('Changed discovery binding')
+        raise validation_error(ValueError('Changed discovery binding'), 'DOCUMENT_IDENTITY')
     provenance = data['provenance']
     raw = data['raw_response_utf8'].encode()
     if hashlib.sha256(raw).hexdigest() != provenance['raw_response_sha256']:
-        raise ValueError('Changed discovery evidence')
+        raise validation_error(ValueError('Changed discovery evidence'), 'DOCUMENT_IDENTITY')
     class Replay:
         def post(self, request):
             return HttpResponse(200, (('Content-Type', 'application/hal+json'), ('API-Version', CONTRACT_VERSION)),
@@ -34,7 +35,7 @@ def validate_discovery(discovery, expected_hash):
         del rebuilt['discovery_hash']
         rebuilt['discovery_hash'] = digest(rebuilt)
     if canonical(rebuilt) != canonical(data):
-        raise ValueError('Discovery package cannot be replayed')
+        raise validation_error(ValueError('Discovery package cannot be replayed'), 'DOCUMENT_IDENTITY')
     return data
 
 
@@ -46,14 +47,14 @@ class OWDocumentRetrievalService:
         data = validate_discovery(discovery, expected_discovery_hash)
         selected = [d for d in data['documents'] if d['identificatie'] == document_identity]
         if len(selected) != 1:
-            raise ValueError('Explicit unique discovery document identity required')
+            raise validation_error(ValueError('Explicit unique discovery document identity required'), 'DOCUMENT_IDENTITY')
         selected = selected[0]
         metadata = selected.get('omgevingsdocumentMetadata')
         if (metadata is None or 'imroDocumentMetadata' in selected
                 or not selected['identificatie'].startswith('/akn/nl/act/')
                 or metadata['isOntwerp'] or metadata['isBesluit']
                 or selected['type'] in ('Omgevingsvergunning', 'omgevingsvergunning')):
-            raise ValueError('Only established OW regelingen supported')
+            raise validation_error(ValueError('Only established OW regelingen supported'), 'DOCUMENT_FAMILY')
         day = data['provenance']['query_parameters']['geldigOp']
         available = data['provenance']['query_parameters']['beschikbaarOp']
         first = self._adapter.fetch(selected, 'metadata', day, available)
@@ -64,7 +65,7 @@ class OWDocumentRetrievalService:
         kind = next((value for suffix, value in kinds.items()
                      if path == urlsplit(BASE).path + '/regelingen/' + uri + suffix), None)
         if kind is None:
-            raise ValueError('Unsupported official annotation endpoint')
+            raise validation_error(ValueError('Unsupported official annotation endpoint'), 'DOCUMENT_IDENTITY')
         request = build_request(uri, 'metadata', day, available)
         _link(annotation_link, uri, next(s for s, k in kinds.items() if k == kind), request.parameters)
         structure = self._adapter.fetch(selected, 'structure', day, available)
@@ -73,10 +74,10 @@ class OWDocumentRetrievalService:
         annotations = self._adapter.fetch(selected, kind, day, available)
         final = self._adapter.fetch(selected, 'metadata', day, available)
         if canonical(first['source']) != canonical(final['source']):
-            raise ValueError('OW metadata changed during retrieval')
+            raise validation_error(ValueError('OW metadata changed during retrieval'), 'DOCUMENT_IDENTITY')
         captures = [first, structure, annotations, final]
         if {c['provenance']['source_status'] for c in captures} != {data['source_status']}:
-            raise ValueError('Mixed OW evidence origins')
+            raise validation_error(ValueError('Mixed OW evidence origins'), 'DOCUMENT_IDENTITY')
         # Source JSON is preserved. The separate index only points into that JSON.
         components = []
         def index(nodes, pointer):
@@ -95,19 +96,19 @@ class OWDocumentRetrievalService:
                 for row in rows:
                     identity = row.get('identificatie')
                     if not isinstance(identity, str) or not identity.strip():
-                        raise ValueError('Missing OW annotation identity')
+                        raise validation_error(ValueError('Missing OW annotation identity'), 'DOCUMENT_IDENTITY')
                     annotation_ids.append(identity)
         if len(set(annotation_ids)) != len(annotation_ids):
-            raise ValueError('Ambiguous OW annotation identity')
+            raise validation_error(ValueError('Ambiguous OW annotation identity'), 'DOCUMENT_IDENTITY')
         component_ids = {c['work_id'] for c in components}
         def check_refs(value):
             if isinstance(value, dict):
                 for key, item in value.items():
                     if key == 'wId' and item not in component_ids:
-                        raise ValueError('Unresolved OW component reference')
+                        raise validation_error(ValueError('Unresolved OW component reference'), 'DOCUMENT_IDENTITY')
                     refs = [item] if key.endswith('Ref') else item if key.endswith('Refs') else []
                     if any(ref not in annotation_ids for ref in refs):
-                        raise ValueError('Unresolved OW annotation reference')
+                        raise validation_error(ValueError('Unresolved OW annotation reference'), 'DOCUMENT_IDENTITY')
                     check_refs(item)
             elif isinstance(value, list):
                 for item in value:

@@ -1,6 +1,6 @@
 """Closed OW regeling retrieval profile, pinned to official Presenteren 8.2.5."""
 from copy import deepcopy
-from bvc_ai.adapters.dso_diagnostics import mark, response_validation
+from bvc_ai.adapters.dso_diagnostics import mark, response_validation, validation_error
 from datetime import timezone
 import hashlib
 import json
@@ -56,45 +56,45 @@ def _validate(value, schema, spec, depth=0):
     kind = schema.get('type')
     if kind == 'object':
         if type(value) is not dict or not set(schema.get('required', [])) <= value.keys():
-            reject()
+            reject('RESPONSE_STRUCTURE' if type(value) is not dict else 'REQUIRED_FIELD')
         props = schema.get('properties', {})
         if set(value) - props.keys():
-            reject()
+            reject('UNKNOWN_PROPERTY')
         for key, item in value.items():
             if key in ('geometry', 'geometrie', 'boundingBox'):
                 raise ValueError('Geometry payload outside OW retrieval scope')
             _validate(item, props[key], spec, depth + 1)
     elif kind == 'array':
         if type(value) is not list or len(value) < schema.get('minItems', 0):
-            reject()
+            reject('RESPONSE_STRUCTURE' if type(value) is not list else 'VALUE_CONSTRAINT')
         for item in value:
             _validate(item, schema['items'], spec, depth + 1)
     elif kind == 'string':
         if type(value) is not str:
-            reject()
+            reject('RESPONSE_STRUCTURE')
         if schema.get('format') in ('date', 'date-time'):
             date_value(value, timestamp=schema['format'] == 'date-time')
     elif kind == 'boolean':
         if type(value) is not bool:
-            reject()
+            reject('RESPONSE_STRUCTURE')
     elif kind in ('integer', 'number'):
         if type(value) not in ((int,) if kind == 'integer' else (int, float)) or not math.isfinite(value):
-            reject()
+            reject('VALUE_CONSTRAINT')
     else:
         reject()
     if 'enum' in schema and value not in schema['enum']:
-        reject()
+        reject('VALUE_CONSTRAINT')
 
 
 def build_request(uri, kind, day, available):
     if type(uri) is not str or not re.fullmatch(r'_akn_nl_act_[A-Za-z0-9_]+', uri) or kind not in KINDS:
-        raise ValueError('Unsupported OW retrieval identity or endpoint')
+        raise validation_error(ValueError('Unsupported OW retrieval identity or endpoint'), 'DOCUMENT_IDENTITY')
     date_value(day)
     stamp = date_value(available, timestamp=True)
     # Presenteren rounds availability upward to whole seconds. No implicit rounding.
     fraction = re.search(r'\.(\d+)', available)
     if fraction and any(c != '0' for c in fraction[1]):
-        raise ValueError('Whole-second discovery availability required for OW retrieval')
+        raise validation_error(ValueError('Whole-second discovery availability required for OW retrieval'), 'VALUE_CONSTRAINT')
     available = stamp.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
     parameters = [('geldigOp', day), ('inWerkingOp', day), ('beschikbaarOp', available)]
     if kind != 'structure':
@@ -132,7 +132,7 @@ def _link(href, uri, suffix, parameters):
     parts = urlsplit(href)
     expected = BASE + '/regelingen/' + uri + suffix
     if parts.scheme + '://' + parts.netloc + parts.path != expected or parts.fragment:
-        raise ValueError('Conflicting OW identity link')
+        raise validation_error(ValueError('Conflicting OW identity link'), 'DOCUMENT_IDENTITY')
     pairs = parse_qsl(parts.query, keep_blank_values=True)
     if len(pairs) != len(dict(pairs)):
         reject()
@@ -140,12 +140,12 @@ def _link(href, uri, suffix, parameters):
     expected_params = dict(parameters)
     for name in ('geldigOp', 'inWerkingOp', 'beschikbaarOp'):
         if name not in params:
-            raise ValueError('Missing OW temporal link binding')
+            raise validation_error(ValueError('Missing OW temporal link binding'), 'TEMPORAL_INTERVAL')
         if name == 'beschikbaarOp':
             if date_value(params[name], timestamp=True) != date_value(expected_params[name], timestamp=True):
-                reject()
+                reject('TEMPORAL_INTERVAL')
         elif params[name] != expected_params[name]:
-            reject()
+            reject('TEMPORAL_INTERVAL')
     if set(params) - (set(expected_params) | {'_expand'}):
         reject()
     if '_expand' in params and params['_expand'] != 'false':
@@ -167,13 +167,13 @@ def parse_response(response, request, kind, selected):
     if (headers.get('api-version') != VERSION
             or headers.get('content-type', '').split(';')[0].strip() != 'application/hal+json'
             or headers.get('content-encoding', 'identity') != 'identity'):
-        reject()
+        reject('CONTENT_TYPE' if headers.get('content-type', '').split(';')[0].strip() != 'application/hal+json' else 'UNKNOWN')
     data = read_json(response.body)
     spec = contract()
     _validate(data, spec['components']['schemas'][SCHEMAS[kind]], spec)
     uri = selected['identificatie'].replace('/', '_').replace('-', '_')
     if '_links' not in data:
-        raise ValueError('Incomplete OW response binding')
+        raise validation_error(ValueError('Incomplete OW response binding'), 'RESPONSE_STRUCTURE')
     links = data['_links']
     _link(links['self']['href'], uri, KINDS[kind], request.parameters)
     if kind == 'metadata':
@@ -183,7 +183,7 @@ def parse_response(response, request, kind, selected):
                 or registration.get('versie') != selected['versie']
                 or data['type']['waarde'] != selected['type']
                 or data['aangeleverdDoorEen']['code'] != selected['aangeleverdDoorEen']['code']):
-            raise ValueError('OW discovery identity/version mismatch')
+            raise validation_error(ValueError('OW discovery identity/version mismatch'), 'DOCUMENT_IDENTITY')
         for discovery_field, source_field, timestamp in (
                 ('geldigVanaf', 'beginGeldigheid', False), ('inwerkingVanaf', 'beginInwerking', False),
                 ('beschikbaarVanaf', 'tijdstipRegistratie', True), ('geldigTot', 'eindGeldigheid', False),
@@ -192,7 +192,7 @@ def parse_response(response, request, kind, selected):
                     source_field not in registration or
                     date_value(selected[discovery_field], timestamp=timestamp) !=
                     date_value(registration[source_field], timestamp=timestamp)):
-                raise ValueError('OW discovery temporal metadata mismatch')
+                raise validation_error(ValueError('OW discovery temporal metadata mismatch'), 'TEMPORAL_INTERVAL')
         _link(links['documentstructuur']['href'], uri, '/documentstructuur', request.parameters)
     else:
         _link(links['regeling']['href'], uri, '', request.parameters)
@@ -200,20 +200,20 @@ def parse_response(response, request, kind, selected):
         seen = set()
         def visit(nodes):
             if not nodes:
-                raise ValueError('Empty or incomplete OW document structure')
+                raise validation_error(ValueError('Empty or incomplete OW document structure'), 'RESPONSE_STRUCTURE')
             for node in nodes:
                 if not node['identificatie'].strip() or not node['expressie'].strip() or node['identificatie'] in seen:
-                    raise ValueError('Ambiguous OW component identity')
+                    raise validation_error(ValueError('Ambiguous OW component identity'), 'DOCUMENT_IDENTITY')
                 seen.add(node['identificatie'])
                 children = node.get('_embedded', {}).get('documentComponenten', [])
                 if children:
                     visit(children)
                 elif not node.get('inhoud') and not node.get('gereserveerd') and not node.get('vervallen'):
-                    raise ValueError('Incomplete OW leaf component')
+                    raise validation_error(ValueError('Incomplete OW leaf component'), 'RESPONSE_STRUCTURE')
         visit(data['_embedded']['documentComponenten'])
     if kind.endswith('annotations'):
         if not any(k != '_links' for k in data):
-            raise ValueError('Incomplete OW annotations')
+            raise validation_error(ValueError('Incomplete OW annotations'), 'RESPONSE_STRUCTURE')
         _link(links['documentstructuur']['href'], uri, '/documentstructuur', request.parameters)
     return data
 

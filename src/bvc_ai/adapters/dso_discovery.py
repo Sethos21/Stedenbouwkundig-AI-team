@@ -1,6 +1,6 @@
 """Closed point-discovery profile for the official DSO Ontsluiten v2 API."""
 from copy import deepcopy
-from bvc_ai.adapters.dso_diagnostics import mark, response_validation
+from bvc_ai.adapters.dso_diagnostics import mark, response_validation, validation_error
 from dataclasses import dataclass, field
 from decimal import Decimal
 import hashlib
@@ -88,7 +88,7 @@ def parse_response(response, request):
     if (headers.get('content-type', '').split(';')[0].strip() != 'application/hal+json'
             or headers.get('api-version') != CONTRACT_VERSION
             or headers.get('content-encoding', 'identity') != 'identity'):
-        reject()
+        reject('CONTENT_TYPE' if headers.get('content-type', '').split(';')[0].strip() != 'application/hal+json' else 'UNKNOWN')
     data = read_json(response.body)
     spec = contract()
     validate(data, spec['components']['schemas']['Documenten'], spec)
@@ -100,31 +100,31 @@ def parse_response(response, request):
             or page['totalElements'] != len(docs) or len(docs) > PAGE_SIZE
             or page['totalPages'] != (1 if docs else 0)
             or 'next' in data['_links']):
-        raise ValueError('Incomplete or ambiguous DSO discovery page')
+        raise validation_error(ValueError('Incomplete or ambiguous DSO discovery page'), 'PAGINATION')
     ids, uris, expressions = set(), set(), set()
     for doc in docs:
         identity, uri = doc['identificatie'], doc['uriIdentificatie']
         if identity in ids or uri in uris or doc['versie'] < 0:
-            raise ValueError('Ambiguous DSO document identity')
+            raise validation_error(ValueError('Ambiguous DSO document identity'), 'DOCUMENT_IDENTITY')
         ids.add(identity)
         uris.add(uri)
         for start, end, timestamp in (('geldigVanaf', 'geldigTot', False),
                                       ('inwerkingVanaf', 'inwerkingTot', False),
                                       ('beschikbaarVanaf', 'beschikbaarTot', True)):
             if start in doc and end in doc and date_value(doc[start], timestamp=timestamp) >= date_value(doc[end], timestamp=timestamp):
-                raise ValueError('Ambiguous DSO temporal interval')
+                raise validation_error(ValueError('Ambiguous DSO temporal interval'), 'TEMPORAL_INTERVAL')
         ow = 'omgevingsdocumentMetadata' in doc
         imro = 'imroDocumentMetadata' in doc
         if ow == imro:
-            raise ValueError('Ambiguous DSO document family')
+            raise validation_error(ValueError('Ambiguous DSO document family'), 'DOCUMENT_FAMILY')
         if ow:
             expression = doc['omgevingsdocumentMetadata']['expressionId']
             if (not identity.startswith('/akn/nl/') or uri != identity.replace('/', '_')
                     or not expression.startswith(identity + '/') or expression in expressions):
-                raise ValueError('Ambiguous DSO expression identity')
+                raise validation_error(ValueError('Ambiguous DSO expression identity'), 'DOCUMENT_IDENTITY')
             expressions.add(expression)
         elif not identity.startswith('NL.IMRO.') or uri != identity:
-            raise ValueError('Ambiguous DSO IMRO identity')
+            raise validation_error(ValueError('Ambiguous DSO IMRO identity'), 'DOCUMENT_IDENTITY')
     # All candidates retained; no relevance ranking, legal interpretation or selection.
     return sorted(deepcopy(docs), key=lambda d: (d['identificatie'], d['versie']))
 

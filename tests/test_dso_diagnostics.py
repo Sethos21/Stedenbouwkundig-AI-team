@@ -38,7 +38,7 @@ class DiagnosticTests(unittest.TestCase):
         result = json.loads(text)
         self.assertEqual(result['status'], 'FAILED_CLOSED')
         self.assertEqual(set(result), {'status', 'details', 'phase', 'category',
-                                      'http_status', 'contract_version'})
+                                      'http_status', 'contract_version', 'validation_error_code'})
         return result
 
     def transport(self, status=200, version='2.13.1', failure=None, body=b'{}', get=False):

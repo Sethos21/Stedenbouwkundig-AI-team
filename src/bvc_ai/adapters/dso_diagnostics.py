@@ -8,6 +8,24 @@ CATEGORIES = {"AUTHENTICATION", "NETWORK_TRANSPORT", "UNEXPECTED_HTTP_STATUS",
               "CONTRACT_VERSION_MISMATCH", "SCHEMA_VALIDATION", "INTERNAL_APPLICATION"}
 
 
+VALIDATION_CODES = frozenset({
+    "CONTENT_TYPE", "RESPONSE_STRUCTURE", "REQUIRED_FIELD", "UNKNOWN_PROPERTY",
+    "EMPTY_STRING", "VALUE_CONSTRAINT", "PAGINATION", "DOCUMENT_IDENTITY",
+    "DOCUMENT_FAMILY", "TEMPORAL_INTERVAL", "UNKNOWN",
+})
+
+
+def validation_error(error, code):
+    """Attach only a fixed code at the rejection site; keep the exception contract."""
+    error.validation_error_code = code if type(code) is str and code in VALIDATION_CODES else "UNKNOWN"
+    return error
+
+
+def validation_code(error):
+    code = getattr(error, "validation_error_code", None)
+    return code if type(code) is str and code in VALIDATION_CODES else "UNKNOWN"
+
+
 def diagnostic(phase, category, status=None, version=None):
     # Only bounded semantic versions; never arbitrary provider strings.
     if type(version) is not str or not re.fullmatch(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", version):
@@ -29,9 +47,10 @@ def mark(error, phase, category, status=None, version=None):
 def report(error):
     data = getattr(error, "dso_diagnostic", None)
     if type(data) is not dict:
-        return diagnostic("validatie", "INTERNAL_APPLICATION")
-    return diagnostic(data.get("phase"), data.get("category"),
-                      data.get("http_status"), data.get("contract_version"))
+        return dict(diagnostic("validatie", "INTERNAL_APPLICATION"), validation_error_code=validation_code(error))
+    return dict(diagnostic(data.get("phase"), data.get("category"),
+                           data.get("http_status"), data.get("contract_version")),
+                validation_error_code=validation_code(error))
 
 
 def response_validation(function):

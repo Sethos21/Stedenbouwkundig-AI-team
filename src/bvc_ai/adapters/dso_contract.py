@@ -4,15 +4,15 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from bvc_ai.adapters.dso_diagnostics import mark
+from bvc_ai.adapters.dso_diagnostics import mark, validation_error
 
 CONTRACT_URL = 'https://service.omgevingswet.overheid.nl/publiek/omgevingsinformatie/api/ontsluiten/v2/openapi.json'
 CONTRACT_VERSION = '2.13.1'
 CONTRACT_SHA256 = '4b2c33dc2a91a8c9073042978636f5222802395c3f1664b82c0c425eb126e0b4'
 
 
-def reject():
-    raise ValueError('Invalid or unsupported DSO contract data')
+def reject(code='UNKNOWN'):
+    raise validation_error(ValueError('Invalid or unsupported DSO contract data'), code)
 
 
 def canonical(value):
@@ -26,16 +26,16 @@ def digest(value):
 
 def date_value(value, *, timestamp=False):
     if type(value) is not str:
-        reject()
+        reject('VALUE_CONSTRAINT')
     if timestamp and not re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})', value):
-        reject()
+        reject('VALUE_CONSTRAINT')
     try:
         parsed = datetime.fromisoformat(value) if timestamp else date.fromisoformat(value)
         valid = (parsed.tzinfo is not None and 'T' in value) if timestamp else parsed.isoformat() == value
     except (ValueError, TypeError):
-        reject()
+        reject('VALUE_CONSTRAINT')
     if not valid:
-        reject()
+        reject('VALUE_CONSTRAINT')
     return parsed
 
 
@@ -52,7 +52,7 @@ def read_json(body):
     try:
         return json.loads(body, object_pairs_hook=unique, parse_constant=constant)
     except (ValueError, UnicodeError, RecursionError):
-        raise ValueError('Invalid DSO JSON') from None
+        raise validation_error(ValueError('Invalid DSO JSON'), 'RESPONSE_STRUCTURE') from None
 
 
 def contract():
@@ -79,32 +79,32 @@ def validate(value, schema, spec):
     kind = schema.get('type', 'object' if 'properties' in schema else None)
     if kind == 'object':
         if type(value) is not dict or not set(schema.get('required', [])) <= value.keys():
-            reject()
+            reject('RESPONSE_STRUCTURE' if type(value) is not dict else 'REQUIRED_FIELD')
         properties = schema.get('properties', {})
         for key, item in value.items():
             child = properties.get(key, schema.get('additionalProperties'))
             if type(child) is not dict:
-                reject()
+                reject('UNKNOWN_PROPERTY')
             validate(item, child, spec)
     elif kind == 'array':
         if type(value) is not list or len(value) < schema.get('minItems', 0):
-            reject()
+            reject('RESPONSE_STRUCTURE' if type(value) is not list else 'VALUE_CONSTRAINT')
         if schema.get('uniqueItems') and len({canonical(v) for v in value}) != len(value):
-            reject()
+            reject('VALUE_CONSTRAINT')
         for item in value:
             validate(item, schema['items'], spec)
     elif kind == 'string':
         if type(value) is not str or not value.strip():
-            reject()
+            reject('RESPONSE_STRUCTURE' if type(value) is not str else 'EMPTY_STRING')
         if schema.get('format') in ('date', 'date-time'):
             date_value(value, timestamp=schema['format'] == 'date-time')
     elif kind == 'integer':
         if type(value) is not int:
-            reject()
+            reject('RESPONSE_STRUCTURE')
     elif kind == 'boolean':
         if type(value) is not bool:
-            reject()
+            reject('RESPONSE_STRUCTURE')
     else:
         reject()
     if 'enum' in schema and value not in schema['enum']:
-        reject()
+        reject('VALUE_CONSTRAINT')
