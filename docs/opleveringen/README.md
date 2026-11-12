@@ -18,7 +18,11 @@ Dit vraagt geen centrale indexwrite op master. Iedere werkbranch houdt alleen zi
 
 ## Branchgebonden index
 
-Nog geen afgeronde proefpublicatie op deze branch. De proef voegt hier een rapportlink toe; de servergedateerde ontvangstbevestiging in de PR blijft de publicatiewaarheid.
+Nieuwste rapport op **deze branch**: [Structurele GitHub-overdracht](2026-11-12T152800Z-github-overdracht.md). Publicatiebevestiging staat in het PR-ontvangstbewijs; deze rij is geen globale nieuwste-publicatieclaim.
+
+| Datum checkpoint (UTC) | Opdracht / rapport | Opdrachtstatus | Branch | PR / publicatiebewijs |
+|---|---|---|---|---|
+| 2026-11-12 | [GitHub-overdracht en documentatieproef](2026-11-12T152800Z-github-overdracht.md) | VOLTOOID; publicatie afzonderlijk verifiëren | `docs/github-opleverprocedure` | [Draft #3](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/3), CODEX_OPLEVERING_V1-comment |
 
 ## Rapportnaam en inhoud
 
