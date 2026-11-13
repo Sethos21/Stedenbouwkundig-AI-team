@@ -1,6 +1,7 @@
 # Oplevering — <opdracht>
 
 - Opdracht-ID: <YYYY-MM-DDTHHMMSSZ-slug>
+- Bronopdracht: <issue-URL indien van toepassing; run-ID en claimcommentlink volgens OPDRACHTENBUS.md>
 - Datum checkpoint (UTC): <ISO-tijd; publicatietijd komt van GitHub-comment>
 - Doel: <concreet doel en afbakening>
 - Opdrachtstatus: <VOLTOOID | ONVOLTOOID | GEBLOKKEERD>
