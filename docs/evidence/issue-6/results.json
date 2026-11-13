@@ -1,0 +1,76 @@
+{
+  "runtime_source_commit": "28b4dd7b60fd5546e8161054ad76d7cd62bf831a",
+  "master_basis": "0050e8c0595a969eb5c1a84462964008014c44b2",
+  "results": [
+    {
+      "suite": "targeted",
+      "runtime_commit": "28b4dd7b60fd5546e8161054ad76d7cd62bf831a",
+      "command": ".tools/source-venv/Scripts/python.exe -B scripts/run_a06_identity.py --suite targeted",
+      "exit_code": 0,
+      "seconds": 3.594,
+      "unchanged_snapshot_files": 181,
+      "changed_snapshot_files": [],
+      "guard_processes": 2,
+      "blocked_socket_events": 0,
+      "test_sha256": "65f4bb2daa9c0d439faff6c290750106f4b650965ef7f272171b04b5b4608f4d",
+      "runner_sha256": "340332fa270dff73f319205ee106f80eced35b06bfc5083a6b7aca29d4ebbfe5",
+      "log_sha256": "c604126ea7876270420d32c7ae67bdb5275faae3d992b1fdc2736a031bc71603",
+      "tests": 17,
+      "unittest_seconds": 0.662,
+      "local_run_directory": ".tools/issue6-targeted-pkekzhbk",
+      "published_log": "targeted-tests.txt",
+      "published_log_sha256": "e00e4409ebd27c7031b46fc793e07633d4928cdf70e84d3745e6063b412b23f0"
+    },
+    {
+      "suite": "full",
+      "runtime_commit": "28b4dd7b60fd5546e8161054ad76d7cd62bf831a",
+      "command": ".tools/source-venv/Scripts/python.exe -B scripts/run_a06_identity.py --suite full",
+      "exit_code": 0,
+      "seconds": 190.203,
+      "unchanged_snapshot_files": 181,
+      "changed_snapshot_files": [],
+      "guard_processes": 23,
+      "blocked_socket_events": 0,
+      "test_sha256": "d097319f0a2c4e63fb20ed5d38b2bff4091d6dbc799e6998903cbc7d3c8d46b2",
+      "runner_sha256": "340332fa270dff73f319205ee106f80eced35b06bfc5083a6b7aca29d4ebbfe5",
+      "log_sha256": "242f965e6e3508ec4754908d33a3a9c7dc85965158459144ba7cd62a9c067045",
+      "tests": 565,
+      "unittest_seconds": 185.751,
+      "local_run_directory": ".tools/issue6-full-6ghkjog6",
+      "published_log": "full-tests.txt",
+      "published_log_sha256": "6906627510640399af3c1c7c75e4bf67cb0972de662e5361ea522e59c703e8fe"
+    },
+    {
+      "suite": "master",
+      "runtime_commit": "0050e8c0595a969eb5c1a84462964008014c44b2",
+      "command": ".tools/source-venv/Scripts/python.exe -B scripts/run_a06_identity.py --suite master",
+      "exit_code": 0,
+      "seconds": 172.891,
+      "unchanged_snapshot_files": 0,
+      "changed_snapshot_files": [],
+      "guard_processes": 22,
+      "blocked_socket_events": 0,
+      "test_sha256": "65f4bb2daa9c0d439faff6c290750106f4b650965ef7f272171b04b5b4608f4d",
+      "runner_sha256": "340332fa270dff73f319205ee106f80eced35b06bfc5083a6b7aca29d4ebbfe5",
+      "log_sha256": "7c268ed4e2b18bc23402730f66636ac8a918b88b23a9ab85e5a6c09e12fe2289",
+      "tests": 507,
+      "unittest_seconds": 167.957,
+      "local_run_directory": ".tools/issue6-master-r179f29q",
+      "published_log": "master-tests.txt",
+      "published_log_sha256": "b43271b1bce07b5800e4a0f0c20c20a297d50ff61a8fd7ee54f2c7de4d1291a2"
+    }
+  ],
+  "full_to_final_test_change": "Only trailing blank lines removed; text.rstrip and AST equality verified; final file rerun targeted.",
+  "git_blob_sha256": {
+    "tests/characterization/a06_identity_cases.py": "65f4bb2daa9c0d439faff6c290750106f4b650965ef7f272171b04b5b4608f4d",
+    "scripts/run_a06_identity.py": "590fd55a2fb555aa17bd575f32705321ce9fab514843e24e2e82de3e3a93c6cd"
+  },
+  "evidence_policy": "Published logs contain unittest names and final outcome only; source-archive stdout summary and local absolute paths are omitted. Raw-log hash refers to local ignored log, not published bytes.",
+  "preliminary_failures": [
+    "Targeted g9fkytjn: import shadowing by root bvc_ai.py; runner cwd fixed to snapshot/tests.",
+    "Targeted 531tklyp: test expected CLI details in diagnostic helper; test corrected.",
+    "Targeted zvb7w9cs: shared fixture link objects rebound twice; synthetic builder now copies link dicts.",
+    "Full nvpqiev5: 565 tests, 2 BAG setup errors: missing ignored runtime/2d-live parent; runner creates empty parent inside snapshot only. No production/test baseline edits."
+  ],
+  "runner_git_normalization": "Executed runner bytes equal staged Git blob after CRLF to LF normalization (verified)."
+}
