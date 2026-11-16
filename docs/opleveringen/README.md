@@ -18,10 +18,11 @@ Dit vraagt geen centrale indexwrite op master. Iedere werkbranch houdt alleen zi
 
 ## Branchgebonden index
 
-Nieuwste rapport op **deze branch**: [Issue #9 — MVP-00 integratiegereedheid](2026-11-13T124048Z-issue-9-mvp00.md). Publicatiebevestiging staat in het PR-ontvangstbewijs; deze rij is geen globale nieuwste-publicatieclaim.
+Nieuwste rapport op **deze branch**: [Overdracht naar Codex-cloudchat](2026-11-16T120000Z-cloud-overdracht.md). Publicatiebevestiging staat in het PR-ontvangstbewijs; deze rij is geen globale nieuwste-publicatieclaim.
 
 | Datum checkpoint (UTC) | Opdracht / rapport | Opdrachtstatus | Branch | PR / publicatiebewijs |
 |---|---|---|---|---|
+| 2026-11-16 | [Overdracht naar Codex-cloudchat](2026-11-16T120000Z-cloud-overdracht.md) | VOLTOOID; publicatie apart verifiëren | docs/cloud-overdracht-2026-11-16 | Draft-PR en CODEX_OPLEVERING_V1 via vaste ingang |
 | 2026-11-13 | [Issue #9: MVP-00](2026-11-13T124048Z-issue-9-mvp00.md) | VOLTOOID; publicatie apart verifiëren | codex/issue-9 | Draft-PR en CODEX_OPLEVERING_V1 via vaste ingang |
 | 2026-11-12 | [Issue #4: opdrachtenbus](2026-11-12T160800Z-issue-4-opdrachtenbus.md) | VOLTOOID; publicatie afzonderlijk verifiëren | `codex/issue-4` | [Draft #5](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/5), CODEX_OPLEVERING_V1-comment |
 | 2026-11-12 | [GitHub-overdracht en documentatieproef](2026-11-12T152800Z-github-overdracht.md) | VOLTOOID; publicatie afzonderlijk verifiëren | `docs/github-opleverprocedure` | [Draft #3](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/3), CODEX_OPLEVERING_V1-comment |
