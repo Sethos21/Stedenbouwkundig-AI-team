@@ -73,3 +73,11 @@ Bij oplevering volg je ongewijzigd [CODEX_OPLEVERING_V1](opleveringen/README.md)
 ## Begrensde invoering
 
 Issue #4 is alleen procesdocumentatie: geen A06-ontwikkeling, functionele ontwerpwijziging, agentactivatie, live bronaanroep, productieactie, credentialpublicatie of cloudruntime. GitHub-opdracht-/overdrachtsmetadata zijn de enige externe mutaties. K00, HumanApprovalService, bronautorisaties en bestaande branches blijven intact. Een draft-PR/OPGELEVERD-marker geeft geen mergebevoegdheid; onafhankelijke ChatGPT-review en het gebruikersbesluit blijven verplicht. Oude branches lezen de procedure via actuele master of een expliciete opdracht; deze wijziging wordt niet door Codex zelf gemergd.
+
+## Afzonderlijke Codex Actions-documentatieproef (Issue #13)
+
+De bestaande handmatige procedure blijft gelden voor gewone opdrachten. De
+afzonderlijke proefroute gebruikt een eigenaarsdispatch met vastgelegde
+issuerevisie en dezelfde create-only claimbranch per issue. Een eigenaar
+plant het automatische uitvoeringsvenster buiten actieve handmatige sessies.
+Zie de [installatie- en vrijgaveprocedure](infra/CODEX_ACTIONS_INSTALLATIE.md).
