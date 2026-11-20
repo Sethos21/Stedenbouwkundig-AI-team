@@ -100,6 +100,11 @@ def document(value):
     return "    " + value.rstrip().replace("\n", "\n    ") + "\n"
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, message, headers, new_url):
+        return None
+
+
 def execute(task):
     key = os.environ.get("CODEX_ACTIONS_API_KEY")
     require(key, "Missing codex-execution secret CODEX_ACTIONS_API_KEY.")
@@ -113,7 +118,8 @@ def execute(task):
         }).encode(),
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(request, timeout=90) as response:
+    opener = urllib.request.build_opener(NoRedirect())
+    with opener.open(request, timeout=90) as response:
         payload = json.load(response)
     require(payload["status"] == "completed", "Codex response incomplete.")
     chunks = [

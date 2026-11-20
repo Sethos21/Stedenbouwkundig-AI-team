@@ -67,5 +67,26 @@ class RouteTests(unittest.TestCase):
                 self.assertEqual(github.call_count, 4 if earlier_claim else 6)
 
 
+    def test_publish_rejects_unexpected_diff_before_ref_write(self):
+        task = self.task | {"branch": "codex/issue-42", "base": "base", "run": "17"}
+        responses = [
+            self.issue, {"commit": {"sha": "base"}}, {"object": {"sha": "base"}},
+            {"truncated": False, "tree": []}, {"tree": {"sha": "base-tree"}},
+            {"sha": "new-tree"}, {"sha": "new"}, {"parents": [{"sha": "base"}]},
+            {"files": [{"filename": "AGENTS.md", "status": "modified"}]},
+        ]
+        with patch.dict(os.environ, {"DOCUMENT": "c3ludGhldGlj"}), patch.object(route, "github") as github:
+            github.side_effect = responses
+            with self.assertRaisesRegex(route.RouteError, "Unexpected diff"):
+                route.publish(task)
+            methods = [call.kwargs.get("method", "GET") for call in github.call_args_list]
+            self.assertNotIn("PATCH", methods)
+
+    def test_redirect_does_not_forward_model_credentials(self):
+        self.assertIsNone(route.NoRedirect().redirect_request(
+            None, None, 302, "Found", {}, "https://example.org"
+        ))
+
+
 if __name__ == "__main__":
     unittest.main()
