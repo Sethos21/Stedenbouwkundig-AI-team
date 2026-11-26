@@ -4,7 +4,9 @@ Issue #13, concept-PR #14. Deze eerste route verwerkt één expliciet vrijgegeve
 documentatieopdracht per run. Het model krijgt alleen de titel en inhoud van
 het gekozen issue. Het krijgt geen tools, repository-inhoud of GitHub-token.
 Het resultaat kan uitsluitend één nieuw bestand `docs/codex-results/issue-N.md`
-opleveren. De route gebruikt de officiële Responses API met vaste model-ID
+opleveren. De controller schrijft daarnaast een vertrouwd opleverrapport in
+`docs/opleveringen/` en plaatst na verificatie een `CODEX_OPLEVERING_V1`-bewijs
+op de draft-PR. Beide paden staan expliciet op de allowlist. De route gebruikt de officiële Responses API met vaste model-ID
 `gpt-5.3-codex`, maximaal 2.000 uitvoertokens en één aanvraag per claim.
 Toegang tot dit model en de werkelijke kosten moeten in het gekozen OpenAI-project
 worden gecontroleerd.
@@ -18,18 +20,15 @@ worden gecontroleerd.
    met de gepinde officiële checkout-action en dat Actions pull requests mag
    aanmaken. Laat de standaardrechten op read-only staan. De workflow kent
    schrijfbevoegdheden per job toe.
-3. Maak in **Settings → Environments** `codex-control` en `codex-execution`.
-   Beperk beide tot `master`. Stel onafhankelijke vereiste reviewers en
-   preventie van zelfgoedkeuring in, voor zover het private repositoryplan
-   deze mogelijkheden ondersteunt. Schakel de route pas in als de
-   beveiligingsreview heeft vastgesteld dat die bescherming afgedwongen wordt.
-4. Plaats een afzonderlijke OpenAI-projectsleutel als secret
-   `CODEX_ACTIONS_API_KEY` in `codex-execution`. Beperk de sleutel tot
-   noodzakelijke API-rechten en controleer modeltoegang, limieten en monitoring.
-   Voer geen vertrouwelijke data in het proefissue in.
-5. Zet de repositoryvariabele `CODEX_ACTIONS_ENABLED` op `true`, uitsluitend
-   tijdens een door de eigenaar beheerd automatisch uitvoeringsvenster.
-   Start in dat venster geen handmatige opdrachtenbussessie.
+3. De eigenaar meldt dat `codex-control` en `codex-execution` onder
+   **Settings → Environments** zijn beperkt tot `master`. Verifieer vóór
+   vrijgave de branchbeperking, onafhankelijke reviewers en preventie van
+   zelfgoedkeuring. De feitelijke handhaving is nog onbevestigd.
+4. De eigenaar meldt dat `CODEX_ACTIONS_API_KEY` als environment-secret in
+   `codex-execution` staat. Effectieve rechten, modeltoegang en kosten zijn
+   nog onbevestigd. Gebruik uitsluitend synthetische invoer voor de proef.
+5. De eigenaar meldt dat `CODEX_ACTIONS_ENABLED` een **repositoryvariabele**
+   is met waarde `false`. Laat die waarde staan tot expliciete vrijgave.
 
 ## Vrijgave en proef
 
@@ -46,7 +45,8 @@ gh api repos/Sethos21/Stedenbouwkundig-AI-team/issues/ISSUE_ID |
 ```
 
 Controleer de claimcomment, de geslaagde tests in de run, de exacte diff van
-het docbestand en de draft-PR met de teruglink naar de run. Laat het resultaat
+het docbestand en het opleverrapport, plus de draft-PR met teruglink naar de
+run en het ontvangstbewijs. Laat het resultaat
 onafhankelijk beoordelen. Verwacht bij een tweede dispatch naar hetzelfde
 issue dat de claim stopt vóór modelgebruik. Issue #11 en #13 zijn uitgesloten.
 De handmatige opdrachtenbus behoudt haar eigen vrijgaveregels.
@@ -59,11 +59,10 @@ bij herstel. Start geen tweede uitvoering en verwijder geen claim om opnieuw
 te beginnen. Zet bij een incident `CODEX_ACTIONS_ENABLED` uit en stop actieve
 runs via Actions. De workflow maakt alleen draft-PRs.
 
-Automatische merges blijven geblokkeerd. GitHub retourneerde voor deze private
-repository een planbeperking op branchregels, `master` is onbeschermd en
-`allow_auto_merge` staat uit. Een volgende wijziging vereist een GitHub-plan
-met afgedwongen branchbescherming voor deze private repository, verplichte
-actuele checks, onafhankelijke review voor de laatste push, bescherming tegen
-bypass en een bij merge gevalideerde bestandsallowlist. Schakel auto-merge
-pas in na onafhankelijke verificatie van die volledige keten. Gevoelige
-paden en de infrastructuur-PR vallen buiten elke automatische merge.
+De repository is publiek. De actieve [ruleset 27890519](https://github.com/Sethos21/Stedenbouwkundig-AI-team/rules/27890519)
+beschermt de default branch `master` met een PR-verplichting, verplichte
+afhandeling van reviewthreads, een verbod op verwijderen en force-push, en
+zonder bypass. De ruleset vereist nul approvals en geen statuschecks.
+Nul approvals dwingt geen onafhankelijke review af. Auto-merge staat uit
+en er is nog geen live Actions-proef uitgevoerd. De infrastructuur-PR en
+gevoelige paden vallen buiten automatische merges.

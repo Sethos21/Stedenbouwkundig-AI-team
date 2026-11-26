@@ -1,3 +1,4 @@
+import base64
 import os
 import unittest
 from unittest.mock import patch
@@ -81,6 +82,73 @@ class RouteTests(unittest.TestCase):
                 route.publish(task)
             methods = [call.kwargs.get("method", "GET") for call in github.call_args_list]
             self.assertNotIn("PATCH", methods)
+
+    def test_handoff_success_and_fail_closed(self):
+        task = self.task | {"branch": "codex/issue-42", "base": "base", "run": "17"}
+        path = "docs/codex-results/issue-42.md"
+        report_path = "docs/opleveringen/codex-actions-issue-42-run-17.md"
+        root = f"https://github.com/{route.REPO}"
+        pr = {"number": 50, "draft": True, "state": "open",
+              "head": {"sha": "report", "ref": task["branch"]}, "base": {"ref": "master"}}
+        for fail in (None, "base", "backlink", "draft", "ref", "report", "diff"):
+            with self.subTest(fail=fail), patch.dict(os.environ, {"DOCUMENT": "c3ludGhldGlj"}):
+                reports, comments, branches = {}, {}, []
+
+                def api(endpoint, *, method="GET", data=None):
+                    if endpoint == "issues/42":
+                        return self.issue
+                    if endpoint == "branches/master":
+                        return {"commit": {"sha": "advanced" if fail == "base" and reports else "base"}}
+                    if endpoint.startswith("git/ref/heads/"):
+                        return {"object": {"sha": ("other" if fail == "ref" else "report") if branches else "base"}}
+                    if endpoint == "git/trees/base?recursive=1":
+                        return {"truncated": False, "tree": []}
+                    if endpoint == "compare/base...report":
+                        files = [path, report_path] if fail != "diff" else [path, "AGENTS.md"]
+                        return {"files": [{"filename": name, "status": "added"} for name in files]}
+                    if endpoint.startswith("git/refs/heads/"):
+                        self.assertEqual(data, {"sha": "report", "force": False})
+                        branches.append(data)
+                        return {}
+                    if endpoint == "pulls":
+                        self.assertTrue(data["draft"])
+                        return pr
+                    if endpoint == "pulls/50":
+                        return pr | {"draft": fail != "draft"}
+                    if endpoint.startswith("contents/"):
+                        self.assertEqual(endpoint, f"contents/{report_path}?ref=report")
+                        payload = "changed" if fail == "report" else reports[report_path]
+                        return {"content": base64.b64encode(payload.encode()).decode()}
+                    if method == "POST" and endpoint in ("issues/42/comments", "issues/50/comments"):
+                        if fail == "backlink":
+                            raise route.RouteError("Status write failed")
+                        comment_id = len(comments) + 1
+                        comments[comment_id] = data["body"]
+                        return {"id": comment_id}
+                    if endpoint.startswith("issues/comments/"):
+                        return {"body": comments[int(endpoint.rsplit("/", 1)[1])]}
+                    self.fail(f"Unexpected request: {method} {endpoint}")
+
+                def commit(parent, filename, content, message):
+                    self.assertIn((parent, filename), [("base", path), ("work", report_path)])
+                    reports[filename] = content
+                    return "work" if parent == "base" else "report"
+
+                with patch.object(route, "github", side_effect=api), patch.object(
+                    route, "create_document_commit", side_effect=commit
+                ):
+                    if fail:
+                        with self.assertRaises(route.RouteError):
+                            route.publish(task)
+                        self.assertFalse(any(c.startswith("CODEX_OPLEVERING_V1") for c in comments.values()))
+                    else:
+                        route.publish(task)
+                        self.assertIn("    synthetic", reports[path])
+                        self.assertNotIn("synthetic", reports[report_path])
+                        self.assertEqual(len(comments), 2)
+                        self.assertIn("work_commit: work", comments[2])
+                        self.assertIn("report_commit: report", comments[2])
+                        self.assertIn(f"report_url: {root}/blob/report/{report_path}", comments[2])
 
     def test_redirect_does_not_forward_model_credentials(self):
         self.assertIsNone(route.NoRedirect().redirect_request(

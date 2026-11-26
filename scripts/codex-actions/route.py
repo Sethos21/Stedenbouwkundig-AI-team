@@ -131,6 +131,24 @@ def execute(task):
     output("document", base64.b64encode(value.encode()).decode())
 
 
+def create_document_commit(parent, path, report, message):
+    base_tree = github(f"git/commits/{parent}")["tree"]["sha"]
+    tree = github("git/trees", method="POST", data={
+        "base_tree": base_tree,
+        "tree": [{"path": path, "mode": "100644", "type": "blob", "content": report}],
+    })
+    change = github("git/commits", method="POST", data={
+        "message": message,
+        "tree": tree["sha"], "parents": [parent],
+    })
+    sha = change["sha"]
+    commit = github(f"git/commits/{sha}")
+    require([p["sha"] for p in commit["parents"]] == [parent], "Unexpected commit parent.")
+    diff = github(f"compare/{parent}...{sha}")
+    require([(f["filename"], f["status"]) for f in diff["files"]] == [(path, "added")], "Unexpected diff.")
+    return sha
+
+
 def publish(task):
     value = base64.b64decode(os.environ["DOCUMENT"], validate=True).decode()
     body = document(value)
@@ -139,41 +157,65 @@ def publish(task):
     require(github("branches/master")["commit"]["sha"] == base, "Base advanced. Stop for reconciliation.")
     require(github(f"git/ref/heads/{branch}")["object"]["sha"] == base, "Claim ref no longer on base.")
     path = f"docs/codex-results/issue-{number}.md"
+    report_path = f"docs/opleveringen/codex-actions-issue-{number}-run-{run}.md"
     entries = github(f"git/trees/{base}?recursive=1")
     require(not entries["truncated"], "Cannot verify destination.")
-    blockers = {path, "docs", "docs/codex-results"}
-    require(not any(e["path"] in blockers and (e["path"] == path or e["type"] != "tree")
+    blockers = {path, report_path, "docs", "docs/codex-results", "docs/opleveringen"}
+    require(not any(e["path"] in blockers and (e["path"] in {path, report_path} or e["type"] != "tree")
                     for e in entries["tree"]), "Destination exists or has an unsafe parent.")
     run_url = f"https://github.com/{REPO}/actions/runs/{run}"
     report = f"# Codex-documentatieproef #{number}\n\n[Uitvoering]({run_url})\n\n{body}"
-    base_tree = github(f"git/commits/{base}")["tree"]["sha"]
-    tree = github("git/trees", method="POST", data={
-        "base_tree": base_tree,
-        "tree": [{"path": path, "mode": "100644", "type": "blob", "content": report}],
-    })
-    change = github("git/commits", method="POST", data={
-        "message": f"docs: Codex-documentatieproef #{number}",
-        "tree": tree["sha"], "parents": [base],
-    })
-    sha = change["sha"]
-    commit = github(f"git/commits/{sha}")
-    require([p["sha"] for p in commit["parents"]] == [base], "Unexpected commit parent.")
+    work = create_document_commit(base, path, report, f"docs: Codex-documentatieproef #{number}")
+    issue_url = f"https://github.com/{REPO}/issues/{number}"
+    root_url = f"https://github.com/{REPO}"
+    result_url = f"{root_url}/blob/{work}/{path}"
+    report_text = (
+        f"# Oplevering — Codex-documentatieproef #{number}\n\n"
+        f"- Opdracht-ID: codex-actions-issue-{number}-run-{run}\n"
+        f"- [Bronopdracht]({issue_url}) · [Uitvoering en controllertests]({run_url})\n"
+        f"- Vrijgegeven revisie: `{task['revision']}`\n"
+        f"- Branch en claim: `{branch}`\n"
+        f"- Basiscommit: `{base}`\n"
+        f"- Work-commit: `{work}`\n"
+        f"- [Gegenereerd document]({result_url})\n\n"
+        "De controller valideerde het resultaat als tekst en controleerde de gewijzigde paden. "
+        "Onafhankelijke review is vereist. Publicatiestatus en rapportcommit staan in het PR-ontvangstbewijs.\n"
+    )
+    sha = create_document_commit(work, report_path, report_text, f"docs: Opleverrapport #{number}")
     diff = github(f"compare/{base}...{sha}")
-    require([(f["filename"], f["status"]) for f in diff["files"]] == [(path, "added")], "Unexpected diff.")
+    require(sorted((f["filename"], f["status"]) for f in diff["files"])
+            == sorted([(path, "added"), (report_path, "added")]), "Unexpected handoff diff.")
     verify_release(task)
     require(github("branches/master")["commit"]["sha"] == base, "Base changed before publication.")
     github(f"git/refs/heads/{branch}", method="PATCH", data={"sha": sha, "force": False})
-    require(github(f"git/ref/heads/{branch}")["object"]["sha"] == sha, "Unexpected branch HEAD.")
     verify_release(task)
+    report_url = f"{root_url}/blob/{sha}/{report_path}"
     pull = github("pulls", method="POST", data={
         "title": f"[Codex-oplevering] Documentatieproef #{number}",
-        "body": f"Opdracht: #{number}\nRun: {run_url}\nGeverifieerde commit: `{sha}`\nOnafhankelijke review vereist.",
+        "body": f"Opdracht: #{number}\nRun: {run_url}\nRapport: {report_url}\nOnafhankelijke review vereist.",
         "head": branch, "base": "master", "draft": True,
     })
-    require(pull["draft"] and pull["head"]["sha"] == sha, "Unexpected pull request state.")
-    github(f"issues/{number}/comments", method="POST", data={
-        "body": f"Codex Actions: {pull['html_url']}\nRun: {run_url}\nResultaat: https://github.com/{REPO}/blob/{sha}/{path}"
-    })
+    pr_number = pull["number"]
+    pr_url = f"{root_url}/pull/{pr_number}"
+    receipt = (
+        f"CODEX_OPLEVERING_V1\nopdracht_id: codex-actions-issue-{number}-run-{run}\n"
+        "opdracht_status: VOLTOOID\npublicatiestatus: GEPUBLICEERD\n"
+        f"branch: {branch}\nwork_commit: {work}\nreport_commit: {sha}\n"
+        f"remote_head_verified: {sha}\nremote_verification: GitHub Git refs API\n"
+        f"report_path: {report_path}\nreport_url: {report_url}\npr_url: {pr_url}\nsupersedes: GEEN"
+    )
+    link = f"Codex Actions: {pr_url}\nRun: {run_url}\nResultaat: {result_url}\nRapport: {report_url}"
+    comment = github(f"issues/{number}/comments", method="POST", data={"body": link})
+    require(github(f"issues/comments/{comment['id']}")["body"] == link, "Issue backlink readback failed.")
+    verify_release(task)
+    saved_report = github(f"contents/{report_path}?ref={sha}")
+    require(base64.b64decode(saved_report["content"]).decode() == report_text, "Report readback failed.")
+    pull = github(f"pulls/{pr_number}")
+    require(pull["state"] == "open" and pull["draft"] and pull["head"]["sha"] == sha
+            and pull["head"]["ref"] == branch and pull["base"]["ref"] == "master", "Unexpected pull request state.")
+    require(github(f"git/ref/heads/{branch}")["object"]["sha"] == sha, "Unexpected branch HEAD.")
+    comment = github(f"issues/{pr_number}/comments", method="POST", data={"body": receipt})
+    require(github(f"issues/comments/{comment['id']}")["body"] == receipt, "Receipt readback failed.")
 
 
 def main():

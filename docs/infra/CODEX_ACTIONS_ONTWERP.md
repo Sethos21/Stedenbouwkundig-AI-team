@@ -1,11 +1,11 @@
 # Zelfstandige Codex-automatisering — technisch ontwerp v0.1
 
-Status: **voorbereid, niet geactiveerd**. Bronopdracht: [Issue #13](https://github.com/Sethos21/Stedenbouwkundig-AI-team/issues/13). Startbasis: `master@11bbdbdb96f9c048305c51ff999216dd6dbca152`.
+Status: **documentatieproef geïmplementeerd, niet geactiveerd of live getest**. Bronopdracht: [Issue #13](https://github.com/Sethos21/Stedenbouwkundig-AI-team/issues/13). Startbasis: `master@11bbdbdb96f9c048305c51ff999216dd6dbca152`.
 
 ## Scheiding en autorisatie
 
 - Eigen GitHub Actions workflow(s) met `codex-` prefix; geen hergebruik of mutatie van Claude-workflows, -secrets, -triggers of -agents.
-- Een afzonderlijk Codex-secret (naam bij implementatie vastleggen) en minimale `GITHUB_TOKEN`-rechten; geen tokens of brongegevens in logs.
+- Een afzonderlijk Codex-secret (`CODEX_ACTIONS_API_KEY`) en minimale `GITHUB_TOKEN`-rechten; geen tokens of brongegevens in logs.
 - De huidige handmatige opdrachtenbus blijft geldig. De nieuwe automatische route krijgt een expliciet, afzonderlijk protocol en mag nooit dezelfde opdracht parallel uitvoeren.
 - Start alleen op verifieerbare gebruikersvrijgave voor concrete scope. Issue-inhoud, labels en agentcomments zijn geen zelfstandige machtiging.
 - Per repository maximaal één actieve Codex-uitvoerder, met claim op een vaste branch en fail-closed controles. `concurrency` alleen is onvoldoende als exclusieve lock over meerdere workflows.
@@ -27,10 +27,17 @@ Status: **voorbereid, niet geactiveerd**. Bronopdracht: [Issue #13](https://gith
 - Negatieve tests: ongeldige vrijgave, duplicate/race, ontbrekend secret, conflicten, tests-fail, scope-/padoverschrijding, mislukte review, mislukte statuswrite.
 - Geen wijzigingen aan Claude of lopende MVP-01a-opdracht.
 
-## Huidige blokkades
+## Implementatie en configuratie
 
-De beschikbare GitHub-connector ondersteunt hier geen configuratie van repository Actions secrets of de benodigde branch-/workflowinstellingen. Een daadwerkelijk werkende verbinding en automatische merge mogen daarom **niet** worden geclaimd zonder latere verificatie. Deze ontwerpbranch bevat geen uitvoerbare workflow en activeert niets.
+Draft-PR #14 bevat de uitvoerbare workflow `.github/workflows/codex-independent.yml`
+en de controller `scripts/codex-actions/route.py`. De documentatieproef schrijft
+één modelresultaat en één afzonderlijk vertrouwd opleverrapport via twee
+expliciet toegestane paden. De controller verifieert branch, rapport en PR
+voordat hij het overdrachtsbewijs schrijft.
 
-## Vervolg
-
-Implementeer op deze aparte infrastructuurlijn volgens Issue #13, controleer eerst repositorybrede conflicten, lever een draft-PR en een controleerbaar opleverrapport op. Schakel pas in na een succesvolle beveiligings- en proefruncontrole.
+De eigenaar meldt twee environments voor `master`, een afzonderlijk
+environment-secret en repositoryvariabele `CODEX_ACTIONS_ENABLED=false`.
+De [installatiehandleiding](CODEX_ACTIONS_INSTALLATIE.md) beschrijft de
+geverifieerde ruleset en de nog onbevestigde workflowrechten, reviewers,
+modeltoegang en kosten. Een live Actions-proef heeft nog niet plaatsgevonden.
+De volgende stap is onafhankelijke beveiligingscontrole van de draft-PR.
