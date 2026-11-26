@@ -1,0 +1,82 @@
+name: Codex independent
+on:
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Released document task number
+        required: true
+        type: string
+      revision:
+        description: SHA-256 of the exact issue title and body (see setup guide)
+        required: true
+        type: string
+
+permissions: {}
+concurrency:
+  group: codex-independent
+  cancel-in-progress: false
+
+jobs:
+  claim:
+    if: github.repository == 'Sethos21/Stedenbouwkundig-AI-team' && github.ref == 'refs/heads/master' && github.actor == 'Sethos21' && github.triggering_actor == 'Sethos21' && github.run_attempt == '1' && vars.CODEX_ACTIONS_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: codex-control
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: read
+    outputs:
+      task: ${{ steps.claim.outputs.task }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Test trusted controller
+        run: python3 -m unittest discover -s scripts/codex-actions -v
+      - id: claim
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TASK_ISSUE: ${{ inputs.issue }}
+          TASK_REVISION: ${{ inputs.revision }}
+        run: python3 scripts/codex-actions/route.py claim
+
+  execute:
+    needs: claim
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: codex-execution
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      document: ${{ steps.generate.outputs.document }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - id: generate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEX_ACTIONS_API_KEY: ${{ secrets.CODEX_ACTIONS_API_KEY }}
+          TASK: ${{ needs.claim.outputs.task }}
+        run: python3 scripts/codex-actions/route.py execute
+
+  publish:
+    needs: [claim, execute]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: codex-control
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TASK: ${{ needs.claim.outputs.task }}
+          DOCUMENT: ${{ needs.execute.outputs.document }}
+        run: python3 scripts/codex-actions/route.py publish
