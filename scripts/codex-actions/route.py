@@ -149,6 +149,13 @@ def create_document_commit(parent, path, report, message):
     return sha
 
 
+def verify_handoff(pr_number, branch, sha):
+    pull = github(f"pulls/{pr_number}")
+    require(pull["state"] == "open" and pull["draft"] and pull["head"]["sha"] == sha
+            and pull["head"]["ref"] == branch and pull["base"]["ref"] == "master", "Unexpected pull request state.")
+    require(github(f"git/ref/heads/{branch}")["object"]["sha"] == sha, "Unexpected branch HEAD.")
+
+
 def publish(task):
     value = base64.b64decode(os.environ["DOCUMENT"], validate=True).decode()
     body = document(value)
@@ -199,7 +206,8 @@ def publish(task):
     pr_url = f"{root_url}/pull/{pr_number}"
     receipt = (
         f"CODEX_OPLEVERING_V1\nopdracht_id: codex-actions-issue-{number}-run-{run}\n"
-        "opdracht_status: VOLTOOID\npublicatiestatus: GEPUBLICEERD\n"
+        "opdracht_status: ONVOLTOOID\npublicatiestatus: VOORLOPIG\n"
+        f"verification_run: {run_url}\n"
         f"branch: {branch}\nwork_commit: {work}\nreport_commit: {sha}\n"
         f"remote_head_verified: {sha}\nremote_verification: GitHub Git refs API\n"
         f"report_path: {report_path}\nreport_url: {report_url}\npr_url: {pr_url}\nsupersedes: GEEN"
@@ -210,12 +218,11 @@ def publish(task):
     verify_release(task)
     saved_report = github(f"contents/{report_path}?ref={sha}")
     require(base64.b64decode(saved_report["content"]).decode() == report_text, "Report readback failed.")
-    pull = github(f"pulls/{pr_number}")
-    require(pull["state"] == "open" and pull["draft"] and pull["head"]["sha"] == sha
-            and pull["head"]["ref"] == branch and pull["base"]["ref"] == "master", "Unexpected pull request state.")
-    require(github(f"git/ref/heads/{branch}")["object"]["sha"] == sha, "Unexpected branch HEAD.")
+    verify_handoff(pr_number, branch, sha)
+    # An ambiguous write may persist. This comment can never assert completion by itself.
     comment = github(f"issues/{pr_number}/comments", method="POST", data={"body": receipt})
     require(github(f"issues/comments/{comment['id']}")["body"] == receipt, "Receipt readback failed.")
+    verify_handoff(pr_number, branch, sha)
 
 
 def main():

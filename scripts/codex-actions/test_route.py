@@ -90,7 +90,7 @@ class RouteTests(unittest.TestCase):
         root = f"https://github.com/{route.REPO}"
         pr = {"number": 50, "draft": True, "state": "open",
               "head": {"sha": "report", "ref": task["branch"]}, "base": {"ref": "master"}}
-        for fail in (None, "base", "backlink", "draft", "ref", "report", "diff"):
+        for fail in (None, "base", "backlink", "draft", "ref", "report", "diff", "post", "get", "late-pr", "late-ref"):
             with self.subTest(fail=fail), patch.dict(os.environ, {"DOCUMENT": "c3ludGhldGlj"}):
                 reports, comments, branches = {}, {}, []
 
@@ -100,7 +100,7 @@ class RouteTests(unittest.TestCase):
                     if endpoint == "branches/master":
                         return {"commit": {"sha": "advanced" if fail == "base" and reports else "base"}}
                     if endpoint.startswith("git/ref/heads/"):
-                        return {"object": {"sha": ("other" if fail == "ref" else "report") if branches else "base"}}
+                        return {"object": {"sha": ("other" if fail == "ref" or (fail == "late-ref" and 2 in comments) else "report") if branches else "base"}}
                     if endpoint == "git/trees/base?recursive=1":
                         return {"truncated": False, "tree": []}
                     if endpoint == "compare/base...report":
@@ -114,7 +114,7 @@ class RouteTests(unittest.TestCase):
                         self.assertTrue(data["draft"])
                         return pr
                     if endpoint == "pulls/50":
-                        return pr | {"draft": fail != "draft"}
+                        return pr | {"draft": fail != "draft" and not (fail == "late-pr" and 2 in comments)}
                     if endpoint.startswith("contents/"):
                         self.assertEqual(endpoint, f"contents/{report_path}?ref=report")
                         payload = "changed" if fail == "report" else reports[report_path]
@@ -124,9 +124,14 @@ class RouteTests(unittest.TestCase):
                             raise route.RouteError("Status write failed")
                         comment_id = len(comments) + 1
                         comments[comment_id] = data["body"]
+                        if comment_id == 2 and fail == "post":
+                            raise route.RouteError("Ambiguous receipt POST")
                         return {"id": comment_id}
                     if endpoint.startswith("issues/comments/"):
-                        return {"body": comments[int(endpoint.rsplit("/", 1)[1])]}
+                        comment_id = int(endpoint.rsplit("/", 1)[1])
+                        if comment_id == 2 and fail == "get":
+                            raise route.RouteError("Receipt GET failed")
+                        return {"body": comments[comment_id]}
                     self.fail(f"Unexpected request: {method} {endpoint}")
 
                 def commit(parent, filename, content, message):
@@ -140,12 +145,19 @@ class RouteTests(unittest.TestCase):
                     if fail:
                         with self.assertRaises(route.RouteError):
                             route.publish(task)
-                        self.assertFalse(any(c.startswith("CODEX_OPLEVERING_V1") for c in comments.values()))
+                        if fail in {"post", "get", "late-pr", "late-ref"}:
+                            self.assertIn("publicatiestatus: VOORLOPIG", comments[2])
+                            self.assertEqual(len(comments), 2)
+                        else:
+                            self.assertNotIn(2, comments)
+                        self.assertFalse(any("publicatiestatus: GEPUBLICEERD" in c for c in comments.values()))
                     else:
                         route.publish(task)
                         self.assertIn("    synthetic", reports[path])
                         self.assertNotIn("synthetic", reports[report_path])
                         self.assertEqual(len(comments), 2)
+                        self.assertIn("publicatiestatus: VOORLOPIG", comments[2])
+                        self.assertIn(f"verification_run: {root}/actions/runs/17", comments[2])
                         self.assertIn("work_commit: work", comments[2])
                         self.assertIn("report_commit: report", comments[2])
                         self.assertIn(f"report_url: {root}/blob/report/{report_path}", comments[2])

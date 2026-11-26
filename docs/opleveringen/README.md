@@ -77,3 +77,32 @@ Publiceer een veilig statusrapport met ONVOLTOOID zodra veilig stoppen mogelijk 
 Deze procedure wordt door toekomstige agents gevolgd zodra zij deze versie van AGENTS.md lezen. Oude branches krijgen wijzigingen niet automatisch; vóór onafhankelijke acceptatie/merge staat de procedure alleen op deze werkbranch. Voor werk op een oudere branch moet de opdracht de procedure expliciet aanwijzen of moet zij via een afzonderlijk toegestane integratie beschikbaar komen. Er wordt niet eigenmachtig naar master gemergd om dit te forceren.
 
 Alleen GitHub-overdracht is hier toegestaan. Bestaande bron-/netwerkautorisaties, K00, HumanApprovalService, agentactivatie, datarechten en onafhankelijke beoordeling blijven gelden. GitHub-publicatie is geen vrijgave voor productie of formele projectgoedkeuring.
+
+## Voorlopig ontvangstbewijs van Codex Actions
+
+De automatische documentatieproef schrijft één `CODEX_OPLEVERING_V1`-comment
+met `publicatiestatus: VOORLOPIG` en `opdracht_status: ONVOLTOOID`. GitHub
+plaatst comments, wijzigt refs en leest PR-status via afzonderlijke verzoeken.
+Een POST kan zijn opgeslagen zonder bevestiging. De controller probeert deze
+schrijfopdracht nooit blind opnieuw. De comment blijft voorlopig, ook na
+geslaagde teruglezing. De handmatige overdracht hierboven gebruikt haar
+bestaande ontvangstbewijs.
+
+Neem een voorlopig Actions-bewijs pas als voltooide overdracht mee in de
+zoekprocedure na alle volgende controles:
+
+1. Lees de comment op de bedoelde PR terug. Controleer rapport, work-commit en
+   report-commit op de vastgelegde SHA's. Controleer dat run-ID in de
+   opdracht-ID, rapportpad, rapport en `verification_run` overeenkomt.
+2. Verifieer via GitHub dat `verification_run` een geautoriseerde eerste
+   uitvoering van `.github/workflows/codex-independent.yml` op `master` in
+   deze repository is (`workflow_dispatch`, runpoging 1), dat de run-SHA
+   gelijk is aan de basiscommit in het rapport en dat zowel de run als de
+   publicatiejob succesvol zijn afgerond.
+3. Lees de actuele branchref en PR. Vereis dezelfde report-SHA voor beide,
+   de genoemde taakbranch als head, `master` als base en een open draft-PR.
+
+Ontbrekend leesbewijs, mislukte of lopende run, een afwijkende SHA of
+gewijzigde PR-status blokkeert acceptatie. Reconstrueer dan handmatig wat
+GitHub heeft opgeslagen. De controles bevestigen de toestand op het moment
+van lezen. GitHub biedt hiervoor geen atomaire transactie.
