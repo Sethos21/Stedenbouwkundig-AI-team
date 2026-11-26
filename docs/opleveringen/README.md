@@ -18,10 +18,11 @@ Dit vraagt geen centrale indexwrite op master. Iedere werkbranch houdt alleen zi
 
 ## Branchgebonden index
 
-Nieuwste rapport op **deze branch**: [PR #14 — herstel](2026-11-26T120000Z-pr-14-herstel.md). Publicatiebevestiging staat in het PR-ontvangstbewijs.
+Nieuwste rapport op **deze branch**: [PR #14 — overdracht](2026-11-26T151514Z-pr-14-handoff.md). Publicatiebevestiging staat in het PR-ontvangstbewijs.
 
 | Datum checkpoint (UTC) | Opdracht / rapport | Opdrachtstatus | Branch | PR / publicatiebewijs |
 |---|---|---|---|---|
+| 2026-11-26 | [PR #14: fail-closed overdracht](2026-11-26T151514Z-pr-14-handoff.md) | VOLTOOID | infra/codex-actions-independent | [Draft #14](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/14) |
 | 2026-11-26 | [PR #14: drie reviewcorrecties](2026-11-26T120000Z-pr-14-herstel.md) | VOLTOOID | infra/codex-actions-independent | [Draft #14](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/14) |
 | 2026-11-20 | [Issue #13: Codex Actions](2026-11-20T104500Z-issue-13-codex-actions.md) | GEBLOKKEERD | infra/codex-actions-independent | [Draft #14](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/14) |
 | 2026-11-13 | [Issue #9: MVP-00](2026-11-13T124048Z-issue-9-mvp00.md) | VOLTOOID; publicatie apart verifiëren | codex/issue-9 | Draft-PR en CODEX_OPLEVERING_V1 via vaste ingang |
