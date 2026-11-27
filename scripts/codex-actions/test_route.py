@@ -1,7 +1,10 @@
 import base64
+from contextlib import redirect_stderr
+import io
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+from urllib.error import HTTPError, URLError
 
 import route
 
@@ -161,6 +164,87 @@ class RouteTests(unittest.TestCase):
                         self.assertIn("work_commit: work", comments[2])
                         self.assertIn("report_commit: report", comments[2])
                         self.assertIn(f"report_url: {root}/blob/report/{report_path}", comments[2])
+
+    def test_http_diagnostics_are_allowlisted_for_both_providers(self):
+        for code, category in ((400, "bad_request"), (401, "unauthorized"), (403, "forbidden"),
+                               (404, "not_found"), (429, "rate_limited"), (503, "server_error"),
+                               (302, "http_error")):
+            for provider in ("GitHub", "OpenAI"):
+                with self.subTest(code=code, provider=provider), patch.dict(os.environ, {
+                    "GH_TOKEN": "github-secret", "CODEX_ACTIONS_API_KEY": "openai-secret",
+                    "GITHUB_SHA": "base",
+                }), patch.object(route.urllib.request, "build_opener") as opener, redirect_stderr(io.StringIO()) as log:
+                    body = Mock()
+                    opener.return_value.open.side_effect = HTTPError(
+                        "https://untrusted.invalid/path-secret", code, "reason-secret",
+                        {"X-Private": "header-secret"}, body,
+                    )
+                    with self.assertRaisesRegex(route.RouteError, "^API call failed"):
+                        if provider == "GitHub":
+                            route.github("issues/path-secret?param=query-secret")
+                        else:
+                            with patch.object(route, "github", return_value={"commit": {"sha": "base"}}):
+                                route.preflight()
+                    operation = "GitHub GET issues" if provider == "GitHub" else "OpenAI preflight model lookup"
+                    self.assertEqual(log.getvalue(), f"{operation} http_status={code} category={category}\n")
+                    body.read.assert_not_called()
+                    opener.return_value.open.assert_called_once()
+
+    def test_transport_and_invalid_json_are_redacted(self):
+        for error, category in ((URLError("secret"), "transport_error"),
+                                (ValueError("secret"), "invalid_json")):
+            with self.subTest(category=category), patch.dict(os.environ, {"GH_TOKEN": "secret"}), \
+                 patch.object(route.urllib.request, "build_opener") as opener, redirect_stderr(io.StringIO()) as log:
+                opener.return_value.open.side_effect = error
+                with self.assertRaises(route.RouteError):
+                    route.github("branches/master")
+                self.assertEqual(log.getvalue(), f"GitHub GET branches http_status=none category={category}\n")
+
+    def test_preflight_only_reads_fixed_endpoints_with_separate_credentials(self):
+        with patch.dict(os.environ, {
+            "GH_TOKEN": "github-secret", "CODEX_ACTIONS_API_KEY": "openai-secret",
+            "GITHUB_SHA": "base",
+        }), patch.object(route, "request_json", side_effect=[
+            ({"commit": {"sha": "base"}}, False), ({"id": route.MODEL}, False),
+        ]) as api, patch.object(route, "output") as output:
+            route.preflight()
+            output.assert_not_called()
+        requests = [call.args[0] for call in api.call_args_list]
+        self.assertEqual([request.get_method() for request in requests], ["GET", "GET"])
+        self.assertEqual([request.full_url for request in requests], [
+            f"https://api.github.com/repos/{route.REPO}/branches/master",
+            f"https://api.openai.com/v1/models/{route.MODEL}",
+        ])
+        self.assertEqual([request.get_header("Authorization") for request in requests],
+                         ["Bearer github-secret", "Bearer openai-secret"])
+        self.assertTrue(all(request.data is None for request in requests))
+
+    def test_preflight_stops_before_openai_on_stale_master(self):
+        with patch.dict(os.environ, {
+            "GH_TOKEN": "github-secret", "CODEX_ACTIONS_API_KEY": "openai-secret",
+            "GITHUB_SHA": "stale",
+        }), patch.object(route, "request_json", return_value=({"commit": {"sha": "base"}}, False)) as api:
+            with self.assertRaisesRegex(route.RouteError, "stale"):
+                route.preflight()
+            api.assert_called_once()
+
+    def test_github_pagination_keeps_requests_on_fixed_origin(self):
+        with patch.dict(os.environ, {"GH_TOKEN": "test"}), \
+             patch.object(route.urllib.request, "build_opener") as opener, redirect_stderr(io.StringIO()):
+            responses = []
+            for body, link in ((b"[1]", '<https://untrusted.invalid/>; rel="next"'), (b"[2]", "")):
+                response = Mock(status=200, headers={"Link": link})
+                response.read.return_value = body
+                context = Mock()
+                context.__enter__ = Mock(return_value=response)
+                context.__exit__ = Mock(return_value=False)
+                responses.append(context)
+            opener.return_value.open.side_effect = responses
+            self.assertEqual(route.github("issues?state=open", paginate=True), [1, 2])
+            self.assertEqual([call.args[0].full_url for call in opener.return_value.open.call_args_list], [
+                f"https://api.github.com/repos/{route.REPO}/issues?state=open&page=1",
+                f"https://api.github.com/repos/{route.REPO}/issues?state=open&page=2",
+            ])
 
     def test_redirect_does_not_forward_model_credentials(self):
         self.assertIsNone(route.NoRedirect().redirect_request(

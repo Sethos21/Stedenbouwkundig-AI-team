@@ -2,11 +2,12 @@
 
 import base64
 import hashlib
+import http.client
 import json
 import os
 import re
-import subprocess
 import sys
+import urllib.error
 import urllib.request
 
 OWNER = "Sethos21"
@@ -24,21 +25,85 @@ def require(condition, message):
         raise RouteError(message)
 
 
+HTTP_CATEGORIES = {
+    400: "bad_request",
+    401: "unauthorized",
+    403: "forbidden",
+    404: "not_found",
+    429: "rate_limited",
+}
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, message, headers, new_url):
+        return None
+
+
+def diagnostic(operation, status, category):
+    print(f"{operation} http_status={status} category={category}", file=sys.stderr)
+
+
+def request_json(request, operation, *, timeout):
+    status = "none"
+    try:
+        with urllib.request.build_opener(NoRedirect()).open(request, timeout=timeout) as response:
+            status = response.status
+            payload = json.load(response)
+            has_next = any(
+                re.search(r';\s*rel="next"\s*$', link)
+                for link in response.headers.get("Link", "").split(",")
+            )
+    except urllib.error.HTTPError as error:
+        status = error.code
+        category = HTTP_CATEGORIES.get(status, "server_error" if 500 <= status <= 599 else "http_error")
+        error.close()
+    except (OSError, http.client.HTTPException):
+        category = "transport_error"
+    except (ValueError, RecursionError):
+        category = "invalid_json"
+    else:
+        diagnostic(operation, status, "ok")
+        return payload, has_next
+
+    diagnostic(operation, status, category)
+    raise RouteError("API call failed. Inspect the operation before taking further action.")
+
+
 def github(path, *, method="GET", data=None, paginate=False):
-    command = ["gh", "api", "--method", method, f"repos/{REPO}/{path}"]
-    if paginate:
-        command.extend(["--paginate", "--slurp"])
-    if data is not None:
-        command.extend(["--input", "-"])
-    # gh receives only the scoped GitHub token.
-    result = subprocess.run(
-        command, input=json.dumps(data) if data is not None else None,
-        text=True, capture_output=True, timeout=40,
-        env={k: v for k, v in os.environ.items() if k != "CODEX_ACTIONS_API_KEY"},
-    )
-    require(result.returncode == 0, f"GitHub {method} failed; inspect the run before retrying.")
-    value = json.loads(result.stdout)
-    return [item for page in value for item in page] if paginate else value
+    token = os.environ.get("GH_TOKEN")
+    require(token, "Missing scoped GitHub token.")
+    # Log only fixed resource names. Never log URLs, IDs, or query parameters.
+    parts = path.split("?", 1)[0].split("/")
+    resource = parts[0] if parts[0] in {"branches", "issues", "pulls", "compare", "contents", "git"} else "other"
+    if resource == "git" and len(parts) > 1 and parts[1] in {"ref", "refs", "commits", "trees"}:
+        resource += "/" + parts[1]
+    if resource == "issues" and "comments" in parts:
+        resource += "/comments"
+    operation = f"GitHub {method} {resource}"
+    url = f"https://api.github.com/repos/{REPO}/{path}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "codex-actions-controller",
+    }
+    body = json.dumps(data).encode() if data is not None else None
+    if not paginate:
+        return request_json(urllib.request.Request(url, data=body, headers=headers, method=method),
+                            operation, timeout=40)[0]
+
+    results = []
+    separator = "&" if "?" in path else "?"
+    for page in range(1, 101):
+        # Use Link only as a continuation signal. Credentials always stay on the fixed origin.
+        request = urllib.request.Request(f"{url}{separator}page={page}", headers=headers, method=method)
+        items, has_next = request_json(request, operation, timeout=40)
+        require(isinstance(items, list), "Invalid GitHub pagination response.")
+        results.extend(items)
+        if not has_next:
+            return results
+    raise RouteError("GitHub pagination limit reached.")
 
 
 def revision(issue):
@@ -100,14 +165,26 @@ def document(value):
     return "    " + value.rstrip().replace("\n", "\n    ") + "\n"
 
 
-class NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, request, fp, code, message, headers, new_url):
-        return None
+def openai_key():
+    key = os.environ.get("CODEX_ACTIONS_API_KEY")
+    require(key, "Missing codex-execution secret CODEX_ACTIONS_API_KEY.")
+    return key
+
+
+def preflight():
+    key = openai_key()
+    base = os.environ["GITHUB_SHA"]
+    require(github("branches/master")["commit"]["sha"] == base, "Dispatch base is stale.")
+    request = urllib.request.Request(
+        f"https://api.openai.com/v1/models/{MODEL}",
+        headers={"Authorization": f"Bearer {key}"},
+    )
+    payload, _ = request_json(request, "OpenAI preflight model lookup", timeout=20)
+    require(isinstance(payload, dict) and payload.get("id") == MODEL, "Unexpected model metadata.")
 
 
 def execute(task):
-    key = os.environ.get("CODEX_ACTIONS_API_KEY")
-    require(key, "Missing codex-execution secret CODEX_ACTIONS_API_KEY.")
+    key = openai_key()
     issue = verify_release(task)
     request = urllib.request.Request(
         "https://api.openai.com/v1/responses",
@@ -118,9 +195,7 @@ def execute(task):
         }).encode(),
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
     )
-    opener = urllib.request.build_opener(NoRedirect())
-    with opener.open(request, timeout=90) as response:
-        payload = json.load(response)
+    payload, _ = request_json(request, "OpenAI execute response generation", timeout=90)
     require(payload["status"] == "completed", "Codex response incomplete.")
     chunks = [
         part["text"] for item in payload["output"] if item["type"] == "message"
@@ -229,15 +304,19 @@ def main():
     commands = {"execute": execute, "publish": publish}
     command = sys.argv[1]
     try:
-        if command == "claim":
+        print(f"Controller phase={command}" if command in {"claim", "execute", "publish", "preflight"}
+              else "Controller phase=unknown", file=sys.stderr)
+        if command == "preflight":
+            preflight()
+        elif command == "claim":
             claim()
         else:
             commands[command](json.loads(os.environ["TASK"]))
     except RouteError as error:
         print(str(error), file=sys.stderr)
         return 1
-    except Exception as error:
-        print(f"Operation failed: {type(error).__name__}", file=sys.stderr)
+    except Exception:
+        print("Operation failed: unexpected controller error.", file=sys.stderr)
         return 1
     return 0
 
