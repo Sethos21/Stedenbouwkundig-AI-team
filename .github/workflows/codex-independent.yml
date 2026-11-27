@@ -2,13 +2,21 @@ name: Codex independent
 on:
   workflow_dispatch:
     inputs:
-      issue:
-        description: Released document task number
+      mode:
+        description: Run a read-only preflight or process a released documentation issue
+        type: choice
+        options:
+          - preflight
+          - document
+        default: preflight
         required: true
+      issue:
+        description: Released document task number (required in document mode)
+        required: false
         type: string
       revision:
-        description: SHA-256 of the exact issue title and body (see setup guide)
-        required: true
+        description: SHA-256 of the issue title and body (required in document mode)
+        required: false
         type: string
 
 permissions: {}
@@ -17,8 +25,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  preflight:
+    if: inputs.mode == 'preflight' && github.repository == 'Sethos21/Stedenbouwkundig-AI-team' && github.ref == 'refs/heads/master' && github.actor == 'Sethos21' && github.triggering_actor == 'Sethos21' && github.run_attempt == '1' && vars.CODEX_ACTIONS_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    environment: codex-execution
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Test trusted controller
+        run: python3 -m unittest discover -s scripts/codex-actions -v
+      - name: Check GitHub and OpenAI access
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEX_ACTIONS_API_KEY: ${{ secrets.CODEX_ACTIONS_API_KEY }}
+        run: python3 scripts/codex-actions/route.py preflight
+
   claim:
-    if: github.repository == 'Sethos21/Stedenbouwkundig-AI-team' && github.ref == 'refs/heads/master' && github.actor == 'Sethos21' && github.triggering_actor == 'Sethos21' && github.run_attempt == '1' && vars.CODEX_ACTIONS_ENABLED == 'true'
+    if: inputs.mode == 'document' && github.repository == 'Sethos21/Stedenbouwkundig-AI-team' && github.ref == 'refs/heads/master' && github.actor == 'Sethos21' && github.triggering_actor == 'Sethos21' && github.run_attempt == '1' && vars.CODEX_ACTIONS_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     environment: codex-control
