@@ -18,10 +18,11 @@ Dit vraagt geen centrale indexwrite op master. Iedere werkbranch houdt alleen zi
 
 ## Branchgebonden index
 
-Nieuwste rapport op **deze branch**: [PR #14 — overdracht](2026-11-26T151514Z-pr-14-handoff.md). Publicatiebevestiging staat in het PR-ontvangstbewijs.
+Nieuwste rapport op **deze branch**: [Issue #18 — veilige API-diagnostiek en preflight](2026-11-27T142548Z-issue-18.md). Publicatiebevestiging staat in het PR-ontvangstbewijs.
 
 | Datum checkpoint (UTC) | Opdracht / rapport | Opdrachtstatus | Branch | PR / publicatiebewijs |
 |---|---|---|---|---|
+| 2026-11-27 | [Issue #18: veilige API-diagnostiek en preflight](2026-11-27T142548Z-issue-18.md) | VOLTOOID | codex/issue-18 | Draft-PR en CODEX_OPLEVERING_V1 via vaste ingang |
 | 2026-11-26 | [PR #14: fail-closed overdracht](2026-11-26T151514Z-pr-14-handoff.md) | VOLTOOID | infra/codex-actions-independent | [Draft #14](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/14) |
 | 2026-11-26 | [PR #14: drie reviewcorrecties](2026-11-26T120000Z-pr-14-herstel.md) | VOLTOOID | infra/codex-actions-independent | [Draft #14](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/14) |
 | 2026-11-20 | [Issue #13: Codex Actions](2026-11-20T104500Z-issue-13-codex-actions.md) | GEBLOKKEERD | infra/codex-actions-independent | [Draft #14](https://github.com/Sethos21/Stedenbouwkundig-AI-team/pull/14) |
